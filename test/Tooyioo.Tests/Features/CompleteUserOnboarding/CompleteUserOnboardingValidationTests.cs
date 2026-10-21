@@ -75,7 +75,6 @@ public sealed class CompleteUserOnboardingValidationTests
                 .WithLastName("Bloggs")
                 .WithEmail("jane.bloggs@test.com")
                 .WithExternalIdentityId(subject)
-                .WithIsEmailVerified(true)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("jane-bloggs")

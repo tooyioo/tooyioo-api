@@ -34,7 +34,6 @@ public sealed class WhenUserOnboardingWithAliasCanBeCanceled
             _userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithExternalIdentityId(_subject)
-                .WithIsEmailVerified(true)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen().WithAlias(_alias).Build());
 

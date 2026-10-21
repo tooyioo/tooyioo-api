@@ -33,7 +33,6 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
             _userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithExternalIdentityId(_subject)
-                .WithIsEmailVerified(true)
                 .Build());
 
         await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(

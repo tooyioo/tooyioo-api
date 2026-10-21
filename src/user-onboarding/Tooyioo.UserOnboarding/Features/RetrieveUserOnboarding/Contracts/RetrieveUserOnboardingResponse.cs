@@ -46,8 +46,7 @@ public sealed record RetrieveUserOnboardingResponse
     public required bool IsEmailVerified { get; init; }
 
     /// <summary>
-    /// Current onboarding status:
-    /// <see cref="StatusInProgress"/>, <see cref="StatusCompleted"/> or <see cref="StatusCanceled"/>.
+    /// Current onboarding status: <c>in_progress</c>, <c>completed</c> or <c>canceled</c>.
     /// </summary>
     public required string Status { get; init; }
 

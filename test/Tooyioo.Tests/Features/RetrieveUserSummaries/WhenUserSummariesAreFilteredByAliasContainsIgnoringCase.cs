@@ -58,7 +58,6 @@ public sealed class WhenUserSummariesAreFilteredByAliasContainsIgnoringCase(Mong
                 .WithLastName(_janeLastName)
                 .WithEmail("jane.bloggs@test.com")
                 .WithExternalIdentityId(_janeUserId)
-                .WithIsEmailVerified(true)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias(_janeAlias)
@@ -89,7 +88,6 @@ public sealed class WhenUserSummariesAreFilteredByAliasContainsIgnoringCase(Mong
                 .WithLastName("Bloggins")
                 .WithEmail("casey.bloggins@test.com")
                 .WithExternalIdentityId(caseySubject)
-                .WithIsEmailVerified(true)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("casey-bloggins")

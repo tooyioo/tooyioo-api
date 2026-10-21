@@ -52,7 +52,6 @@ public sealed class WhenUsersAreFilteredByIdContainsIgnoringCase(MongoTestContai
                 .WithLastName("Bloggs")
                 .WithEmail("jane.bloggs@test.com")
                 .WithExternalIdentityId(_janeSubject)
-                .WithIsEmailVerified(true)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("jane-bloggs")
@@ -83,7 +82,6 @@ public sealed class WhenUsersAreFilteredByIdContainsIgnoringCase(MongoTestContai
                 .WithLastName("Bloggins")
                 .WithEmail("casey.bloggins@test.com")
                 .WithExternalIdentityId(caseySubject)
-                .WithIsEmailVerified(true)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("casey-bloggins")

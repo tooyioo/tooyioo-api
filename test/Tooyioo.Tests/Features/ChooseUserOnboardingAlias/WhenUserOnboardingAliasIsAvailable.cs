@@ -40,7 +40,6 @@ public sealed class WhenUserOnboardingAliasIsAvailable
                 .WithLastName(_lastName)
                 .WithEmail(_email)
                 .WithExternalIdentityId(_subject)
-                .WithIsEmailVerified(true)
                 .Build());
 
         await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
