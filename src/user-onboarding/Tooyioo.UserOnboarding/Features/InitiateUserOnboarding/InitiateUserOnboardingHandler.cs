@@ -5,7 +5,6 @@ using Slicent.EventStore;
 using Tooyioo.Common;
 using Tooyioo.UserOnboarding.Contracts;
 using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
-
 // ReSharper disable ClassNeverInstantiated.Global
 // ReSharper disable ConvertToPrimaryConstructor
 
@@ -51,29 +50,24 @@ public sealed class InitiateUserOnboardingHandler
             return new InitiateUserOnboardingUnexpectedStateErrorResult();
         }
 
-        var userOnboardingEvents = new List<object>
-        {
-            new UserOnboardingDomainEvents.V1.UserOnboardingInitiated(command.Name, command.LastName, command.Email),
-            new UserOnboardingDomainEvents.V1.UserOnboardingExternalIdentityAssociated(externalIdentity.Id,
-                externalIdentity.Provider.ToString(), externalIdentity.Issuer)
-        };
+        var userOnboardingInitiated = new UserOnboardingDomainEvents.V1.UserOnboardingInitiated(
+            command.Name,
+            command.LastName,
+            command.Email,
+            command.IsEmailVerified,
+            externalIdentity.Id,
+            externalIdentity.Provider.ToString(),
+            externalIdentity.Issuer);
 
-        if (command.IsEmailConfirmed)
-        {
-            userOnboardingEvents.Add(new UserOnboardingDomainEvents.V1.UserOnboardingEmailVerified());
-        }
+        var externalIdentityClaimed =
+            new ExternalIdentityClaimingDomainEvents.V1.ExternalIdentityClaimed(userOnboardingId);
 
-        var claimingExternalIdentityEvents = new object[]
-        {
-            new ExternalIdentityClaimingDomainEvents.V1.ExternalIdentityClaimed(userOnboardingId)
-        };
-        
         try
         {
             _ = await _eventWriter.StoreStateChanges(
                 [
-                    userOnboarding.ToStateStreamChanges(userOnboardingEvents),
-                    claimingExternalIdentity.ToStateStreamChanges(claimingExternalIdentityEvents)
+                    userOnboarding.ToStateStreamChanges([userOnboardingInitiated]),
+                    claimingExternalIdentity.ToStateStreamChanges([externalIdentityClaimed])
                 ],
                 cancellationToken);
 
@@ -90,7 +84,7 @@ public sealed record InitiateUserOnboardingCommand(
     string Name, 
     string LastName, 
     string Email, 
-    bool IsEmailConfirmed,
+    bool IsEmailVerified,
     ExternalIdentity ExternalIdentity)
     : ICommand<InitiateUserOnboardingCommandResult>;
 

@@ -36,9 +36,7 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
                 .WithName(_name)
                 .WithLastName(_lastName)
                 .WithEmail(_email)
-                .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(_subject)
+                .WithExternalIdentityId(_subject)
                 .Build());
 
         await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(

@@ -1,4 +1,3 @@
-using System.Text;
 using Eventuous;
 using Microsoft.Extensions.DependencyInjection;
 using Slicent;
@@ -21,9 +20,9 @@ public sealed class WhenDomainEventsAreSerialized
 
         (object Event, string Name)[] cases =
         [
-            (new UserOnboardingInitiated("Ada", "Lovelace", "ada@example.com"), "V1.UserOnboardingInitiated"),
-            (new UserOnboardingExternalIdentityAssociated("google-1", "Google", "issuer"), "V1.UserOnboardingExternalIdentityAssociated"),
-            (new UserOnboardingEmailVerified(), "V1.UserOnboardingEmailVerified"),
+            (new UserOnboardingInitiated("Ada", "Lovelace", "ada@example.com", 
+                true, "google-1", "Google", "issuer"), 
+                "V1.UserOnboardingInitiated"),
             (new UserOnboardingAliasChosen("ada"), "V1.UserOnboardingAliasChosen"),
             (new UserOnboardingCompleted("user-1", "v1"), "V1.UserOnboardingCompleted"),
             (new UserOnboardingCanceled("requested"), "V1.UserOnboardingCanceled"),
@@ -51,11 +50,22 @@ public sealed class WhenDomainEventsAreSerialized
         services.AddSlicent(typeof(ContractsAssemblyMarker).Assembly);
         await using var provider = services.BuildServiceProvider();
         var serializer = provider.GetRequiredService<IEventSerializer>();
-        var payload = Encoding.UTF8.GetBytes("""{"name":"Ada","lastName":"Lovelace","email":"ada@example.com"}""");
+        var payload = """
+                      {"name":"Ada","lastName":"Lovelace","email":"ada@example.com",
+                      "isEmailVerified":true,"externalIdentityId":"google-1",
+                      "externalIdentityProvider":"Google","externalIdentityIssuer":"issuer"}
+                      """u8.ToArray();
 
         var read = serializer.DeserializeEvent(payload, "V1.UserOnboardingInitiated", "application/json");
 
         await Assert.That(((DeserializationResult.SuccessfullyDeserialized)read).Payload)
-            .IsEqualTo(new UserOnboardingInitiated("Ada", "Lovelace", "ada@example.com"));
+            .IsEqualTo(new UserOnboardingInitiated(
+                "Ada", 
+                "Lovelace", 
+                "ada@example.com", 
+                true, 
+                "google-1", 
+                "Google", 
+                "issuer"));
     }
 }

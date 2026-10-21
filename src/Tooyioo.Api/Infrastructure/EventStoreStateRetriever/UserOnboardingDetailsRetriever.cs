@@ -40,8 +40,8 @@ public sealed class UserOnboardingDetailsRetriever
             LastName = userOnboardingState.LastName,
             Email = userOnboardingState.Email,
             IsEmailVerified = userOnboardingState.IsEmailVerified,
-            ExternalId = userOnboardingState.ExternalId,
-            ExternalProvider = userOnboardingState.ExternalProvider
+            ExternalId = userOnboardingState.ExternalIdentityId,
+            ExternalProvider = userOnboardingState.ExternalIdentityProvider
         };
     }
 }

@@ -35,11 +35,9 @@ public sealed class WhenAnotherUserTriesToChooseAliasForUserOnboarding
                 .WithName("Jane")
                 .WithLastName("Bloggs")
                 .WithEmail("jane.bloggs@test.com")
-                .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(_ownerSubject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build());
+                .WithExternalIdentityId(_ownerSubject)
+                .WithIsEmailVerified(true)
+                .Build());
 
         await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
             new ClaimingExternalIdentityId(_ownerSubject),
@@ -53,11 +51,9 @@ public sealed class WhenAnotherUserTriesToChooseAliasForUserOnboarding
                 .WithName("Other")
                 .WithLastName("User")
                 .WithEmail("other.user@test.com")
-                .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(_anotherSubject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build());
+                .WithExternalIdentityId(_anotherSubject)
+                .WithIsEmailVerified(true)
+                .Build());
 
         await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
             new ClaimingExternalIdentityId(_anotherSubject),

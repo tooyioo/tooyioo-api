@@ -57,8 +57,7 @@ public sealed class WhenAnotherUserTriesToCancelUserOnboarding
     {
         await Host.Given<UserOnboardingState, UserOnboardingId>(
             userOnboardingId,
-            DomainEvent.UserOnboardingInitiated().Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated().WithSubject(subject).Build());
+            DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(subject).Build());
 
         await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
             new ClaimingExternalIdentityId(subject),

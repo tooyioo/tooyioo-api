@@ -31,8 +31,7 @@ public sealed class WhenUserOnboardingIsAlreadyCanceled
 
         await Host.Given<UserOnboardingState, UserOnboardingId>(
             _userOnboardingId,
-            DomainEvent.UserOnboardingInitiated().Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated().WithSubject(_subject).Build(),
+            DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(_subject).Build(),
             DomainEvent.UserOnboardingAliasChosen().WithAlias(_alias).Build(),
             DomainEvent.UserOnboardingCanceled().Build());
 

@@ -32,9 +32,10 @@ public sealed class WhenUserOnboardingWithAliasCanBeCanceled
 
         await Host.Given<UserOnboardingState, UserOnboardingId>(
             _userOnboardingId,
-            DomainEvent.UserOnboardingInitiated().Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated().WithSubject(_subject).Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build(),
+            DomainEvent.UserOnboardingInitiated()
+                .WithExternalIdentityId(_subject)
+                .WithIsEmailVerified(true)
+                .Build(),
             DomainEvent.UserOnboardingAliasChosen().WithAlias(_alias).Build());
 
         await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(

@@ -18,9 +18,8 @@ public sealed record UserDocument
     public required string Email { get; init; }
     public required bool IsEmailVerified { get; init; }
     public required string PhoneNumber { get; init; }
-    public required string ExternalId { get; init; }
-    public required string ExternalIdProvider { get; init; }
+    public required string ExternalIdentityId { get; init; }
+    public required string ExternalIdentityProvider { get; init; }
     public required string UserOnboardingId { get; init; }
-    public required string UserOnboardingInitiatedAt { get; init; }
     public required string TermsAndConditionsVersion { get; init; }
 }

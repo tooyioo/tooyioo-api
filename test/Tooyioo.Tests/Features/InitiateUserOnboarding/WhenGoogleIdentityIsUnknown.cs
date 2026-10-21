@@ -58,11 +58,9 @@ public sealed class WhenGoogleIdentityIsUnknown
                     .WithName(_name)
                     .WithLastName(_lastName)
                     .WithEmail(_email)
-                    .Build(),
-                DomainEvent.UserOnboardingExternalIdentityAssociated()
-                    .WithSubject(_subject)
-                    .Build(),
-                DomainEvent.UserOnboardingEmailVerified().Build());
+                    .WithIsEmailVerified(true)
+                    .WithExternalIdentityId(_subject)
+                    .Build());
 
     [Test]
     public async Task Then_external_identity_is_claimed()

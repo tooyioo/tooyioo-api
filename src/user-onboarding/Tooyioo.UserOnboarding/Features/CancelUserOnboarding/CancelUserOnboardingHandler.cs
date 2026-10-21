@@ -51,7 +51,7 @@ public sealed class CancelUserOnboardingHandler
 
         var externalIdentityClaiming =
             await _eventReader.LoadStateOrNew<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-                userOnboarding.State.ExternalId,
+                userOnboarding.State.ExternalIdentityId,
                 cancellationToken);
 
         if (externalIdentityClaiming.State.UserOnboardingId != userOnboardingId)

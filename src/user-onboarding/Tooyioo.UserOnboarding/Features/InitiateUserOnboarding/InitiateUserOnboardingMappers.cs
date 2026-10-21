@@ -4,6 +4,7 @@ using Tooyioo.Common;
 using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Contracts;
 using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
 // ReSharper disable ConvertToPrimaryConstructor
+// ReSharper disable UnusedType.Global
 
 namespace Tooyioo.UserOnboarding.Features.InitiateUserOnboarding;
 

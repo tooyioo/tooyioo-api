@@ -32,15 +32,13 @@ public sealed class WhenUserOnboardingAliasWasReleased
 
         await Host.Given<UserOnboardingState, UserOnboardingId>(
             _canceledUserOnboardingId,
-            DomainEvent.UserOnboardingInitiated().Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated().WithSubject(_canceledSubject).Build(),
+            DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(_canceledSubject).Build(),
             DomainEvent.UserOnboardingAliasChosen().WithAlias(_alias).Build(),
             DomainEvent.UserOnboardingCanceled().Build());
 
         await Host.Given<UserOnboardingState, UserOnboardingId>(
             _newUserOnboardingId,
-            DomainEvent.UserOnboardingInitiated().Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated().WithSubject(_newSubject).Build());
+            DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(_newSubject).Build());
 
         await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
             new ClaimingExternalIdentityId(_newSubject),

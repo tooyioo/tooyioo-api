@@ -37,11 +37,9 @@ public sealed class ChooseUserOnboardingAliasValidationTests
                 .WithName(name)
                 .WithLastName(lastName)
                 .WithEmail(email)
-                .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(subject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build());
+                .WithExternalIdentityId(subject)
+                .WithIsEmailVerified(true)
+                .Build());
 
         await host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
             new ClaimingExternalIdentityId(subject),

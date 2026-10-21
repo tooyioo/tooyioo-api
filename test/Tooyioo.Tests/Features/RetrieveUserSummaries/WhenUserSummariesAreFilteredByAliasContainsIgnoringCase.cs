@@ -57,11 +57,9 @@ public sealed class WhenUserSummariesAreFilteredByAliasContainsIgnoringCase(Mong
                 .WithName(_janeName)
                 .WithLastName(_janeLastName)
                 .WithEmail("jane.bloggs@test.com")
+                .WithExternalIdentityId(_janeUserId)
+                .WithIsEmailVerified(true)
                 .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(_janeSubject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias(_janeAlias)
                 .Build(),
@@ -75,9 +73,7 @@ public sealed class WhenUserSummariesAreFilteredByAliasContainsIgnoringCase(Mong
                 .WithName("John")
                 .WithLastName("Smith")
                 .WithEmail("john.smith@test.com")
-                .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(johnSubject)
+                .WithExternalIdentityId(johnUserOnboardingId)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("john-smith")
@@ -92,11 +88,9 @@ public sealed class WhenUserSummariesAreFilteredByAliasContainsIgnoringCase(Mong
                 .WithName("Casey")
                 .WithLastName("Bloggins")
                 .WithEmail("casey.bloggins@test.com")
+                .WithExternalIdentityId(caseySubject)
+                .WithIsEmailVerified(true)
                 .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(caseySubject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("casey-bloggins")
                 .Build(),

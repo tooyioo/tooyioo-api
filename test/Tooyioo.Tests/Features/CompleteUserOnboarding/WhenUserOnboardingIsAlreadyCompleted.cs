@@ -31,11 +31,9 @@ public sealed class WhenUserOnboardingIsAlreadyCompleted
                 .WithName("Jane")
                 .WithLastName("Bloggs")
                 .WithEmail("jane.bloggs@test.com")
+                .WithExternalIdentityId(_subject)
+                .WithIsEmailVerified(true)
                 .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(_subject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("jane-bloggs")
                 .Build(),

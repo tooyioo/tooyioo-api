@@ -9,13 +9,14 @@ public static class UserOnboardingDomainEvents
         private const string Prefix = "V1.";
 
         [DomainEventType(Prefix + "UserOnboardingInitiated")]
-        public record UserOnboardingInitiated(string Name, string LastName, string Email);
-
-        [DomainEventType(Prefix + "UserOnboardingExternalIdentityAssociated")]
-        public record UserOnboardingExternalIdentityAssociated(string Id, string Provider, string Issuer);
-
-        [DomainEventType(Prefix + "UserOnboardingEmailVerified")]
-        public record UserOnboardingEmailVerified;
+        public record UserOnboardingInitiated(
+            string Name, 
+            string LastName, 
+            string Email,
+            bool IsEmailVerified,
+            string ExternalIdentityId,
+            string ExternalIdentityProvider,
+            string ExternalIdentityIssuer);
 
         [DomainEventType(Prefix + "UserOnboardingAliasChosen")]
         public record UserOnboardingAliasChosen(string Alias);

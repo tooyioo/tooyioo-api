@@ -16,7 +16,7 @@
       <PackageReference Include="Eventuous.Extensions.DependencyInjection" Version="0.17.0" />
       <PackageReference Include="Eventuous.KurrentDB" Version="0.17.0" />
       <PackageReference Include="Eventuous.Projections.MongoDB" Version="0.17.0" />
-      <PackageReference Include="SharpCompress" Version="0.50.4" />
+      <PackageReference Include="SharpCompress" Version="0.50.7" />
       <PackageReference Include="Snappier" Version="1.3.1" />
     </ItemGroup>
 

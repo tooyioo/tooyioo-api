@@ -36,10 +36,9 @@ public static class RetrieveUserMappers
                     PhoneNumber = ok.Document.PhoneNumber,
                     CreatedAt = ok.Document.CreatedAt,
                     LastModifiedAt = ok.Document.LastModifiedAt,
-                    ExternalId = ok.Document.ExternalId,
-                    ExternalProvider = ok.Document.ExternalIdProvider,
+                    ExternalIdentityId = ok.Document.ExternalIdentityId,
+                    ExternalIdentityProvider = ok.Document.ExternalIdentityProvider,
                     UserOnboardingId = ok.Document.UserOnboardingId,
-                    UserOnboardingInitiatedAt = ok.Document.UserOnboardingInitiatedAt,
                     TermsAndConditionsVersion = ok.Document.TermsAndConditionsVersion
                 }),
                 notFound => queryHttpResponseGenerator.NotFound(

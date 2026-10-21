@@ -2,7 +2,7 @@
 using Slicent.Application;
 using Slicent.Application.Queries;
 using Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Contracts;
-
+using Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Support;
 // ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable UnusedType.Global
 
@@ -32,17 +32,26 @@ public static class RetrieveUserOnboardingMappers
                     Name = ok.Document.Name,
                     LastName = ok.Document.LastName,
                     Email = ok.Document.Email,
+                    IsEmailVerified = ok.Document.IsEmailVerified,
+                    CancellationReason = ok.Document.CancellationReason,
+                    Status = ToStatus(ok.Document.Status),
                     CreatedAt = ok.Document.CreatedAt,
                     LastModifiedAt = ok.Document.LastModifiedAt,
                     CompletedAt = ok.Document.CompletedAt,
-                    CanceledAt = ok.Document.CanceledAt,
-                    CancellationReason = ok.Document.CancellationReason,
-                    Status = ok.Document.Status,
-                    IsEmailVerified = ok.Document.IsEmailVerified
+                    CanceledAt = ok.Document.CanceledAt
                 }),
                 notFound => queryHttpResponseGenerator.NotFound(
                     context,
                     "user_onboarding_not_found",
                     $"Could not find user onboarding with Id {notFound.Id}"));
+
+        private static string ToStatus(string storedStatus) =>
+            storedStatus switch
+            {
+                UserOnboardingProjector.InProgress => RetrieveUserOnboardingResponse.StatusInProgress,
+                UserOnboardingProjector.Completed  => RetrieveUserOnboardingResponse.StatusCompleted,
+                UserOnboardingProjector.Canceled   => RetrieveUserOnboardingResponse.StatusCanceled,
+                _ => throw new ArgumentOutOfRangeException(nameof(storedStatus), storedStatus, null)
+            };
     }
 }

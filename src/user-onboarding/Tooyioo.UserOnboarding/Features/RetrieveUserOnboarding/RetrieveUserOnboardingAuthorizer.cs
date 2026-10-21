@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Slicent.Application.Authorization;
 using Tooyioo.Common;
 using Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Contracts;
-
 // ReSharper disable ClassNeverInstantiated.Global
 
 namespace Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding;

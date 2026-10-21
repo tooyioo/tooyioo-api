@@ -56,11 +56,9 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
                 .WithName("Jane")
                 .WithLastName("Bloggs")
                 .WithEmail("jane.bloggs@test.com")
+                .WithExternalIdentityId(_janeSubject)
+                .WithIsEmailVerified(true)
                 .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(_janeSubject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("jane-bloggs")
                 .Build(),
@@ -74,9 +72,7 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
                 .WithName("John")
                 .WithLastName("Smith")
                 .WithEmail("john.smith@test.com")
-                .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(johnSubject)
+                .WithExternalIdentityId(johnSubject)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("john-smith")
@@ -91,11 +87,9 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
                 .WithName("Casey")
                 .WithLastName("Bloggins")
                 .WithEmail("casey.bloggins@test.com")
+                .WithExternalIdentityId(caseySubject)
+                .WithIsEmailVerified(true)
                 .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(caseySubject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("casey-bloggins")
                 .Build(),

@@ -10,12 +10,6 @@ public static class DomainEvent
     public static UserOnboardingInitiatedBuilder UserOnboardingInitiated()
         => new();
 
-    public static UserOnboardingExternalIdentityAssociatedBuilder UserOnboardingExternalIdentityAssociated()
-        => new();
-
-    public static UserOnboardingEmailVerifiedBuilder UserOnboardingEmailVerified()
-        => new();
-
     public static UserOnboardingAliasChosenBuilder UserOnboardingAliasChosen()
         => new();
 
@@ -43,6 +37,10 @@ public sealed class UserOnboardingInitiatedBuilder
     private string _name = "Jane";
     private string _lastName = "Bloggs";
     private string _email = "jane.bloggs@test.com";
+    private bool _isEmailVerified = false;
+    private string _externalIdentityId = "google-sub-123";
+    private string _externalIdentityProvider = nameof(ExternalIdentityProvider.Google);
+    private string _externalIdentityIssuer = GoogleIdentityTokenBuilder.Issuer;
 
     public UserOnboardingInitiatedBuilder WithName(string name)
     {
@@ -61,49 +59,40 @@ public sealed class UserOnboardingInitiatedBuilder
         _email = email;
         return this;
     }
+    
+    public UserOnboardingInitiatedBuilder WithIsEmailVerified(bool isEmailVerified)
+    {
+        _isEmailVerified = isEmailVerified;
+        return this;
+    }
+    
+    public UserOnboardingInitiatedBuilder WithExternalIdentityId(string externalIdentityId)
+    {
+        _externalIdentityId = externalIdentityId;
+        return this;
+    }
+    
+    public UserOnboardingInitiatedBuilder WithExternalIdentityProvider(string externalIdentityProvider)
+    {
+        _externalIdentityProvider = externalIdentityProvider;
+        return this;
+    }
+    
+    public UserOnboardingInitiatedBuilder WithExternalIdentityIssuer(string externalIdentityIssuer)
+    {
+        _externalIdentityIssuer = externalIdentityIssuer;
+        return this;
+    }
 
     public UserOnboardingDomainEvents.V1.UserOnboardingInitiated Build()
-        => new(_name, _lastName, _email);
-}
-
-public sealed class UserOnboardingExternalIdentityAssociatedBuilder
-{
-    private string _id = "google-sub-123";
-    private string _provider = nameof(ExternalIdentityProvider.Google);
-    private string _issuer = GoogleIdentityTokenBuilder.Issuer;
-
-    public UserOnboardingExternalIdentityAssociatedBuilder WithId(string id)
-    {
-        _id = id;
-        return this;
-    }
-
-    public UserOnboardingExternalIdentityAssociatedBuilder WithSubject(string subject)
-    {
-        _id = subject;
-        return this;
-    }
-
-    public UserOnboardingExternalIdentityAssociatedBuilder WithProvider(string provider)
-    {
-        _provider = provider;
-        return this;
-    }
-
-    public UserOnboardingExternalIdentityAssociatedBuilder WithIssuer(string issuer)
-    {
-        _issuer = issuer;
-        return this;
-    }
-
-    public UserOnboardingDomainEvents.V1.UserOnboardingExternalIdentityAssociated Build()
-        => new(_id, _provider, _issuer);
-}
-
-public sealed class UserOnboardingEmailVerifiedBuilder
-{
-    public UserOnboardingDomainEvents.V1.UserOnboardingEmailVerified Build()
-        => new();
+        => new(
+            _name, 
+            _lastName, 
+            _email, 
+            _isEmailVerified, 
+            _externalIdentityId, 
+            _externalIdentityProvider,
+            _externalIdentityIssuer);
 }
 
 public sealed class UserOnboardingAliasChosenBuilder

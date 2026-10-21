@@ -10,12 +10,14 @@ namespace Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Support;
 public sealed class UserOnboardingProjector
     : MongoProjector<UserOnboardingDocument>
 {
+    internal const string InProgress = "in_progress";
+    internal const string Completed = "completed";
+    internal const string Canceled = "canceled";
+    
     public UserOnboardingProjector(IMongoDatabase database, ITypeMapper typeMapper)
         : base(database, null, typeMapper)
     {
         On<UserOnboardingDomainEvents.V1.UserOnboardingInitiated>(stream => stream.GetId(), Handle);
-        On<UserOnboardingDomainEvents.V1.UserOnboardingExternalIdentityAssociated>(stream => stream.GetId(), Handle);
-        On<UserOnboardingDomainEvents.V1.UserOnboardingEmailVerified>(stream => stream.GetId(), Handle);
         On<UserOnboardingDomainEvents.V1.UserOnboardingAliasChosen>(stream => stream.GetId(), Handle);
         On<UserOnboardingDomainEvents.V1.UserOnboardingCompleted>(stream => stream.GetId(), Handle);
         On<UserOnboardingDomainEvents.V1.UserOnboardingCanceled>(stream => stream.GetId(), Handle);
@@ -33,44 +35,15 @@ public sealed class UserOnboardingProjector
             .Set(x => x.Name, evt.Name)
             .Set(x => x.LastName, evt.LastName)
             .Set(x => x.Email, evt.Email)
-            .Set(x => x.IsEmailVerified, false)
-            .Set(x => x.Status, UserOnboardingStatuses.InProgress)
+            .Set(x => x.IsEmailVerified, evt.IsEmailVerified)
+            .Set(x => x.ExternalIdentityId, evt.ExternalIdentityId)
+            .Set(x => x.ExternalIdentityProvider, evt.ExternalIdentityProvider)
+            .Set(x => x.ExternalIdentityIssuer, evt.ExternalIdentityIssuer)
+            .Set(x => x.Status, InProgress)
             .Set(x => x.CompletedAt, null)
             .Set(x => x.CanceledAt, null)
             .Set(x => x.CancellationReason, null)
             .Set(x => x.CreatedAt, happenedAtUtc)
-            .Set(x => x.LastModifiedAt, happenedAtUtc)
-            .Set(x => x.Revision, ctx.StreamPosition);
-    }
-
-    private static UpdateDefinition<UserOnboardingDocument> Handle(
-        IMessageConsumeContext<UserOnboardingDomainEvents.V1.UserOnboardingExternalIdentityAssociated> ctx,
-        UpdateDefinitionBuilder<UserOnboardingDocument> update)
-    {
-        var evt = ctx.Message;
-        var happenedAtUtc = DateTime.SpecifyKind(ctx.Created, DateTimeKind.Utc);
-
-        return update
-            .SetOnInsert(x => x.Id, ctx.Stream.GetId())
-            .Set(x => x.ExternalIdentity, new ExternalIdentityDocument
-            {
-                Id = evt.Id,
-                Provider = evt.Provider,
-                Issuer = evt.Issuer
-            })
-            .Set(x => x.LastModifiedAt, happenedAtUtc)
-            .Set(x => x.Revision, ctx.StreamPosition);
-    }
-    
-    private static UpdateDefinition<UserOnboardingDocument> Handle(
-        IMessageConsumeContext<UserOnboardingDomainEvents.V1.UserOnboardingEmailVerified> ctx, 
-        UpdateDefinitionBuilder<UserOnboardingDocument> update)
-    {
-        var happenedAtUtc = DateTime.SpecifyKind(ctx.Created, DateTimeKind.Utc);
-        
-        return update
-            .SetOnInsert(x => x.Id, ctx.Stream.GetId())
-            .Set(x => x.IsEmailVerified, true)
             .Set(x => x.LastModifiedAt, happenedAtUtc)
             .Set(x => x.Revision, ctx.StreamPosition);
     }
@@ -97,7 +70,7 @@ public sealed class UserOnboardingProjector
 
         return update
             .SetOnInsert(x => x.Id, ctx.Stream.GetId())
-            .Set(x => x.Status, UserOnboardingStatuses.Completed)
+            .Set(x => x.Status, Completed)
             .Set(x => x.CompletedAt, happenedAtUtc)
             .Set(x => x.LastModifiedAt, happenedAtUtc)
             .Set(x => x.Revision, ctx.StreamPosition);
@@ -112,7 +85,7 @@ public sealed class UserOnboardingProjector
 
         return update
             .SetOnInsert(x => x.Id, ctx.Stream.GetId())
-            .Set(x => x.Status, UserOnboardingStatuses.Canceled)
+            .Set(x => x.Status, Canceled)
             .Set(x => x.CanceledAt, happenedAtUtc)
             .Set(x => x.CancellationReason, evt.Reason)
             .Set(x => x.LastModifiedAt, happenedAtUtc)

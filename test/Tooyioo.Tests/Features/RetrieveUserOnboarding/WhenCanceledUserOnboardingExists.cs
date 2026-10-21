@@ -30,9 +30,7 @@ public sealed class WhenCanceledUserOnboardingExists(MongoTestContainer mongoDb)
 
         await Host.Given<UserOnboardingState, UserOnboardingId>(
             _userOnboardingId,
-            DomainEvent.UserOnboardingInitiated().Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated().WithSubject(_subject).Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build(),
+            DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(_subject).Build(),
             DomainEvent.UserOnboardingCanceled().Build());
     }
 

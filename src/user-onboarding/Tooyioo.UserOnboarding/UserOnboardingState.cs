@@ -10,9 +10,9 @@ public record UserOnboardingState
     public string LastName { get; private init; } = null!;
     public string Email { get; private init; } = null!;
     public bool IsEmailVerified { get; private init; }
-    public string ExternalId { get; private init; } = null!;
-    public string ExternalProvider { get; private init; } = null!;
-    public string ExternalIssuer { get; private init; } = null!;
+    public string ExternalIdentityId { get; private init; } = null!;
+    public string ExternalIdentityProvider { get; private init; } = null!;
+    public string ExternalIdentityIssuer { get; private init; } = null!;
     public string? Alias { get; private init; }
     public bool IsComplete { get; private init; }
     public string? UserId { get; private init; }
@@ -22,8 +22,6 @@ public record UserOnboardingState
     public UserOnboardingState()
     {
         On<UserOnboardingDomainEvents.V1.UserOnboardingInitiated>(Initiated);
-        On<UserOnboardingDomainEvents.V1.UserOnboardingExternalIdentityAssociated>(UserExternalIdAssociated);
-        On<UserOnboardingDomainEvents.V1.UserOnboardingEmailVerified>(UserOnboardingEmailVerified);
         On<UserOnboardingDomainEvents.V1.UserOnboardingAliasChosen>(UserOnboardingAliasChosen);
         On<UserOnboardingDomainEvents.V1.UserOnboardingCompleted>(UserOnboardingCompleted);
         On<UserOnboardingDomainEvents.V1.UserOnboardingCanceled>(UserOnboardingCanceled);
@@ -37,29 +35,11 @@ public record UserOnboardingState
         {
             Name = domainEvent.Name,
             LastName = domainEvent.LastName,
-            Email = domainEvent.Email
-        };
-    }
-    
-    private static UserOnboardingState UserExternalIdAssociated(
-        UserOnboardingState state, 
-        UserOnboardingDomainEvents.V1.UserOnboardingExternalIdentityAssociated domainEvent)
-    {
-        return state with
-        {
-            ExternalId = domainEvent.Id,
-            ExternalProvider = domainEvent.Provider,
-            ExternalIssuer = domainEvent.Issuer
-        };
-    }
-    
-    private static UserOnboardingState UserOnboardingEmailVerified(
-        UserOnboardingState state, 
-        UserOnboardingDomainEvents.V1.UserOnboardingEmailVerified domainEvent)
-    {
-        return state with
-        {
-            IsEmailVerified = true
+            Email = domainEvent.Email,
+            IsEmailVerified = domainEvent.IsEmailVerified,
+            ExternalIdentityId = domainEvent.ExternalIdentityId,
+            ExternalIdentityProvider = domainEvent.ExternalIdentityProvider,
+            ExternalIdentityIssuer = domainEvent.ExternalIdentityIssuer
         };
     }
     

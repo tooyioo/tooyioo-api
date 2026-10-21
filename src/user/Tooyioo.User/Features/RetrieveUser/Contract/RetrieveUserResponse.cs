@@ -10,7 +10,6 @@ namespace Tooyioo.User.Features.RetrieveUser.Contract;
 /// "name": "Joe", "lastName": "Bloggs", "email": "joe@test.com", "isEmailVerified": true,
 /// "phoneNumber": "+34644000000", "externalId": "google-sub-123", "externalProvider": "Google",
 /// "userOnboardingId": "00000000-0000-0000-0000-000000000001",
-/// "userOnboardingInitiatedAt": "2026-01-01T12:00:00.000Z",
 /// "createdAt": "2026-01-01T12:05:00.000Z", "lastModifiedAt": "2026-01-01T12:05:00.000Z",
 /// "termsAndConditionsVersion": "v1"}
 /// </example>
@@ -54,22 +53,17 @@ public sealed record RetrieveUserResponse
     /// <summary>
     /// The identifier assigned by the external identity provider.
     /// </summary>
-    public required string ExternalId { get; init; }
+    public required string ExternalIdentityId { get; init; }
     
     /// <summary>
     /// The external identity provider name.
     /// </summary>
-    public required string ExternalProvider { get; init; }
+    public required string ExternalIdentityProvider { get; init; }
     
     /// <summary>
     /// The user onboarding process identifier that originated the user.
     /// </summary>
     public required string UserOnboardingId { get; init; }
-    
-    /// <summary>
-    /// The UTC date and time when user onboarding was initiated.
-    /// </summary>
-    public required string UserOnboardingInitiatedAt { get; init; }
     
     /// <summary>
     /// The UTC date and time when the user document was created.

@@ -16,18 +16,13 @@ public sealed record UserOnboardingDocument
     public required string Name { get; init; }
     public required string LastName { get; init; }
     public required string Email { get; init; }
-    public bool IsEmailVerified { get; init; }
-    public required ExternalIdentityDocument ExternalIdentity { get; init; }
+    public required bool IsEmailVerified { get; init; }
     public string? Alias { get; init; }
+    public required string ExternalIdentityId { get; init; }
+    public required string ExternalIdentityProvider { get; init; }
+    public required string ExternalIdentityIssuer { get; init; }
     public required string Status { get; init; }
     public required DateTime? CompletedAt { get; init; }
     public required DateTime? CanceledAt { get; init; }
     public required string? CancellationReason { get; init; }
-}
-
-public sealed record ExternalIdentityDocument
-{
-    public required string Id { get; init; }
-    public required string Provider { get; init; }
-    public required string Issuer { get; init; }
 }

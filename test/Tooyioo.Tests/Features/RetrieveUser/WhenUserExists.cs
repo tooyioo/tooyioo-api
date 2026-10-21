@@ -43,11 +43,9 @@ public sealed class WhenUserExists(MongoTestContainer mongoDb)
                 .WithName("Jane")
                 .WithLastName("Bloggs")
                 .WithEmail("jane.bloggs@test.com")
+                .WithIsEmailVerified(true)
+                .WithExternalIdentityId(_subject)
                 .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(_subject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("jane-bloggs")
                 .Build(),
@@ -76,20 +74,15 @@ public sealed class WhenUserExists(MongoTestContainer mongoDb)
         => await Assert.That(_body.Id).IsEqualTo(_userId);
 
     [Test]
-    public async Task Then_response_returns_projected_personal_details()
+    public async Task Then_response_returns_expected_details()
     {
         await Assert.That(_body.Name).IsEqualTo("Jane");
         await Assert.That(_body.LastName).IsEqualTo("Bloggs");
         await Assert.That(_body.Email).IsEqualTo("jane.bloggs@test.com");
         await Assert.That(_body.IsEmailVerified).IsTrue();
         await Assert.That(_body.Alias).IsEqualTo("jane-bloggs");
-    }
-
-    [Test]
-    public async Task Then_response_returns_projected_onboarding_details()
-    {
-        await Assert.That(_body.ExternalId).IsEqualTo(_subject);
-        await Assert.That(_body.ExternalProvider).IsEqualTo(nameof(ExternalIdentityProvider.Google));
+        await Assert.That(_body.ExternalIdentityId).IsEqualTo(_subject);
+        await Assert.That(_body.ExternalIdentityProvider).IsEqualTo(nameof(ExternalIdentityProvider.Google));
         await Assert.That(_body.UserOnboardingId).IsEqualTo(_userOnboardingId.Value);
         await Assert.That(_body.TermsAndConditionsVersion).IsEqualTo(_termsAndConditionsVersion);
     }

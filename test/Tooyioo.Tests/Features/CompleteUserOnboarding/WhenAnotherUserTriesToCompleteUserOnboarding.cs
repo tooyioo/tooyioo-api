@@ -71,11 +71,9 @@ public sealed class WhenAnotherUserTriesToCompleteUserOnboarding
                 .WithName(name)
                 .WithLastName(lastName)
                 .WithEmail(email)
+                .WithExternalIdentityId(subject)
+                .WithIsEmailVerified(true)
                 .Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated()
-                .WithSubject(subject)
-                .Build(),
-            DomainEvent.UserOnboardingEmailVerified().Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("jane-bloggs")
                 .Build());

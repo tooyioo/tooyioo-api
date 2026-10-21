@@ -27,8 +27,7 @@ public sealed class CancelUserOnboardingValidationTests
 
         await host.Given<UserOnboardingState, UserOnboardingId>(
             userOnboardingId,
-            DomainEvent.UserOnboardingInitiated().Build(),
-            DomainEvent.UserOnboardingExternalIdentityAssociated().WithSubject(subject).Build());
+            DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(subject).Build());
 
         await host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
             new ClaimingExternalIdentityId(subject),

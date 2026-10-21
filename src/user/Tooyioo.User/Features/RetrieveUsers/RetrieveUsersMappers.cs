@@ -56,10 +56,9 @@ public static class RetrieveUsersMappers
                         Email = x.Email,
                         IsEmailVerified = x.IsEmailVerified,
                         PhoneNumber = x.PhoneNumber,
-                        ExternalId = x.ExternalId,
-                        ExternalProvider = x.ExternalIdProvider,
+                        ExternalId = x.ExternalIdentityId,
+                        ExternalProvider = x.ExternalIdentityProvider,
                         UserOnboardingId = x.UserOnboardingId,
-                        UserOnboardingInitiatedAt = x.UserOnboardingInitiatedAt,
                         CreatedAt = x.CreatedAt,
                         LastModifiedAt = x.LastModifiedAt,
                         TermsAndConditionsVersion = x.TermsAndConditionsVersion

@@ -11,6 +11,10 @@ namespace Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Contracts;
 /// </example>
 public sealed record RetrieveUserOnboardingResponse
 {
+    public const string StatusInProgress = "in_progress";
+    public const string StatusCompleted = "completed";
+    public const string StatusCanceled = "canceled";
+    
     /// <summary>
     /// The unique identifier of the user onboarding
     /// </summary>
@@ -42,14 +46,15 @@ public sealed record RetrieveUserOnboardingResponse
     public required bool IsEmailVerified { get; init; }
 
     /// <summary>
-    /// Current onboarding status
+    /// Current onboarding status:
+    /// <see cref="StatusInProgress"/>, <see cref="StatusCompleted"/> or <see cref="StatusCanceled"/>.
     /// </summary>
     public required string Status { get; init; }
 
     /// <summary>
     /// Flag indicating whether the user onboarding is complete or needs to be completed
     /// </summary>
-    public bool IsComplete => CompletedAt is not null;
+    public bool IsComplete => Status == StatusCompleted;
 
     /// <summary>
     /// Creation date
