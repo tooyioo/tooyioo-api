@@ -138,6 +138,41 @@ The collection reads the Google ID token from Bruno's OAuth store:
 {{$oauth2.google-credentials.id_token}}
 ```
 
+## Event model
+
+The event model is defined in [`doc/event-model/tooyioo.em.hcl`](doc/event-model/tooyioo.em.hcl). It can be rendered as an HTML diagram using [EMHCL](https://github.com/event-modeling-hcl/eventmodeling-hcl).
+
+### Install EMHCL on Linux
+
+1. Download the latest **Linux AMD64** binary from the [EMHCL releases](https://github.com/event-modeling-hcl/eventmodeling-hcl/releases).
+2. Extract the archive if necessary and install the `emhcl` executable in `~/.local/bin`:
+
+   ```bash
+   mkdir -p ~/.local/bin
+   install -m 755 ~/Downloads/emhcl ~/.local/bin/emhcl
+   ```
+3. Ensure `~/.local/bin` is in your `PATH`:
+   ```bash
+   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+4. Verify the installation
+   ```bash
+   emhcl --help
+   ```
+   
+### Generate the event model diagram
+
+From the repository root, run:
+
+```bash
+emhcl diagram doc/event-model/tooyioo.em.hcl > doc/event-model/tooyioo.em.html
+```
+
+This generates the HTML diagram at `doc/event-model/tooyioo.em.html`. Run the command again whenever the event model changes to regenerate the diagram.
+To update EMHCL, download the latest release and replace the executable in `~/.local/bin`.
+
+
 ## Troubleshooting and development notes
 
 ### Podman and Testcontainers on Linux
