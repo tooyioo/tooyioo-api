@@ -48,9 +48,9 @@ public static class RetrieveUserOnboardingMappers
         private static string ToStatus(string storedStatus) =>
             storedStatus switch
             {
-                UserOnboardingProjector.InProgress => RetrieveUserOnboardingResponse.StatusInProgress,
-                UserOnboardingProjector.Completed  => RetrieveUserOnboardingResponse.StatusCompleted,
-                UserOnboardingProjector.Canceled   => RetrieveUserOnboardingResponse.StatusCanceled,
+                UserOnboardingDocument.StatusInProgress => RetrieveUserOnboardingResponse.StatusInProgress,
+                UserOnboardingDocument.StatusCompleted  => RetrieveUserOnboardingResponse.StatusCompleted,
+                UserOnboardingDocument.StatusCanceled   => RetrieveUserOnboardingResponse.StatusCanceled,
                 _ => throw new ArgumentOutOfRangeException(nameof(storedStatus), storedStatus, null)
             };
     }

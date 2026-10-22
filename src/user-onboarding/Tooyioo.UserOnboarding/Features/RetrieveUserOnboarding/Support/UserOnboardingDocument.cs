@@ -8,6 +8,10 @@ namespace Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Support;
 public sealed record UserOnboardingDocument
     : Document
 {
+    internal const string StatusInProgress = "in_progress";
+    internal const string StatusCompleted = "completed";
+    internal const string StatusCanceled = "canceled";
+    
     public UserOnboardingDocument(string Id) 
         : base(Id)
     {

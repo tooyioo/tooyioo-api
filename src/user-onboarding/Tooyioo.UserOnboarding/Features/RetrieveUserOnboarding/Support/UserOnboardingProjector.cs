@@ -10,10 +10,6 @@ namespace Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Support;
 public sealed class UserOnboardingProjector
     : MongoProjector<UserOnboardingDocument>
 {
-    internal const string InProgress = "in_progress";
-    internal const string Completed = "completed";
-    internal const string Canceled = "canceled";
-    
     public UserOnboardingProjector(IMongoDatabase database, ITypeMapper typeMapper)
         : base(database, null, typeMapper)
     {
@@ -39,7 +35,7 @@ public sealed class UserOnboardingProjector
             .Set(x => x.ExternalIdentityId, evt.ExternalIdentityId)
             .Set(x => x.ExternalIdentityProvider, evt.ExternalIdentityProvider)
             .Set(x => x.ExternalIdentityIssuer, evt.ExternalIdentityIssuer)
-            .Set(x => x.Status, InProgress)
+            .Set(x => x.Status, UserOnboardingDocument.StatusInProgress)
             .Set(x => x.CompletedAt, null)
             .Set(x => x.CanceledAt, null)
             .Set(x => x.CancellationReason, null)
@@ -70,7 +66,7 @@ public sealed class UserOnboardingProjector
 
         return update
             .SetOnInsert(x => x.Id, ctx.Stream.GetId())
-            .Set(x => x.Status, Completed)
+            .Set(x => x.Status, UserOnboardingDocument.StatusCompleted)
             .Set(x => x.CompletedAt, happenedAtUtc)
             .Set(x => x.LastModifiedAt, happenedAtUtc)
             .Set(x => x.Revision, ctx.StreamPosition);
@@ -85,7 +81,7 @@ public sealed class UserOnboardingProjector
 
         return update
             .SetOnInsert(x => x.Id, ctx.Stream.GetId())
-            .Set(x => x.Status, Canceled)
+            .Set(x => x.Status, UserOnboardingDocument.StatusCanceled)
             .Set(x => x.CanceledAt, happenedAtUtc)
             .Set(x => x.CancellationReason, evt.Reason)
             .Set(x => x.LastModifiedAt, happenedAtUtc)

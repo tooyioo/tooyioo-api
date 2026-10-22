@@ -11,9 +11,9 @@ namespace Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Contracts;
 /// </example>
 public sealed record RetrieveUserOnboardingResponse
 {
-    public const string StatusInProgress = "in_progress";
-    public const string StatusCompleted = "completed";
-    public const string StatusCanceled = "canceled";
+    internal const string StatusInProgress = "in_progress";
+    internal const string StatusCompleted = "completed";
+    internal const string StatusCanceled = "canceled";
     
     /// <summary>
     /// The unique identifier of the user onboarding
