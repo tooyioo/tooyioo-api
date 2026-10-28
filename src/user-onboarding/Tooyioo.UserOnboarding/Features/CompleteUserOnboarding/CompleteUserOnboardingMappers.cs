@@ -34,16 +34,17 @@ public static class CompleteUserOnboardingMappers
                 err => err.Match<IResult>(
                     _ => commandHttpResponseGenerator.Conflict(
                         context,
-                        "complete_user_onboarding_concurrency_conflict",
+                        "onboarding_already_canceled",
+                        "Could not complete user onboarding because it has been canceled"),
+                    _ => commandHttpResponseGenerator.Conflict(
+                        context,
+                        "concurrent_update",
                         "Could not complete user onboarding because of a concurrency conflict, please retry"),
                     _ => commandHttpResponseGenerator.Conflict(
                         context,
-                        "complete_user_onboarding_unexpected_state_conflict",
-                        "Could not complete user onboarding because of an unexpected state conflict, please retry"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "complete_user_onboarding_canceled_conflict",
-                        "Could not complete user onboarding because it has been canceled")
+                        "onboarding_state_unexpected",
+                        "Could not complete user onboarding because of an unexpected state conflict, please retry")
+
                 ));
     }
 }

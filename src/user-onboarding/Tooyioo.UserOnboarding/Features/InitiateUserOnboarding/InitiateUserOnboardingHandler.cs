@@ -47,7 +47,7 @@ public sealed class InitiateUserOnboardingHandler
         
         if (userOnboarding.Events.Length != 0)
         {
-            return new InitiateUserOnboardingUnexpectedStateErrorResult();
+            return new InitiateUserOnboardingUnexpectedStateError();
         }
 
         var userOnboardingInitiated = new UserOnboardingDomainEvents.V1.UserOnboardingInitiated(
@@ -75,7 +75,7 @@ public sealed class InitiateUserOnboardingHandler
         }
         catch (OptimisticConcurrencyException)
         {
-            return new InitiateUserOnboardingConcurrencyErrorResult();
+            return new InitiateUserOnboardingConcurrencyError();
         }
     }
 }
@@ -93,8 +93,8 @@ public partial class InitiateUserOnboardingCommandResult;
 
 public sealed record InitiateUserOnboardingOkResult(UserOnboardingId UserOnboardingId);
 
-[Union<InitiateUserOnboardingConcurrencyErrorResult, InitiateUserOnboardingUnexpectedStateErrorResult>]
+[Union<InitiateUserOnboardingConcurrencyError, InitiateUserOnboardingUnexpectedStateError>]
 public partial class InitiateUserOnboardingCommandErrorResult;
 
-public sealed record InitiateUserOnboardingConcurrencyErrorResult;
-public sealed record InitiateUserOnboardingUnexpectedStateErrorResult;
+public sealed record InitiateUserOnboardingConcurrencyError;
+public sealed record InitiateUserOnboardingUnexpectedStateError;

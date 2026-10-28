@@ -82,12 +82,12 @@ public sealed class WhenUserOnboardingAliasIsAlreadyInUse
     }
 
     [Test]
-    public async Task Then_response_is_bad_request()
-        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+    public async Task Then_response_is_conflict()
+        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.Conflict);
 
     [Test]
     public async Task Then_response_explains_alias_is_already_in_use()
-        => await Assert.That(_body.Title).IsEqualTo("choose_user_onboarding_alias_already_in_use");
+        => await Assert.That(_body.Title).IsEqualTo("alias_already_claimed");
 
     [Test]
     public async Task Then_user_onboarding_stream_has_no_new_events()

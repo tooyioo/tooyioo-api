@@ -75,8 +75,8 @@ public sealed class WhenUserOnboardingIsCompleted
         => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.Conflict);
 
     [Test]
-    public async Task Then_response_explains_completed_conflict()
-        => await Assert.That(_body.Title).IsEqualTo("cancel_user_onboarding_completed_conflict");
+    public async Task Then_response_explains_onboarding_is_already_completed()
+        => await Assert.That(_body.Title).IsEqualTo("onboarding_already_completed");
 
     [Test]
     public async Task Then_user_onboarding_stream_has_no_new_events()

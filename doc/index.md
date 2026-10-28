@@ -19,6 +19,7 @@ Use this index to choose the smallest relevant reading set for a task.
 - [Initiate user onboarding](slices/initiate-user-onboarding.md) records current behavior and decisions for the onboarding initiation slice.
 - [Complete user onboarding](slices/complete-user-onboarding.md) records current behavior and decisions for the onboarding completion slice.
 - [Cancel user onboarding](slices/cancel-user-onboarding.md) records current behavior and decisions for the onboarding cancellation slice.
+- [Choose user onboarding alias](slices/choose-user-onboarding-alias.md) records the alias selection rules and consistency boundary.
 
 ## Agent workflow
 

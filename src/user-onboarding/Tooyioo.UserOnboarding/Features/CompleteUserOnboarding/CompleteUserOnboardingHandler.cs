@@ -34,7 +34,7 @@ public sealed class CompleteUserOnboardingHandler
         
         if (userOnboarding.Events.Length == 0)
         {
-            return new CompleteUserOnboardingUnexpectedStateErrorResult();
+            return new CompleteUserOnboardingUnexpectedStateError();
         }
 
         if (userOnboarding.State is { IsComplete: true, UserId: { } existingUserId })
@@ -44,7 +44,7 @@ public sealed class CompleteUserOnboardingHandler
 
         if (userOnboarding.State.IsCanceled)
         {
-            return new CompleteUserOnboardingCanceledErrorResult();
+            return new CompleteUserOnboardingAlreadyCanceledError();
         }
 
         var userId = UserId.New();
@@ -64,7 +64,7 @@ public sealed class CompleteUserOnboardingHandler
         }
         catch (OptimisticConcurrencyException)
         {
-            return new CompleteUserOnboardingConcurrencyConflictError();
+            return new CompleteUserOnboardingConcurrencyConflict();
         }
     }
 }
@@ -77,8 +77,8 @@ public partial class CompleteUserOnboardingCommandResult;
 
 public sealed record CompleteUserOnboardingCommandOkResult(UserOnboardingId UserOnboardingId, string UserId);
 
-[Union<CompleteUserOnboardingConcurrencyConflictError, CompleteUserOnboardingUnexpectedStateErrorResult, CompleteUserOnboardingCanceledErrorResult>]
+[Union<CompleteUserOnboardingAlreadyCanceledError, CompleteUserOnboardingConcurrencyConflict, CompleteUserOnboardingUnexpectedStateError>]
 public partial class CompleteUserOnboardingCommandErrorResult;
-public sealed record CompleteUserOnboardingConcurrencyConflictError;
-public sealed record CompleteUserOnboardingUnexpectedStateErrorResult;
-public sealed record CompleteUserOnboardingCanceledErrorResult;
+public sealed record CompleteUserOnboardingAlreadyCanceledError;
+public sealed record CompleteUserOnboardingConcurrencyConflict;
+public sealed record CompleteUserOnboardingUnexpectedStateError;

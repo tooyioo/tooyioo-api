@@ -36,12 +36,12 @@ public sealed class CancelUserOnboardingHandler
 
         if (userOnboarding.Events.Length == 0)
         {
-            return new CancelUserOnboardingUnexpectedStateErrorResult();
+            return new CancelUserOnboardingUnexpectedStateError();
         }
 
         if (userOnboarding.State.IsComplete)
         {
-            return new CancelUserOnboardingCompletedErrorResult();
+            return new CancelUserOnboardingAlreadyCompletedError();
         }
 
         if (userOnboarding.State.IsCanceled)
@@ -56,7 +56,7 @@ public sealed class CancelUserOnboardingHandler
 
         if (externalIdentityClaiming.State.UserOnboardingId != userOnboardingId)
         {
-            return new CancelUserOnboardingUnexpectedStateErrorResult();
+            return new CancelUserOnboardingUnexpectedStateError();
         }
 
         var stateChanges = new List<StateStreamChanges>
@@ -78,7 +78,7 @@ public sealed class CancelUserOnboardingHandler
 
             if (aliasClaiming.State.UserOnboardingId != userOnboardingId)
             {
-                return new CancelUserOnboardingUnexpectedStateErrorResult();
+                return new CancelUserOnboardingUnexpectedStateError();
             }
 
             stateChanges.Add(aliasClaiming.ToStateStreamChanges([
@@ -107,8 +107,8 @@ public partial class CancelUserOnboardingCommandResult;
 
 public sealed record CancelUserOnboardingCommandOkResult(UserOnboardingId UserOnboardingId);
 
-[Union<CancelUserOnboardingConcurrencyConflictError, CancelUserOnboardingCompletedErrorResult, CancelUserOnboardingUnexpectedStateErrorResult>]
+[Union<CancelUserOnboardingAlreadyCompletedError, CancelUserOnboardingConcurrencyConflictError, CancelUserOnboardingUnexpectedStateError>]
 public partial class CancelUserOnboardingCommandErrorResult;
+public sealed record CancelUserOnboardingAlreadyCompletedError;
 public sealed record CancelUserOnboardingConcurrencyConflictError;
-public sealed record CancelUserOnboardingCompletedErrorResult;
-public sealed record CancelUserOnboardingUnexpectedStateErrorResult;
+public sealed record CancelUserOnboardingUnexpectedStateError;

@@ -30,26 +30,26 @@ public static class ChooseUserOnboardingAliasMappers
             => commandResult.Match<IResult>(
                 ok => commandHttpResponseGenerator.Ok(new ChooseUserOnboardingAliasResponse { UserOnboardingId = ok.UserOnboardingId }),
                 err => err.Match<IResult>(
-                    aliasInUseError => commandHttpResponseGenerator.BadRequest(
+                    aliasAlreadyClaimedError => commandHttpResponseGenerator.Conflict(
                         context,
-                        "choose_user_onboarding_alias_already_in_use",
-                        $"The provided user onboarding alias is already in use by onboarding with Id {aliasInUseError.UserOnboardingId}"),
-                    aliasAlreadyChosenError => commandHttpResponseGenerator.BadRequest(
+                        "alias_already_claimed",
+                        $"The provided user onboarding alias is already in use by onboarding with Id {aliasAlreadyClaimedError.UserOnboardingId}"),
+                    aliasAlreadyChosenError => commandHttpResponseGenerator.Conflict(
                         context,
-                        "choose_user_onboarding_different_alias_already_chosen",
+                        "alias_already_chosen",
                         $"A different alias {aliasAlreadyChosenError.ExistingAlias} had already been chosen for this onboarding"),
                     _ => commandHttpResponseGenerator.Conflict(
                         context,
-                        "choose_user_onboarding_alias_concurrency_conflict",
+                        "onboarding_not_in_progress",
+                        "Could not choose user onboarding alias because onboarding is no longer in progress"),
+                    _ => commandHttpResponseGenerator.Conflict(
+                        context,
+                        "concurrent_update",
                         "Could not choose user onboarding alias because of a concurrency conflict, please retry"),
                     _ => commandHttpResponseGenerator.Conflict(
                         context,
-                        "choose_user_onboarding_alias_unexpected_state_conflict",
-                        "Could not choose user onboarding alias because of an unexpected state conflict, please retry"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "choose_user_onboarding_alias_canceled_conflict",
-                        "Could not choose user onboarding alias because user onboarding has been canceled")
+                        "onboarding_state_unexpected",
+                        "Could not choose user onboarding alias because of an unexpected state conflict, please retry")
                 ));
     }
 }

@@ -50,5 +50,5 @@ public sealed class WhenUserOnboardingDoesNotExist
 
     [Test]
     public async Task Then_response_explains_unexpected_state()
-        => await Assert.That(_body.Title).IsEqualTo("complete_user_onboarding_unexpected_state_conflict");
+        => await Assert.That(_body.Title).IsEqualTo("onboarding_state_unexpected");
 }
