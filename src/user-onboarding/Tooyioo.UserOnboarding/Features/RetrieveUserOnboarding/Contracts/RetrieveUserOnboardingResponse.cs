@@ -5,9 +5,11 @@ namespace Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Contracts;
 /// Response to retrieve a user onboarding
 /// </summary>
 /// <example>
-/// {"id": "00000000-0000-0000-0000-000000000001", "alias": "joe-bloggs-spain_123", "email": "joe@test.com",
-/// "phoneNumber": "+34644000000", "isComplete": true, "createdAt": "2026-01-01T00:00:00.123Z",
-/// "lastModifiedAt": "2026-01-01T00:00:00.123Z", "completedAt": "2026-01-01T00:00:00.123Z"}
+/// {"userOnboardingId": "00000000-0000-0000-0000-000000000001", "alias": "joe-bloggs-spain_123",
+/// "name": "Joe", "lastName": "Bloggs", "email": "joe@test.com", "isEmailVerified": true,
+/// "status": "completed", "isComplete": true, "createdAt": "2026-01-01T00:00:00.123Z",
+/// "lastModifiedAt": "2026-01-01T00:00:00.123Z", "completedAt": "2026-01-01T00:00:00.123Z",
+/// "canceledAt": null, "cancellationReason": null}
 /// </example>
 public sealed record RetrieveUserOnboardingResponse
 {

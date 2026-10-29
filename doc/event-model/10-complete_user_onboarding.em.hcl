@@ -1,12 +1,18 @@
 state_change "complete_user_onboarding" {
   title       = "Complete User Onboarding"
-  description = "Completing an existing onboarding creates a user ID and records the accepted terms version. Repeating completion returns the existing user ID without appending another event."
+  description = "POST /user-onboarding/{id}/complete completes an existing onboarding, creates a user ID, and records the accepted terms version. Repeating completion returns the existing user ID without appending another event."
   status      = "done"
 
   screen "complete_user_onboarding_ui" {
-    title = "Complete User Onboarding UI"
+    title = "Complete Onboarding"
     actor = actor.authenticated_user
     to    = [command.complete_user_onboarding]
+
+    field "user_onboarding_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000001"
+    }
 
     field "terms_and_conditions_version" {
       type    = "String"
@@ -23,8 +29,9 @@ state_change "complete_user_onboarding" {
     ]
 
     field "user_onboarding_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000001"
     }
 
     field "terms_and_conditions_version" {

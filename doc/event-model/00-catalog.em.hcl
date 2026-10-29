@@ -8,6 +8,14 @@ actor "authenticated_user" {
 bounded_context "onboarding" {
   title = "User Onboarding"
 
+  field_type "user" {
+    type = "Custom"
+  }
+
+  field_type "user_summary" {
+    type = "Custom"
+  }
+
   aggregate "user_onboarding" {
     title       = "User Onboarding"
     description = "Stream of events associated to a user onboarding process."

@@ -11,6 +11,7 @@ chapter "user_onboarding_happy_path" {
     workflow.retrieve_user_onboarding_after_alias_chosen,
     workflow.complete_user_onboarding,
     workflow.retrieve_user_onboarding_after_completion,
+    workflow.retrieve_user_profile,
   ]
 }
 
@@ -19,5 +20,13 @@ chapter "user_onboarding_cancellation" {
   workflows = [
     workflow.cancel_user_onboarding,
     workflow.retrieve_user_onboarding_after_cancellation,
+  ]
+}
+
+chapter "user_directory" {
+  title = "Chapter 3 - User Directory"
+  workflows = [
+    workflow.retrieve_users,
+    workflow.retrieve_user_summaries,
   ]
 }

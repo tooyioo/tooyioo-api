@@ -26,6 +26,7 @@ public static class InitiateUserOnboardingMappers
             var personalDetails = PersonalDetailsClaimsParser.Parse(context.User);
 
             return new InitiateUserOnboardingCommand(
+                UserOnboardingId.New(),
                 personalDetails.Name.Trim(),
                 personalDetails.LastName.Trim(),
                 personalDetails.Email.Trim(),

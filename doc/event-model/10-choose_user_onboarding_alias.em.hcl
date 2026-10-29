@@ -1,12 +1,18 @@
 state_change "choose_user_onboarding_alias" {
   title       = "Choose User Onboarding Alias"
-  description = "An available alias is claimed and assigned to the user onboarding. Choosing the same alias again succeeds without new events; an alias owned by another onboarding is rejected."
+  description = "POST /user-onboarding/{id}/choose-alias claims an available alias and assigns it to the user onboarding. It atomically writes the User Onboarding and Alias Claiming streams. Choosing the same alias again succeeds without new events; an alias owned by another onboarding is rejected."
   status      = "done"
 
   screen "choose_user_onboarding_alias_ui" {
-    title = "Choose User Onboarding Alias UI"
+    title = "Choose an Alias"
     actor = actor.authenticated_user
     to    = [command.choose_user_onboarding_alias]
+
+    field "user_onboarding_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000001"
+    }
 
     field "alias" {
       type    = "String"
@@ -27,13 +33,15 @@ state_change "choose_user_onboarding_alias" {
     ]
 
     field "user_onboarding_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000001"
     }
 
     field "alias" {
-      type    = "String"
-      example = "joe-1984"
+      type         = "String"
+      id_attribute = true
+      example      = "joe-1984"
     }
   }
 

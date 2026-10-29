@@ -1,12 +1,18 @@
 state_change "cancel_user_onboarding" {
   title       = "Cancel User Onboarding"
-  description = "Cancel an in-progress onboarding, releasing its external identity and, when chosen, its alias. Completed or unknown onboardings cannot be canceled."
+  description = "POST /user-onboarding/{id}/cancel cancels an in-progress onboarding. It writes the User Onboarding and External Identity Claiming streams, and also writes Alias Claiming when the onboarding has an alias. Completed or unknown onboardings cannot be canceled."
   status      = "done"
 
   screen "cancel_user_onboarding_ui" {
-    title = "Cancel User Onboarding UI"
+    title = "Cancel Onboarding"
     actor = actor.authenticated_user
     to    = [command.cancel_user_onboarding]
+
+    field "user_onboarding_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000001"
+    }
 
     field "reason" {
       type    = "String"
@@ -29,8 +35,9 @@ state_change "cancel_user_onboarding" {
     ]
 
     field "user_onboarding_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000001"
     }
 
     field "reason" {

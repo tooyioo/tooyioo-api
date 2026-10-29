@@ -41,7 +41,7 @@ public sealed class InitiateUserOnboardingHandler
             return new InitiateUserOnboardingOkResult(existingUserOnboardingId);
         }
         
-        var userOnboardingId = UserOnboardingId.New();
+        var userOnboardingId = command.UserOnboardingId;
         var userOnboarding =
             await _eventReader.LoadStateOrNew<UserOnboardingState, UserOnboardingId>(userOnboardingId, cancellationToken);
         
@@ -81,6 +81,7 @@ public sealed class InitiateUserOnboardingHandler
 }
 
 public sealed record InitiateUserOnboardingCommand(
+    UserOnboardingId UserOnboardingId,
     string Name, 
     string LastName, 
     string Email, 

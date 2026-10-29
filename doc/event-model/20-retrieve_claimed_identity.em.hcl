@@ -1,16 +1,17 @@
 state_view "retrieve_claimed_identity" {
   title  = "Retrieve Claimed Identity"
+  description = "This read model is an in-memory lookup, not an HTTP resource. Initiate User Onboarding uses it to determine whether the external identity is already claimed globally and, if so, which onboarding owns it."
   status = "done"
 
   readmodel "claimed_identity" {
     title       = "Claimed Identity"
-    description = "Claimed Identity and associated user onboarding Id."
+    description = "In-memory command-side state rehydrated from the External Identity Claiming stream."
     question    = "What is the user onboarding that claimed this external identity?"
     from = [
       event.onboarding.external_identity_claimed
     ]
 
-    field "id" {
+    field "external_identity_id" {
       type         = "String"
       id_attribute = true
       example      = "abc123"

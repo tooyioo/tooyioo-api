@@ -1,26 +1,22 @@
 state_change "initiate_user_onboarding" {
   title       = "Initiate User Onboarding"
-  description = "An unclaimed external identity initiates a new onboarding and is claimed. A retry with an already claimed identity returns the existing onboarding ID without appending events."
+  description = "POST /user-onboarding/initiate starts an onboarding for an unclaimed external identity and claims it. It atomically writes the User Onboarding and External Identity Claiming streams. A retry with an already claimed identity returns the existing onboarding ID without appending events."
   status      = "done"
 
   screen "initiate_user_onboarding_ui" {
-    title = "Initiate User Onboarding UI"
-    actor = actor.authenticated_user
-    to    = [command.initiate_user_onboarding]
+    title       = "Choose an Identity Provider"
+    actor       = actor.authenticated_user
+    to          = [command.initiate_user_onboarding]
 
-    field "provider" {
+    field "external_identity_provider" {
       type    = "String"
       example = "Google"
     }
   }
 
-  screen_image "initiate_user_onboarding_mockup" {
-    url = "./event-model/images/initiate-user-onboarding.png"
-  }
-
   command "initiate_user_onboarding" {
     title       = "Initiate User Onboarding"
-    description = "Uses the external identity from the provider's id_token to look up Claimed Identity. If it is already claimed, returns the existing user onboarding without appending events, in an idempotent manner. Otherwise, initiates onboarding and claims the identity."
+    description = "Personal details and external identity details are extracted from the id_token issued by the selected external_identity_provider. The external identity is used to look up Claimed Identity. If already claimed, the existing user onboarding is returned without appending events; otherwise onboarding is initiated and the identity is claimed."
     aggregate   = aggregate.onboarding.user_onboarding
     aggregate_dependencies = [
       aggregate.onboarding.external_identity_claiming,
@@ -29,6 +25,12 @@ state_change "initiate_user_onboarding" {
       event.onboarding.user_onboarding_initiated,
       event.onboarding.external_identity_claimed,
     ]
+
+    field "user_onboarding_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000001"
+    }
 
     field "name" {
       type    = "String"
@@ -51,8 +53,9 @@ state_change "initiate_user_onboarding" {
     }
 
     field "external_identity_id" {
-      type    = "String"
-      example = "abc123"
+      type         = "String"
+      id_attribute = true
+      example      = "abc123"
     }
 
     field "external_identity_provider" {
@@ -67,10 +70,10 @@ state_change "initiate_user_onboarding" {
   }
 
   scenario "google_user_onboarding_is_initiated_with_unclaimed_external_identity" {
-    title = "User Onboarding is initiated with an unclaimed Google's external identity"
+    title = "The user chooses Google to begin onboarding with an unclaimed external identity"
 
     when {
-      title   = "Initiate onboarding for a given external identity"
+      title   = "Initiate onboarding with the external identity returned by Google"
       command = command.initiate_user_onboarding
     }
 

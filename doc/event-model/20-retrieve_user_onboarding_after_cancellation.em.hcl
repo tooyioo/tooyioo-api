@@ -1,10 +1,11 @@
 state_view "retrieve_user_onboarding_after_cancellation" {
-  title  = "Retrieve User Onboarding After Cancellation"
-  status = "done"
+  title       = "Retrieve User Onboarding After Cancellation"
+  description = "Retrieves the persisted User Onboarding projection through GET /user-onboarding/{id}. The read model's id and the screen's user_onboarding_id identify the same onboarding."
+  status      = "done"
 
   readmodel "user_onboarding" {
     title       = "User Onboarding"
-    description = "The current user onboarding details after cancellation."
+    description = "Persistent User Onboarding read model assembled from onboarding events, including cancellation status and reason."
     question    = "What is the state of this canceled user onboarding?"
     from = [
       event.onboarding.user_onboarding_initiated,
@@ -100,8 +101,73 @@ state_view "retrieve_user_onboarding_after_cancellation" {
   }
 
   screen "retrieve_user_onboarding_ui" {
-    title = "Retrieve User Onboarding UI"
+    title = "User Onboarding"
     actor = actor.authenticated_user
+
+    field "user_onboarding_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000001"
+    }
+
+    field "name" {
+      type    = "String"
+      example = "Joe"
+    }
+
+    field "last_name" {
+      type    = "String"
+      example = "Bloggs"
+    }
+
+    field "email" {
+      type    = "String"
+      example = "joe@test.com"
+    }
+
+    field "is_email_verified" {
+      type    = "Boolean"
+      example = true
+    }
+
+    field "alias" {
+      type     = "String"
+      optional = true
+      example  = "joe-1984"
+    }
+
+    field "status" {
+      type    = "String"
+      example = "canceled"
+    }
+
+    field "completed_at" {
+      type     = "DateTime"
+      optional = true
+      example  = null
+    }
+
+    field "canceled_at" {
+      type     = "DateTime"
+      optional = true
+      example  = "2026-01-01T00:10:00.123Z"
+    }
+
+    field "cancellation_reason" {
+      type     = "String"
+      optional = true
+      example  = "Changed mind"
+    }
+
+    field "created_at" {
+      type    = "DateTime"
+      example = "2026-01-01T00:00:00.123Z"
+    }
+
+    field "last_modified_at" {
+      type    = "DateTime"
+      example = "2026-01-01T00:10:00.123Z"
+    }
   }
 
   scenario "canceled_user_onboarding_without_alias_is_retrieved" {
