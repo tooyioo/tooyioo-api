@@ -22,10 +22,9 @@ public sealed class RetrieveUserOnboardingEndpoint
                 RetrieveUserOnboardingResponse>(
                 "/user-onboarding/{id:guid}",
                 cfg => cfg
-                    .WithName("Retrieve User Onboarding")
-                    .WithSummary("Retrieves a user onboarding")
-                    .WithDescription("Retrieves a user onboarding by its Id")
-                    .WithTags("UserOnboarding"))
+                    .WithName("retrieve-user-onboarding")
+                    .WithSummary("Get a user onboarding")
+                    .WithTags("user-onboarding"))
             .RequireRouteAuthorization<RetrieveUserOnboardingRoute, RetrieveUserOnboardingAuthorizer>()
             .WithQueryConventions<RetrieveUserOnboardingResponse, HttpProblemDetails>();
 }

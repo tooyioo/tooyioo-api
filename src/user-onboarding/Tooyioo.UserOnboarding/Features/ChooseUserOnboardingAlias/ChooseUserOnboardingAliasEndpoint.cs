@@ -24,10 +24,11 @@ public sealed class ChooseUserOnboardingAliasEndpoint
                 ChooseUserOnboardingAliasResponse>(
                 "/user-onboarding/{id:guid}/choose-alias",
                 cfg => cfg
-                    .WithName("Choose User Onboarding Alias")
-                    .WithSummary("Chooses user onboarding alias")
-                    .WithDescription("Chooses a globally unique alias as part of user onboarding")
-                    .WithTags("UserOnboarding"))
+                    .WithName("choose-user-onboarding-alias")
+                    .WithSummary("Choose an onboarding alias")
+                    .WithDescription(
+                        "Claims an available alias for an in-progress onboarding. Repeating the same choice is idempotent; a different alias cannot replace it.")
+                    .WithTags("user-onboarding"))
             .RequireRouteAuthorization<ChooseUserOnboardingAliasRoute, ChooseUserOnboardingAliasAuthorizer>()
             .WithCommandConventions<ChooseUserOnboardingAliasResponse, HttpProblemDetails>();
 }

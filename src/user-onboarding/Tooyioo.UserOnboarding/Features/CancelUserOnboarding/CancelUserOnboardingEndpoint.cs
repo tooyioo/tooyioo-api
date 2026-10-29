@@ -22,10 +22,11 @@ public sealed class CancelUserOnboardingEndpoint
                 CancelUserOnboardingResponse>(
                 "/user-onboarding/{id:guid}/cancel",
                 cfg => cfg
-                    .WithName("Cancel User Onboarding")
-                    .WithSummary("Cancels user onboarding")
-                    .WithDescription("Cancels an in-progress user onboarding process")
-                    .WithTags("UserOnboarding"))
+                    .WithName("cancel-user-onboarding")
+                    .WithSummary("Cancel user onboarding")
+                    .WithDescription(
+                        "Cancels an in-progress onboarding and releases its external identity and chosen alias. Repeating the request for a canceled onboarding succeeds without changing state.")
+                    .WithTags("user-onboarding"))
             .RequireRouteAuthorization<CancelUserOnboardingRoute, CancelUserOnboardingAuthorizer>()
             .WithCommandConventions<CancelUserOnboardingResponse, HttpProblemDetails>();
 }

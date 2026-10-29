@@ -15,15 +15,17 @@ public sealed class InitiateUserOnboardingEndpoint
 {
     public void Map(IEndpointRouteBuilder app)
         => app
-            .MapCommand<InitiateUserOnboardingRequest, InitiateUserOnboardingCommand, InitiateUserOnboardingCommandResult,
+            .MapCommand<InitiateUserOnboardingRequest, InitiateUserOnboardingCommand,
+                InitiateUserOnboardingCommandResult,
                 InitiateUserOnboardingResponse>(
                 "user-onboarding/initiate",
                 cfg
                     => cfg
-                        .WithName("Initiate User Onboarding")
-                        .WithSummary("Initiates a user onboarding")
-                        .WithDescription("Initiates a user onboarding with the information coming from external Id provider")
-                        .WithTags("UserOnboarding"))
+                        .WithName("initiate-user-onboarding")
+                        .WithSummary("Initiate user onboarding")
+                        .WithDescription(
+                            "Uses the authenticated external identity to start onboarding. Repeated requests for the same identity return its existing onboarding.")
+                        .WithTags("user-onboarding"))
             .RequireAuthorization(AuthorizationPolicies.ExternalIdentity)
             .WithCommandConventions<InitiateUserOnboardingResponse, HttpProblemDetails>();
 }

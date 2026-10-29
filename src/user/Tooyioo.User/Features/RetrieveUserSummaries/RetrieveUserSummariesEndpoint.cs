@@ -22,10 +22,11 @@ public sealed class RetrieveUserSummariesEndpoint
                 RetrieveUserSummariesResponse>(
                 "/users/summaries",
                 cfg => cfg
-                    .WithName("Retrieve User Summaries")
-                    .WithSummary("Retrieves user summaries")
-                    .WithDescription("Retrieves paged user summaries filtered by query parameters")
-                    .WithTags("User"))
+                    .WithName("retrieve-user-summaries")
+                    .WithSummary("List user summaries")
+                    .WithDescription(
+                        "Returns paginated user summaries containing IDs, aliases, and names. Supports filtering by ID and alias.")
+                    .WithTags("users"))
             .RequireRouteAuthorization<RetrieveUserSummariesRoute, RetrieveUserSummariesAuthorizer>()
             .WithQueryConventions<RetrieveUserSummariesResponse, HttpProblemDetails>();
 }

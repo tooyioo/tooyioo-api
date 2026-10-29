@@ -22,10 +22,11 @@ public sealed class CompleteUserOnboardingEndpoint
                 CompleteUserOnboardingResponse>(
                 "/user-onboarding/{id:guid}/complete",
                 cfg => cfg
-                    .WithName("Complete User Onboarding")
-                    .WithSummary("Completes user onboarding")
-                    .WithDescription("Completes user onboarding process")
-                    .WithTags("UserOnboarding"))
+                    .WithName("complete-user-onboarding")
+                    .WithSummary("Complete user onboarding")
+                    .WithDescription(
+                        "Completes onboarding and returns the resulting user. Repeating the request after completion returns the existing user.")
+                    .WithTags("user-onboarding"))
             .RequireRouteAuthorization<CompleteUserOnboardingRoute, CompleteUserOnboardingAuthorizer>()
             .WithCommandConventions<CompleteUserOnboardingResponse, HttpProblemDetails>();
 }

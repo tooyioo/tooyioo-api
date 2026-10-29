@@ -22,10 +22,11 @@ public sealed class RetrieveUsersEndpoint
                 RetrieveUsersResponse>(
                 "/users",
                 cfg => cfg
-                    .WithName("Retrieve Users")
-                    .WithSummary("Retrieves users")
-                    .WithDescription("Retrieves paged users filtered by query parameters")
-                    .WithTags("User"))
+                    .WithName("retrieve-users")
+                    .WithSummary("List users")
+                    .WithDescription(
+                        "Returns paginated users and supports filtering by profile, identity, email verification, and date ranges.")
+                    .WithTags("users"))
             .RequireRouteAuthorization<RetrieveUsersRoute, RetrieveUsersAuthorizer>()
             .WithQueryConventions<RetrieveUsersResponse, HttpProblemDetails>();
 }
