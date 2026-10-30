@@ -82,7 +82,7 @@ public sealed class CancelUserOnboardingHandler
             }
 
             stateChanges.Add(aliasClaiming.ToStateStreamChanges([
-                new AliasClaimingDomainEvents.V1.AliasReleased(userOnboardingId)
+                new UserAliasClaimingDomainEvents.V1.UserAliasReleased(userOnboardingId)
             ]));
         }
 

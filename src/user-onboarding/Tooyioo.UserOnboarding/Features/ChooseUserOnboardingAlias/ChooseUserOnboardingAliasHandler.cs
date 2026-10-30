@@ -67,7 +67,7 @@ public sealed class ChooseUserOnboardingAliasHandler
             new object[] { new UserOnboardingDomainEvents.V1.UserOnboardingAliasChosen(alias) };
         
         var claimingAliasEvents =
-            new object[] { new AliasClaimingDomainEvents.V1.AliasClaimed(userOnboardingId) };
+            new object[] { new UserAliasClaimingDomainEvents.V1.UserAliasClaimed(userOnboardingId) };
         
         try
         {

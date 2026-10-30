@@ -12,13 +12,13 @@ internal sealed record ClaimingAliasState
 
     public ClaimingAliasState()
     {
-        On<AliasClaimingDomainEvents.V1.AliasClaimed>(Claimed);
-        On<AliasClaimingDomainEvents.V1.AliasReleased>(Released);
+        On<UserAliasClaimingDomainEvents.V1.UserAliasClaimed>(Claimed);
+        On<UserAliasClaimingDomainEvents.V1.UserAliasReleased>(Released);
     }
 
     private static ClaimingAliasState Claimed(
         ClaimingAliasState state,
-        AliasClaimingDomainEvents.V1.AliasClaimed domainEvent)
+        UserAliasClaimingDomainEvents.V1.UserAliasClaimed domainEvent)
     {
         return state with
         {
@@ -28,7 +28,7 @@ internal sealed record ClaimingAliasState
 
     private static ClaimingAliasState Released(
         ClaimingAliasState state,
-        AliasClaimingDomainEvents.V1.AliasReleased domainEvent)
+        UserAliasClaimingDomainEvents.V1.UserAliasReleased domainEvent)
     {
         return state with
         {

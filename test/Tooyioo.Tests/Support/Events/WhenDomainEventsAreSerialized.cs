@@ -2,7 +2,7 @@ using Eventuous;
 using Microsoft.Extensions.DependencyInjection;
 using Slicent;
 using Tooyioo.UserOnboarding.Contracts;
-using static Tooyioo.UserOnboarding.Contracts.AliasClaimingDomainEvents.V1;
+using static Tooyioo.UserOnboarding.Contracts.UserAliasClaimingDomainEvents.V1;
 using static Tooyioo.UserOnboarding.Contracts.ExternalIdentityClaimingDomainEvents.V1;
 using static Tooyioo.UserOnboarding.Contracts.UserOnboardingDomainEvents.V1;
 
@@ -26,8 +26,8 @@ public sealed class WhenDomainEventsAreSerialized
             (new UserOnboardingAliasChosen("ada"), "V1.UserOnboardingAliasChosen"),
             (new UserOnboardingCompleted("user-1", "v1"), "V1.UserOnboardingCompleted"),
             (new UserOnboardingCanceled("requested"), "V1.UserOnboardingCanceled"),
-            (new AliasClaimed("onboarding-1"), "V1.AliasClaimed"),
-            (new AliasReleased("onboarding-1"), "V1.AliasReleased"),
+            (new UserAliasClaimed("onboarding-1"), "V1.AliasClaimed"),
+            (new UserAliasReleased("onboarding-1"), "V1.AliasReleased"),
             (new ExternalIdentityClaimed("onboarding-1"), "V1.ExternalIdentityClaimed"),
             (new ExternalIdentityReleased("onboarding-1"), "V1.ExternalIdentityReleased")
         ];

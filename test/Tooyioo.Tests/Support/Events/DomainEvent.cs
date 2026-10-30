@@ -200,7 +200,7 @@ public sealed class AliasClaimedBuilder
         return this;
     }
 
-    public AliasClaimingDomainEvents.V1.AliasClaimed Build()
+    public UserAliasClaimingDomainEvents.V1.UserAliasClaimed Build()
         => new(_userOnboardingId);
 }
 
@@ -220,6 +220,6 @@ public sealed class AliasReleasedBuilder
         return this;
     }
 
-    public AliasClaimingDomainEvents.V1.AliasReleased Build()
+    public UserAliasClaimingDomainEvents.V1.UserAliasReleased Build()
         => new(_userOnboardingId);
 }

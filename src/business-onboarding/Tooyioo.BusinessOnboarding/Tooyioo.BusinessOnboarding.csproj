@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <LangVersion>latest</LangVersion>
+        <!--XML Comments for OpenAPI-->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591;EVTC001</NoWarn>
+        <!--End of XML Comments for OpenAPI-->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Tooyioo.Common\Tooyioo.Common.csproj" />
+        <ProjectReference Include="..\Tooyioo.BusinessOnboarding.Contracts\Tooyioo.BusinessOnboarding.Contracts.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Features\InitiateBusinessOnboarding\" />
+      <Folder Include="Features\RecordBusinessOnboardingAddress\" />
+      <Folder Include="Features\RecordBusinessOnboardingContactDetails\" />
+      <Folder Include="Features\RecordBusinessOnboardingTaxtDetails\" />
+      <Folder Include="Features\RetrieveBusinessOnboarding\" />
+    </ItemGroup>
+
+</Project>

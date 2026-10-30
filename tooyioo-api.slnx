@@ -6,6 +6,10 @@
     <Project Path="src/Tooyioo.AppHost/Tooyioo.AppHost.csproj" />
     <Project Path="src/Tooyioo.Common/Tooyioo.Common.csproj" />
   </Folder>
+  <Folder Name="/src/business-onboarding/">
+    <Project Path="src/business-onboarding/Tooyioo.BusinessOnboarding.Contracts/Tooyioo.BusinessOnboarding.Contracts.csproj" />
+    <Project Path="src/business-onboarding/Tooyioo.BusinessOnboarding/Tooyioo.BusinessOnboarding.csproj" />
+  </Folder>
   <Folder Name="/src/user-onboarding/">
     <Project Path="src/user-onboarding/Tooyioo.UserOnboarding.Contracts/Tooyioo.UserOnboarding.Contracts.csproj" />
     <Project Path="src/user-onboarding/Tooyioo.UserOnboarding/Tooyioo.UserOnboarding.csproj" />
