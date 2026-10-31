@@ -3,21 +3,21 @@ using Tooyioo.UserOnboarding.Contracts;
 
 // ReSharper disable ClassNeverInstantiated.Global
 
-namespace Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Support;
+namespace Tooyioo.UserOnboarding.Features.Support;
 
-internal sealed record ClaimingAliasState
-    : State<ClaimingAliasState, ClaimingAliasId>
+internal sealed record ClaimingUserAliasState
+    : State<ClaimingUserAliasState, ClaimingUserAliasId>
 {
     public UserOnboardingId? UserOnboardingId { get; private init; }
 
-    public ClaimingAliasState()
+    public ClaimingUserAliasState()
     {
         On<UserAliasClaimingDomainEvents.V1.UserAliasClaimed>(Claimed);
         On<UserAliasClaimingDomainEvents.V1.UserAliasReleased>(Released);
     }
 
-    private static ClaimingAliasState Claimed(
-        ClaimingAliasState state,
+    private static ClaimingUserAliasState Claimed(
+        ClaimingUserAliasState state,
         UserAliasClaimingDomainEvents.V1.UserAliasClaimed domainEvent)
     {
         return state with
@@ -26,8 +26,8 @@ internal sealed record ClaimingAliasState
         };
     }
 
-    private static ClaimingAliasState Released(
-        ClaimingAliasState state,
+    private static ClaimingUserAliasState Released(
+        ClaimingUserAliasState state,
         UserAliasClaimingDomainEvents.V1.UserAliasReleased domainEvent)
     {
         return state with

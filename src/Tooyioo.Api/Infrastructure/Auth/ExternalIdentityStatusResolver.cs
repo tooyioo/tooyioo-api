@@ -2,7 +2,8 @@
 using Slicent.EventStore;
 using Tooyioo.Common;
 using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
+
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace Tooyioo.Api.Infrastructure.Auth;

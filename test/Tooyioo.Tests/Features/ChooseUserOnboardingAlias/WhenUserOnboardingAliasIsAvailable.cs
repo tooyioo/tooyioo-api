@@ -5,8 +5,7 @@ using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
 using Tooyioo.UserOnboarding;
 using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Support;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -53,7 +52,7 @@ public sealed class WhenUserOnboardingAliasIsAvailable
             .CaptureSnapshot();
 
         _aliasClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingAliasState, ClaimingAliasId>(new ClaimingAliasId(_alias))
+            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
             .CaptureSnapshot();
     }
 
@@ -93,10 +92,10 @@ public sealed class WhenUserOnboardingAliasIsAvailable
     [Test]
     public async Task Then_user_alias_is_claimed()
         => await Host.Events
-            .Stream<ClaimingAliasState, ClaimingAliasId>(new ClaimingAliasId(_alias))
+            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
             .ShouldAppendExactly(
                 _aliasClaimStreamBeforeWhen,
-                DomainEvent.AliasClaimed()
+                DomainEvent.UserAliasClaimed()
                     .WithUserOnboardingId(_userOnboardingId)
                     .Build());
 }

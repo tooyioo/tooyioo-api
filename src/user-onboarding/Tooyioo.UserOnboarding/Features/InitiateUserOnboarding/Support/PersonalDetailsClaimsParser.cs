@@ -3,7 +3,7 @@ using Tooyioo.Common;
 
 namespace Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
 
-public static class PersonalDetailsClaimsParser
+internal static class PersonalDetailsClaimsParser
 {
     public static PersonalDetails Parse(ClaimsPrincipal principal)
         => new(

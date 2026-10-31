@@ -4,7 +4,7 @@ using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Common;
 using Tooyioo.UserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
 // ReSharper disable ClassNeverInstantiated.Global
 // ReSharper disable ConvertToPrimaryConstructor
 

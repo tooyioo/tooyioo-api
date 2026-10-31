@@ -31,6 +31,7 @@
     
     <ItemGroup>
       <ProjectReference Include="..\Slicent\Slicent.csproj" />
+      <ProjectReference Include="..\business-onboarding\Tooyioo.BusinessOnboarding\Tooyioo.BusinessOnboarding.csproj" />
       <ProjectReference Include="..\user-onboarding\Tooyioo.UserOnboarding\Tooyioo.UserOnboarding.csproj" />
       <ProjectReference Include="..\user\Tooyioo.User\Tooyioo.User.csproj" />
     </ItemGroup>

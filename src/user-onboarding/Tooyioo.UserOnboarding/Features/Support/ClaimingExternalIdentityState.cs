@@ -3,7 +3,7 @@ using Tooyioo.UserOnboarding.Contracts;
 
 // ReSharper disable ClassNeverInstantiated.Global
 
-namespace Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+namespace Tooyioo.UserOnboarding.Features.Support;
 
 public sealed record ClaimingExternalIdentityState
     : State<ClaimingExternalIdentityState, ClaimingExternalIdentityId>

@@ -6,8 +6,7 @@ using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
 using Tooyioo.UserOnboarding;
 using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Support;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -52,7 +51,7 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
             .CaptureSnapshot();
 
         _aliasClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingAliasState, ClaimingAliasId>(new ClaimingAliasId(_alias))
+            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
             .CaptureSnapshot();
     }
 
@@ -88,6 +87,6 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
     [Test]
     public async Task Then_alias_claim_stream_has_no_new_events()
         => await Host.Events
-            .Stream<ClaimingAliasState, ClaimingAliasId>(new ClaimingAliasId(_alias))
+            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
             .ShouldHaveNoChangesSince(_aliasClaimStreamBeforeWhen);
 }

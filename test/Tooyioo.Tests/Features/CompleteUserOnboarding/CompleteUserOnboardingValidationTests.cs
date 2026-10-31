@@ -6,7 +6,7 @@ using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.UserOnboarding;
 using Tooyioo.UserOnboarding.Features.CompleteUserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 

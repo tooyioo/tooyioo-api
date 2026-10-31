@@ -8,7 +8,7 @@ using Tooyioo.Tests.Support.VerticalSlices;
 using Tooyioo.User.Features.RetrieveUser.Contract;
 using Tooyioo.User.Features.Support;
 using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.RetrieveUser;
 

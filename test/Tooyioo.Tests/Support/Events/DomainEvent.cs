@@ -1,3 +1,4 @@
+using Tooyioo.BusinessOnboarding.Contracts;
 using Tooyioo.Common;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.UserOnboarding;
@@ -25,10 +26,13 @@ public static class DomainEvent
     public static ExternalIdentityReleasedBuilder ExternalIdentityReleased()
         => new();
 
-    public static AliasClaimedBuilder AliasClaimed()
+    public static UserAliasClaimedBuilder UserAliasClaimed()
         => new();
 
-    public static AliasReleasedBuilder AliasReleased()
+    public static UserAliasReleasedBuilder UserAliasReleased()
+        => new();
+
+    public static BusinessOnboardingInitiatedBuilder BusinessOnboardingInitiated()
         => new();
 }
 
@@ -184,17 +188,17 @@ public sealed class ExternalIdentityReleasedBuilder
         => new(_userOnboardingId);
 }
 
-public sealed class AliasClaimedBuilder
+public sealed class UserAliasClaimedBuilder
 {
     private string _userOnboardingId = 1.ToGuid().ToString();
 
-    public AliasClaimedBuilder WithUserOnboardingId(string userOnboardingId)
+    public UserAliasClaimedBuilder WithUserOnboardingId(string userOnboardingId)
     {
         _userOnboardingId = userOnboardingId;
         return this;
     }
 
-    public AliasClaimedBuilder WithUserOnboardingId(UserOnboardingId userOnboardingId)
+    public UserAliasClaimedBuilder WithUserOnboardingId(UserOnboardingId userOnboardingId)
     {
         _userOnboardingId = userOnboardingId.Value;
         return this;
@@ -204,17 +208,17 @@ public sealed class AliasClaimedBuilder
         => new(_userOnboardingId);
 }
 
-public sealed class AliasReleasedBuilder
+public sealed class UserAliasReleasedBuilder
 {
     private string _userOnboardingId = 1.ToGuid().ToString();
 
-    public AliasReleasedBuilder WithUserOnboardingId(string userOnboardingId)
+    public UserAliasReleasedBuilder WithUserOnboardingId(string userOnboardingId)
     {
         _userOnboardingId = userOnboardingId;
         return this;
     }
 
-    public AliasReleasedBuilder WithUserOnboardingId(UserOnboardingId userOnboardingId)
+    public UserAliasReleasedBuilder WithUserOnboardingId(UserOnboardingId userOnboardingId)
     {
         _userOnboardingId = userOnboardingId.Value;
         return this;
@@ -222,4 +226,25 @@ public sealed class AliasReleasedBuilder
 
     public UserAliasClaimingDomainEvents.V1.UserAliasReleased Build()
         => new(_userOnboardingId);
+}
+
+public sealed class BusinessOnboardingInitiatedBuilder
+{
+    private string _legalName = "Acme Ltd";
+    private string _initiatedBy = 1.ToGuid().ToString();
+
+    public BusinessOnboardingInitiatedBuilder WithLegalName(string legalName)
+    {
+        _legalName = legalName;
+        return this;
+    }
+
+    public BusinessOnboardingInitiatedBuilder WithInitiatedBy(UserId initiatedBy)
+    {
+        _initiatedBy = initiatedBy;
+        return this;
+    }
+
+    public BusinessOnboardingDomainEvents.V1.BusinessOnboardingInitiated Build()
+        => new(_legalName, _initiatedBy);
 }

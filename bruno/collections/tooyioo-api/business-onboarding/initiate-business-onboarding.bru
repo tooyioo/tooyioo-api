@@ -1,0 +1,26 @@
+meta {
+  name: initiate-business-onboarding
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/business-onboarding/initiate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "legalName": "Acme Ltd"
+  }
+}
+
+script:post-response {
+  bru.setVar("dynamicBusinessOnboardingId", res.body.businessOnboardingId);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

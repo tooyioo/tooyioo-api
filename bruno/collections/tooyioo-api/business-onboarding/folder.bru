@@ -1,0 +1,12 @@
+meta {
+  name: business-onboarding
+  seq: 4
+}
+
+headers {
+  Authorization: Bearer {{$oauth2.google-credentials.id_token}}
+}
+
+auth {
+  mode: inherit
+}

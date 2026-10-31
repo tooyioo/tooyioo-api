@@ -11,7 +11,7 @@ namespace Tooyioo.Api.Infrastructure.Auth;
 
 public static class AuthExtensions
 {
-    private const string DefaultScheme = "DefaultScheme";
+    private const string DefaultScheme = "default-scheme";
 
     public static TBuilder AddAuth<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
@@ -50,16 +50,16 @@ public static class AuthExtensions
             .SetFallbackPolicy(new AuthorizationPolicyBuilder(DefaultScheme)
                 .RequireAuthenticatedUser()
                 .Build())
-            .AddPolicy(AuthorizationPolicies.ExternalIdentity, policy => policy
+            .AddPolicy(AuthorizationPolicies.ExternalIdentityRequired, policy => policy
                 .AddAuthenticationSchemes(DefaultScheme)
                 .RequireAuthenticatedUser()
                 .RequireClaim(Claims.Sub)
                 .RequireClaim(Claims.Issuer))
-            .AddPolicy(AuthorizationPolicies.UserOnboarding, policy => policy
+            .AddPolicy(AuthorizationPolicies.UserOnboardingRequired, policy => policy
                 .AddAuthenticationSchemes(DefaultScheme)
                 .RequireAuthenticatedUser()
                 .RequireClaim(Claims.UserOnboardingId))
-            .AddPolicy(AuthorizationPolicies.UserOnboarded, policy => policy
+            .AddPolicy(AuthorizationPolicies.UserRequired, policy => policy
                 .AddAuthenticationSchemes(DefaultScheme)
                 .RequireAuthenticatedUser()
                 .RequireClaim(Claims.UserId));
@@ -112,7 +112,7 @@ public static class AuthExtensions
         context.Principal = resolutionStatusResult.Match(
             userOnboarding => AddClaims(
                 claimsPrincipal,
-                claimsIdentity, new Claim( Claims.UserOnboardingId,userOnboarding.UserOnboardingId.ToString())),
+                claimsIdentity, new Claim( Claims.UserOnboardingId,userOnboarding.UserOnboardingId)),
 
             userOnboarded => AddClaims(
                 claimsPrincipal,

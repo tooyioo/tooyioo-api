@@ -6,8 +6,7 @@ using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
 using Tooyioo.UserOnboarding;
 using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Support;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -51,9 +50,9 @@ public sealed class WhenUserOnboardingAliasIsAlreadyInUse
                 .WithUserOnboardingId(_userOnboardingId)
                 .Build());
 
-        await Host.Given<ClaimingAliasState, ClaimingAliasId>(
-            new ClaimingAliasId(_alias),
-            DomainEvent.AliasClaimed()
+        await Host.Given<ClaimingUserAliasState, ClaimingUserAliasId>(
+            new ClaimingUserAliasId(_alias),
+            DomainEvent.UserAliasClaimed()
                 .WithUserOnboardingId(_otherUserOnboardingId)
                 .Build());
 
@@ -62,7 +61,7 @@ public sealed class WhenUserOnboardingAliasIsAlreadyInUse
             .CaptureSnapshot();
 
         _aliasClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingAliasState, ClaimingAliasId>(new ClaimingAliasId(_alias))
+            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
             .CaptureSnapshot();
     }
 
@@ -98,6 +97,6 @@ public sealed class WhenUserOnboardingAliasIsAlreadyInUse
     [Test]
     public async Task Then_user_alias_claim_stream_has_no_new_events()
         => await Host.Events
-            .Stream<ClaimingAliasState, ClaimingAliasId>(new ClaimingAliasId(_alias))
+            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
             .ShouldHaveNoChangesSince(_aliasClaimStreamBeforeWhen);
 }

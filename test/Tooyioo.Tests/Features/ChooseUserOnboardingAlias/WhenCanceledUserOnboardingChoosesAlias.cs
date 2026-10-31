@@ -6,8 +6,7 @@ using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
 using Tooyioo.UserOnboarding;
 using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Support;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -20,7 +19,7 @@ public sealed class WhenCanceledUserOnboardingChoosesAlias
     private string _subject = null!;
     private string _alias = null!;
     private EventStreamSnapshot _userOnboardingStreamBeforeWhen = null!;
-    private EventStreamSnapshot _aliasClaimStreamBeforeWhen = null!;
+    private EventStreamSnapshot _userAliasClaimStreamBeforeWhen = null!;
 
     protected override async Task Given()
     {
@@ -42,8 +41,8 @@ public sealed class WhenCanceledUserOnboardingChoosesAlias
             .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
             .CaptureSnapshot();
 
-        _aliasClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingAliasState, ClaimingAliasId>(new ClaimingAliasId(_alias))
+        _userAliasClaimStreamBeforeWhen = await Host.Events
+            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
             .CaptureSnapshot();
     }
 
@@ -78,6 +77,6 @@ public sealed class WhenCanceledUserOnboardingChoosesAlias
     [Test]
     public async Task Then_user_alias_claim_stream_has_no_new_events()
         => await Host.Events
-            .Stream<ClaimingAliasState, ClaimingAliasId>(new ClaimingAliasId(_alias))
-            .ShouldHaveNoChangesSince(_aliasClaimStreamBeforeWhen);
+            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
+            .ShouldHaveNoChangesSince(_userAliasClaimStreamBeforeWhen);
 }

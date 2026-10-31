@@ -2,7 +2,7 @@
 
 public static class AuthorizationPolicies
 {
-    public const string ExternalIdentity = "ExternalIdentity";
-    public const string UserOnboarding = "UserOnboarding";
-    public const string UserOnboarded = "UserOnboarded";
+    public const string ExternalIdentityRequired = "external-identity-required";
+    public const string UserOnboardingRequired = "user-onboarding-required";
+    public const string UserRequired = "user-required";
 }

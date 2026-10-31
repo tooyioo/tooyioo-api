@@ -3,7 +3,8 @@ using Funzo;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.UserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Support;
+using Tooyioo.UserOnboarding.Features.Support;
+
 // ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable UnusedType.Global
 // ReSharper disable ClassNeverInstantiated.Global
@@ -55,7 +56,7 @@ public sealed class ChooseUserOnboardingAliasHandler
         }
 
         var claimingAlias =
-            await _eventReader.LoadStateOrNew<ClaimingAliasState, ClaimingAliasId>(alias, cancellationToken);
+            await _eventReader.LoadStateOrNew<ClaimingUserAliasState, ClaimingUserAliasId>(alias, cancellationToken);
 
         if (claimingAlias.State.UserOnboardingId is { } claimingUserOnboardingId
             && claimingUserOnboardingId != userOnboardingId)

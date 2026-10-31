@@ -26,6 +26,6 @@ public sealed class InitiateUserOnboardingEndpoint
                         .WithDescription(
                             "Uses the authenticated external identity to start onboarding. Repeated requests for the same identity return its existing onboarding.")
                         .WithTags("user-onboarding"))
-            .RequireAuthorization(AuthorizationPolicies.ExternalIdentity)
+            .RequireAuthorization(AuthorizationPolicies.ExternalIdentityRequired)
             .WithCommandConventions<InitiateUserOnboardingResponse, HttpProblemDetails>();
 }

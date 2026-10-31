@@ -2,14 +2,14 @@ using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
 using Tooyioo.User.Features.Support;
 using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.Support;
 
 public abstract class UserReadModelQueryTest(MongoTestContainer mongoDb)
     : QueryVerticalSliceTest(mongoDb)
 {
-    protected static readonly DateTime ProjectedAtUtc = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTime ProjectedAtUtc = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
     protected Task GivenExternalIdentityClaimingEvents(
         string subject,
