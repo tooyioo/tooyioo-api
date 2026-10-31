@@ -3,59 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tooyioo Test Reports</title>
+    <title>Tooyioo</title>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 40px auto; padding: 0 20px; line-height: 1.5; }
-        h1 { margin-bottom: 5px; }
-        .latest { padding: 20px; margin: 30px 0; border: 1px solid #ddd; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+        body { font-family: system-ui, sans-serif; max-width: 960px; margin: 48px auto; padding: 0 20px; line-height: 1.55; color: #1f2328; }
+        header { padding-bottom: 20px; margin-bottom: 28px; border-bottom: 1px solid #d8dee4; }
+        h1 { margin: 0 0 6px; }
+        .subtitle { margin: 0; color: #59636e; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+        .card { padding: 22px; border: 1px solid #d8dee4; border-radius: 10px; }
+        .card h2 { margin-top: 0; }
+        .card p:last-child { margin-bottom: 0; }
+        a { color: #0969da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
         .passed { color: #16803c; font-weight: 600; }
         .failed { color: #d1242f; font-weight: 600; }
-        a { text-decoration: none; }
+        .unknown { color: #59636e; font-weight: 600; }
+        footer { margin-top: 36px; padding-top: 18px; border-top: 1px solid #d8dee4; color: #59636e; font-size: 0.9rem; }
+        code { font-size: 0.95em; }
     </style>
 </head>
 <body>
-    <h1>Tooyioo Test Reports</h1>
-    <p>TUnit test history for <strong>main</strong>.</p>
-    <div class="latest">
-        <h2>Latest</h2>
-        <p><a href="latest/">Open latest TUnit report →</a></p>
-    </div>
-    <h2>History</h2>
-    <table>
-        <thead>
-            <tr><th>Run</th><th>Date</th><th>Status</th><th>Commit</th><th>Report</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-<tr><td>28</td><td>2026-10-31 13:03:42 UTC</td><td class="passed">PASSED</td><td><code>5dbb959</code></td><td><a href="runs/41203755696/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/41203755696">GitHub Actions</a></td></tr>
-<tr><td>27</td><td>2026-10-31 12:24:05 UTC</td><td class="passed">PASSED</td><td><code>03ffac1</code></td><td><a href="runs/41200860847/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/41200860847">GitHub Actions</a></td></tr>
-<tr><td>26</td><td>2026-10-30 17:12:16 UTC</td><td class="failed">FAILED</td><td><code>91d0292</code></td><td><a href="runs/41096578766/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/41096578766">GitHub Actions</a></td></tr>
-<tr><td>25</td><td>2026-10-29 10:14:42 UTC</td><td class="passed">PASSED</td><td><code>91f1b50</code></td><td><a href="runs/40855862887/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/40855862887">GitHub Actions</a></td></tr>
-<tr><td>24</td><td>2026-10-28 17:37:16 UTC</td><td class="passed">PASSED</td><td><code>3b2dcf8</code></td><td><a href="runs/40737235973/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/40737235973">GitHub Actions</a></td></tr>
-<tr><td>23</td><td>2026-10-26 17:42:22 UTC</td><td class="passed">PASSED</td><td><code>315e29b</code></td><td><a href="runs/40370934827/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/40370934827">GitHub Actions</a></td></tr>
-<tr><td>22</td><td>2026-10-22 18:44:28 UTC</td><td class="passed">PASSED</td><td><code>8ce8dfa</code></td><td><a href="runs/39833784178/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/39833784178">GitHub Actions</a></td></tr>
-<tr><td>21</td><td>2026-10-22 13:34:43 UTC</td><td class="passed">PASSED</td><td><code>a9d0302</code></td><td><a href="runs/39787889055/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/39787889055">GitHub Actions</a></td></tr>
-<tr><td>19</td><td>2026-10-21 15:23:27 UTC</td><td class="passed">PASSED</td><td><code>b14c210</code></td><td><a href="runs/39625027339/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/39625027339">GitHub Actions</a></td></tr>
-<tr><td>20</td><td>2026-10-21 15:23:22 UTC</td><td class="passed">PASSED</td><td><code>b14c210</code></td><td><a href="runs/39625028679/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/39625028679">GitHub Actions</a></td></tr>
-<tr><td>18</td><td>2026-10-01 13:01:48 UTC</td><td class="passed">PASSED</td><td><code>9369848</code></td><td><a href="runs/36865647490/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/36865647490">GitHub Actions</a></td></tr>
-<tr><td>17</td><td>2026-10-01 09:03:28 UTC</td><td class="passed">PASSED</td><td><code>077da1a</code></td><td><a href="runs/36840109756/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/36840109756">GitHub Actions</a></td></tr>
-<tr><td>16</td><td>2026-09-30 16:14:02 UTC</td><td class="passed">PASSED</td><td><code>7f93aa6</code></td><td><a href="runs/36742505450/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/36742505450">GitHub Actions</a></td></tr>
-<tr><td>15</td><td>2026-09-30 16:03:02 UTC</td><td class="passed">PASSED</td><td><code>70b213e</code></td><td><a href="runs/36741191008/">TUnit report</a></td><td><a href="https://github.com/tooyioo/tooyioo-api/actions/runs/36741191008">GitHub Actions</a></td></tr>
-<tr><td>14</td><td>2026-09-28 15:31:19 UTC</td><td class="passed">PASSED</td><td><code>2d9b2b7</code></td><td><a href="runs/36443983282/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/36443983282">GitHub Actions</a></td></tr>
-<tr><td>13</td><td>2026-09-15 18:00:43 UTC</td><td class="passed">PASSED</td><td><code>7fa07b6</code></td><td><a href="runs/35004659309/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/35004659309">GitHub Actions</a></td></tr>
-<tr><td>12</td><td>2026-09-15 17:53:57 UTC</td><td class="passed">PASSED</td><td><code>73ed819</code></td><td><a href="runs/35003977054/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/35003977054">GitHub Actions</a></td></tr>
-<tr><td>11</td><td>2026-09-15 16:02:25 UTC</td><td class="passed">PASSED</td><td><code>92cf79b</code></td><td><a href="runs/34992285679/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34992285679">GitHub Actions</a></td></tr>
-<tr><td>10</td><td>2026-09-15 15:53:06 UTC</td><td class="passed">PASSED</td><td><code>f1ea109</code></td><td><a href="runs/34991275497/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34991275497">GitHub Actions</a></td></tr>
-<tr><td>9</td><td>2026-09-15 15:36:56 UTC</td><td class="passed">PASSED</td><td><code>e60a1b8</code></td><td><a href="runs/34989476078/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34989476078">GitHub Actions</a></td></tr>
-<tr><td>8</td><td>2026-09-15 15:07:59 UTC</td><td class="passed">PASSED</td><td><code>fe2e390</code></td><td><a href="runs/34986214846/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34986214846">GitHub Actions</a></td></tr>
-<tr><td>7</td><td>2026-09-15 14:46:08 UTC</td><td class="passed">PASSED</td><td><code>43852d0</code></td><td><a href="runs/34983731909/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34983731909">GitHub Actions</a></td></tr>
-<tr><td>6</td><td>2026-09-15 13:02:34 UTC</td><td class="passed">PASSED</td><td><code>b070aea</code></td><td><a href="runs/34972373335/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34972373335">GitHub Actions</a></td></tr>
-<tr><td>5</td><td>2026-09-13 20:09:20 UTC</td><td class="passed">PASSED</td><td><code>8ad828d</code></td><td><a href="runs/34779814545/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34779814545">GitHub Actions</a></td></tr>
-<tr><td>4</td><td>2026-09-13 20:06:31 UTC</td><td class="passed">PASSED</td><td><code>8010830</code></td><td><a href="runs/34779598170/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34779598170">GitHub Actions</a></td></tr>
-<tr><td>3</td><td>2026-09-13 20:02:21 UTC</td><td class="passed">PASSED</td><td><code>581c008</code></td><td><a href="runs/34779436016/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34779436016">GitHub Actions</a></td></tr>
-<tr><td>2</td><td>2026-09-13 18:53:47 UTC</td><td class="passed">PASSED</td><td><code>fa8d9c1</code></td><td><a href="runs/34775959037/">TUnit report</a></td><td><a href="https://github.com/coderiff-tech/tooyioo-api/actions/runs/34775959037">GitHub Actions</a></td></tr>
-        </tbody>
-    </table>
+    <header>
+        <h1>Tooyioo</h1>
+        <p class="subtitle">Project artifacts published from <strong>main</strong>.</p>
+    </header>
+
+    <main class="grid">
+        <section class="card">
+            <h2>Test reports</h2>
+            <p>TUnit vertical-slice and read-model test results.</p>
+            <p>
+                Latest:
+                <span class="passed">PASSED</span><br>
+                <small>Run 29 · 2026-10-31 13:17:06 UTC</small>
+            </p>
+            <p>
+                <a href="tests/">Browse test history →</a><br>
+                <a href="latest/">Open latest report →</a>
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>Event model</h2>
+            <p>Interactive canvas generated from the <code>doc/event-model</code> HCL files.</p>
+            <p>
+                <small>Commit <code>2d10a3f</code> · generated 2026-10-31 13:17:06 UTC</small>
+            </p>
+            <p><a href="event-model/">Open event model →</a></p>
+        </section>
+    </main>
+
+    <footer>
+        <a href="https://github.com/tooyioo/tooyioo-api">View the repository on GitHub</a>
+    </footer>
 </body>
 </html>
