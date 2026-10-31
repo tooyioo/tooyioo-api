@@ -155,7 +155,7 @@ The event model is defined in [`doc/event-model`](doc/event-model/) as a folder 
 
 ### Install EMHCL on Linux
 
-1. Download the latest **Linux AMD64** binary from the [EMHCL releases](https://github.com/event-modeling-hcl/eventmodeling-hcl/releases).
+1. Download **EMHCL 0.12.0 or newer compatible** for Linux AMD64 from the [EMHCL releases](https://github.com/event-modeling-hcl/eventmodeling-hcl/releases/tag/v0.12.0).
 2. Extract the archive if necessary and install the `emhcl` executable in `~/.local/bin`:
 
    ```bash
@@ -169,7 +169,7 @@ The event model is defined in [`doc/event-model`](doc/event-model/) as a folder 
    ```
 4. Verify the installation
    ```bash
-   emhcl --help
+   emhcl version
    ```
    
 ### Generate the event model diagram
@@ -183,7 +183,17 @@ emhcl diagram doc/event-model -o doc/tooyioo.em.html
 
 This generates the HTML diagram at `doc/tooyioo.em.html`. The file is ignored by Git, so it is not committed. Run the command again whenever the event model changes.
 
-CI installs a pinned EMHCL version, validates the model, regenerates the canvas, and publishes it to GitHub Pages at `/event-model/`. The installer verifies the release checksum. To update the pinned version, change `EMHCL_VERSION` in [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
+CI installs pinned EMHCL `0.12.0`, validates the model, regenerates the canvas, and publishes it to GitHub Pages at `/event-model/`. The installer verifies the release checksum. To update the pinned version, change `EMHCL_VERSION` in [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
+
+The same installer can upgrade a local Ubuntu installation:
+
+```bash
+EMHCL_INSTALL_DIR="$HOME/.local/bin" EMHCL_VERSION=0.12.0 bash scripts/install-emhcl.sh
+hash -r
+emhcl version
+```
+
+This should print `emhcl v0.12.0`. The script verifies the release archive checksum before installing.
 
 
 ## Troubleshooting and development notes

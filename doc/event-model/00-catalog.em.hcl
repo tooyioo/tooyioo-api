@@ -1,5 +1,23 @@
 # Actors and bounded-context contracts
 
+board {
+  workflows = [
+    workflow.initiate_user_onboarding,
+    workflow.retrieve_claimed_identity,
+    workflow.retrieve_user_onboarding,
+    workflow.choose_user_onboarding_alias,
+    workflow.retrieve_claimed_alias,
+    workflow.retrieve_user_onboarding_after_alias_chosen,
+    workflow.complete_user_onboarding,
+    workflow.retrieve_user_onboarding_after_completion,
+    workflow.retrieve_user_profile,
+    workflow.cancel_user_onboarding,
+    workflow.retrieve_user_onboarding_after_cancellation,
+    workflow.retrieve_users,
+    workflow.retrieve_user_summaries,
+  ]
+}
+
 actor "authenticated_user" {
   title         = "Authenticated User"
   auth_required = true

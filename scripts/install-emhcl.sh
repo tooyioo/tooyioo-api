@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-version="${EMHCL_VERSION:-0.11.0}"
+version="${EMHCL_VERSION:-0.12.0}"
 version="${version#v}"
 install_directory="${EMHCL_INSTALL_DIR:-${RUNNER_TEMP:-/tmp}/emhcl}"
 
