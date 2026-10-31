@@ -38,5 +38,6 @@ chapter "chapter_04_business_onboarding" {
   title = "Chapter 4 - Business Onboarding"
   workflows = [
     workflow.initiate_business_onboarding,
+    workflow.retrieve_business_onboarding,
   ]
 }

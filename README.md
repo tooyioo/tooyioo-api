@@ -13,6 +13,7 @@ Event Source application with vertical slice approach.
 - .NET 10 SDK
 - Podman 6.1.0+
 - Access to the `tooyioo` project in [Google Cloud Console](https://console.cloud.google.com/)
+- EMHCL 0.12.0+ on `PATH` for event model validation and rendering, on Windows or Linux. Same `emhcl` command on both; not required to run the API. See [event model setup](doc/event-model/README.md) for installation.
 
 ## Getting started
 
@@ -157,7 +158,7 @@ The collection reads the Google ID token from Bruno's OAuth store:
 
 ## Event model
 
-The event model lives in [`doc/event-model`](doc/event-model/) and is the source of truth for behavior. See [the event model README](doc/event-model/README.md) for installing or upgrading EMHCL, generating the diagram, and publishing it.
+The event model lives in [`doc/event-model`](doc/event-model/) and is the source of truth for behavior. See [the event model README](doc/event-model/README.md) for file organization, installing or upgrading EMHCL, generating the diagram, and publishing it.
 
 Quick render from the repository root:
 

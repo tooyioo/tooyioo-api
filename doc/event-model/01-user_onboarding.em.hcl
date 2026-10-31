@@ -360,7 +360,7 @@ state_view "retrieve_user_onboarding" {
   }
 
   scenario "scenario_02_user_onboarding_is_not_found" {
-    title = "No user onboarding is available for the requested ID"
+    title = "No user onboarding read model is available for the requested ID"
 
     given {
       title = "The onboarding event has not been projected into the User Onboarding read model"

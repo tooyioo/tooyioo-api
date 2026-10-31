@@ -102,7 +102,7 @@ state_view "retrieve_business_onboarding" {
     description = "Persistent Business Onboarding read model assembled from onboarding events. It is exposed by GET /business-onboarding/{id} and returns one onboarding; it is not paginated."
     question    = "What is the current state of this business onboarding?"
     from = [
-      event.onboarding.business_onboarding_initiated
+      event.business_onboarding.business_onboarding_initiated
     ]
     to = [screen.retrieve_business_onboarding_ui]
 
@@ -220,7 +220,7 @@ state_view "retrieve_business_onboarding" {
 
     given {
       title = "A business onboarding is initiated"
-      event = event.onboarding.business_onboarding_initiated
+      event = event.business_onboarding.business_onboarding_initiated
     }
 
     then {

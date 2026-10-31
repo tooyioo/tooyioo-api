@@ -99,9 +99,26 @@ Rules:
 - If code and HCL disagree, treat it as a defect. Resolve the disagreement; do not document around it.
 - Change the artifact that owns the knowledge: behavior in HCL first; decisions in the slice decision record; implementation in code; setup in `README.md`.
 - When a slice decision record stops being useful, delete the duplicated text instead of maintaining it.
-- Link each slice decision record to its HCL workflow and test folder.
+- Link each slice decision record to its chapter HCL file, workflow ID, and test folder.
 
 The detailed template and rules are in [doc/slices/README.md](doc/slices/README.md).
+
+---
+
+# Event Model Organization
+
+The model lives in `doc/event-model`:
+
+- It is a flat folder. EMHCL ignores subfolders, so do not put `.em.hcl` files in subfolders.
+- `00-*` files are global: catalog, chapters, and hotspots.
+- `NN-<chapter>.em.hcl` contains all workflows for chapter `NN`, in board order. The current convention is one file per chapter, not one file per workflow.
+- File prefixes are for human navigation only. `board.workflows` and `chapter` define model order.
+- When adding a workflow: add it to the board, add it to the chapter list, add the block to the chapter file, then add tests.
+- When adding a chapter: add `chapter_NN_<name>`, create `NN-<chapter>.em.hcl`, and add its workflows to the board and chapter.
+- Chapter IDs use `chapter_NN_`; scenario IDs use `scenario_NN_`, with happy paths before error scenarios.
+- EMHCL 0.12.0+ must be on `PATH` on Windows and Linux; see [the event model README](doc/event-model/README.md).
+
+See [Event model organization](doc/event-model/README.md#adding-a-chapter-or-workflow).
 
 ---
 

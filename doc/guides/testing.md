@@ -22,6 +22,14 @@ Vertical slice tests should exercise the real behavior path:
 
 They should avoid production infrastructure unless the infrastructure itself is the behavior under test.
 
+## Event store and read model
+
+`Host.Given` writes events to the in-memory event store. It does **not** run subscriptions or projectors; the read model stays absent unless the test projects it.
+
+`Host.GivenAndProject<TProjector>` writes the events and explicitly runs the projector.
+
+Auth in the test host resolves app-owned claims from the event store. A query test that needs `user_id` or `user_onboarding_id` must set up the corresponding events even when it intentionally leaves the read model absent. With no events, the request is rejected with `403` before the query can return `404`.
+
 ## Scenario traceability
 
 Tests are the executable acceptance criteria for the HCL event model. Each named HCL scenario that matters should have a corresponding test.
