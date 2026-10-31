@@ -1,11 +1,11 @@
 state_view "retrieve_user_summaries" {
   title       = "Retrieve User Summaries"
-  description = "Returns a paginated, lightweight view of users from the same User read model used by Retrieve Users. It filters by user ID or alias and is exposed as GET /users/summaries. Each paginated User Summary item's id is the user_id."
+  description = "Returns a paginated, lightweight view of users from the same Users projection used by Retrieve Users. The projection is defined by Project Users in Chapter 1. It filters by user ID or alias and is exposed as GET /users/summaries. Each paginated User Summary item's id is the user_id."
   status      = "done"
 
   readmodel "users" {
     title       = "Users"
-    description = "Shared persisted User read model populated by UserOnboardingCompleted. This query returns paginated items containing only user ID, alias, name, and last name."
+    description = "Shared persisted Users read model populated by UserOnboardingCompleted. The projection is defined by Project Users in Chapter 1. This query returns paginated items containing only user ID, alias, name, and last name."
     question    = "Which user summaries match the requested ID or alias?"
     from        = [event.onboarding.user_onboarding_completed]
     to          = [screen.user_summaries_search]

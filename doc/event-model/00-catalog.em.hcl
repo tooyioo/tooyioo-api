@@ -9,6 +9,7 @@ board {
     workflow.retrieve_claimed_alias,
     workflow.retrieve_user_onboarding_after_alias_chosen,
     workflow.complete_user_onboarding,
+    workflow.project_users,
     workflow.retrieve_user_onboarding_after_completion,
     workflow.retrieve_user_profile,
     workflow.cancel_user_onboarding,

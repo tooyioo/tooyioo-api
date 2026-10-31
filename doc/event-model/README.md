@@ -7,6 +7,7 @@ The model targets Event Modeling HCL v0.5.0 and requires `emhcl` 0.12.0 or newer
 - `00-catalog.em.hcl` contains the `board`, actors, and the bounded context.
 - `01-chapters.em.hcl` contains chapter membership. Chapter list order is not story order; `board.workflows` sets the order used by the diagram.
 - `10-*.em.hcl` and `20-*.em.hcl` contain one command or view workflow per file.
+- `20-project_users.em.hcl` defines the shared `Users` projection from `UserOnboardingCompleted`. The Chapter 3 directory queries in `20-retrieve_users.em.hcl` and `20-retrieve_user_summaries.em.hcl` query that projection.
 
 The `board` block lists the workflows in business-story order. Workflows omitted from the board remain valid but render separately as off-board workflows.
 
