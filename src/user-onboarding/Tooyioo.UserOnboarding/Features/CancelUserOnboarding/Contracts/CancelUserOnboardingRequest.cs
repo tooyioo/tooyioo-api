@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Validation;
 
 namespace Tooyioo.UserOnboarding.Features.CancelUserOnboarding.Contracts;
@@ -15,9 +15,12 @@ namespace Tooyioo.UserOnboarding.Features.CancelUserOnboarding.Contracts;
 #pragma warning restore ASP0029
 public sealed record CancelUserOnboardingRequest
 {
+    public const int ReasonMaxLength = 500;
+
     /// <summary>
     /// The reason for the cancellation
     /// </summary>
     [Required(ErrorMessage = "reason_required")]
+    [MaxLength(ReasonMaxLength, ErrorMessage = "reason_too_long")]
     public string Reason { get; init; } = string.Empty;
 }

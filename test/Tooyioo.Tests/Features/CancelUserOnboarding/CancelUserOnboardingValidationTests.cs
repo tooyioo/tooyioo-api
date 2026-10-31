@@ -14,10 +14,11 @@ public sealed class CancelUserOnboardingValidationTests
 {
     [Test]
     [Arguments("not-provided", null, "reason_required")]
-    [Arguments("empty", "", "reason_required")]
+    [Arguments("empty", 0, "reason_required")]
+    [Arguments("too-long", CancelUserOnboardingRequest.ReasonMaxLength + 1, "reason_too_long")]
     public async Task Endpoint_rejects_invalid_payloads(
         string _,
-        string? reason,
+        int? reasonLength,
         params string[] expectedErrors)
     {
         await using var host = await VerticalSliceTestHost.Start();
@@ -40,6 +41,13 @@ public sealed class CancelUserOnboardingValidationTests
         var token = host.GoogleIdentityToken()
             .WithSubject(subject)
             .Build();
+
+        string? reason = reasonLength switch
+        {
+            null => null,
+            0 => string.Empty,
+            _ => new string('a', reasonLength.Value)
+        };
 
         object request = reason is null
             ? new { }

@@ -14,10 +14,11 @@ public sealed class CompleteUserOnboardingValidationTests
 {
     [Test]
     [Arguments("not-provided", null, "terms_and_conditions_version_required")]
-    [Arguments("empty", "", "terms_and_conditions_version_required")]
+    [Arguments("empty", 0, "terms_and_conditions_version_required")]
+    [Arguments("too-long", CompleteUserOnboardingRequest.TermsAndConditionsVersionMaxLength + 1, "terms_and_conditions_version_too_long")]
     public async Task Endpoint_rejects_invalid_payloads(
         string _,
-        string? termsAndConditionsVersion,
+        int? termsAndConditionsVersionLength,
         params string[] expectedErrors)
     {
         await using var host = await VerticalSliceTestHost.Start();
@@ -34,6 +35,13 @@ public sealed class CompleteUserOnboardingValidationTests
         var token = host.GoogleIdentityToken()
             .WithSubject(subject)
             .Build();
+
+        string? termsAndConditionsVersion = termsAndConditionsVersionLength switch
+        {
+            null => null,
+            0 => string.Empty,
+            _ => new string('v', termsAndConditionsVersionLength.Value)
+        };
 
         object request = termsAndConditionsVersion is null
             ? new { }

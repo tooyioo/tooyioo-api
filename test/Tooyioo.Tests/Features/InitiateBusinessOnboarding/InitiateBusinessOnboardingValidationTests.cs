@@ -14,10 +14,11 @@ public sealed class InitiateBusinessOnboardingValidationTests
 {
     [Test]
     [Arguments("not-provided", null, "legal_name_required")]
-    [Arguments("empty", "", "legal_name_required")]
+    [Arguments("empty", 0, "legal_name_required")]
+    [Arguments("too-long", InitiateBusinessOnboardingRequest.LegalNameMaxLength + 1, "legal_name_too_long")]
     public async Task Endpoint_rejects_invalid_payloads(
         string _,
-        string? legalName,
+        int? legalNameLength,
         params string[] expectedErrors)
     {
         await using var host = await VerticalSliceTestHost.Start();
@@ -38,6 +39,13 @@ public sealed class InitiateBusinessOnboardingValidationTests
         var token = host.GoogleIdentityToken()
             .WithSubject(subject)
             .Build();
+
+        string? legalName = legalNameLength switch
+        {
+            null => null,
+            0 => string.Empty,
+            _ => new string('a', legalNameLength.Value)
+        };
 
         object request = legalName is null
             ? new { }

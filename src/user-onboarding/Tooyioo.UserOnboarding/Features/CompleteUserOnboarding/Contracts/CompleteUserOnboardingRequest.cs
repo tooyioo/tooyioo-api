@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Validation;
 
 namespace Tooyioo.UserOnboarding.Features.CompleteUserOnboarding.Contracts;
@@ -15,9 +15,12 @@ namespace Tooyioo.UserOnboarding.Features.CompleteUserOnboarding.Contracts;
 #pragma warning restore ASP0029
 public sealed record CompleteUserOnboardingRequest
 {
+    public const int TermsAndConditionsVersionMaxLength = 50;
+
     /// <summary>
     /// The version of the terms and conditions
     /// </summary>
     [Required(ErrorMessage = "terms_and_conditions_version_required")]
+    [MaxLength(TermsAndConditionsVersionMaxLength, ErrorMessage = "terms_and_conditions_version_too_long")]
     public string TermsAndConditionsVersion { get; init; } = string.Empty;
 }

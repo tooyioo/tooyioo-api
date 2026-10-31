@@ -13,9 +13,12 @@ namespace Tooyioo.BusinessOnboarding.Features.InitiateBusinessOnboarding.Contrac
 #pragma warning restore ASP0029
 public sealed record InitiateBusinessOnboardingRequest
 {
+    public const int LegalNameMaxLength = 200;
+
     /// <summary>
     /// The legal name of the business being onboarded
     /// </summary>
     [Required(ErrorMessage = "legal_name_required")]
+    [MaxLength(LegalNameMaxLength, ErrorMessage = "legal_name_too_long")]
     public string LegalName { get; init; } = string.Empty;
 }
