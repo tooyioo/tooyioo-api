@@ -3,7 +3,8 @@
 [![CI/CD](https://github.com/tooyioo/tooyioo-api/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/tooyioo/tooyioo-api/actions/workflows/ci-cd.yml)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![Tests](https://img.shields.io/badge/tests-TUnit-512BD4?logo=dotnet&logoColor=white)](https://tunit.dev/)
-[![Test Reports](https://img.shields.io/badge/test%20reports-history-2ea44f?logo=github)](https://tooyioo.github.io/tooyioo-api/)
+[![Test Reports](https://img.shields.io/badge/test%20reports-history-2ea44f?logo=github)](https://tooyioo.github.io/tooyioo-api/tests/)
+[![Event Model](https://img.shields.io/badge/event%20model-view-b15b28)](https://tooyioo.github.io/tooyioo-api/event-model/)
 
 Event Source application with vertical slice approach.
 
@@ -112,6 +113,16 @@ dotnet tool run reportgenerator \
 
 Open `report/index.html` to view the report.
 
+## Published documentation
+
+A push to `main` publishes the project pages to GitHub Pages:
+
+- [`/`](https://tooyioo.github.io/tooyioo-api/) - landing page linking both artifacts
+- [`/tests/`](https://tooyioo.github.io/tooyioo-api/tests/) - TUnit test history; the latest report is also available at [`/latest/`](https://tooyioo.github.io/tooyioo-api/latest/)
+- [`/event-model/`](https://tooyioo.github.io/tooyioo-api/event-model/) - interactive event model canvas generated from `doc/event-model`
+
+The test report and event model are published together in one commit to `gh-pages`, so there is no race between separate deployments. The generated event model HTML is not committed to the repository.
+
 ## Interacting with the API
 
 ### Scalar
@@ -140,7 +151,7 @@ The collection reads the Google ID token from Bruno's OAuth store:
 
 ## Event model
 
-The event model is defined in [`doc/event-model/tooyioo.em.hcl`](doc/event-model/tooyioo.em.hcl). It can be rendered as an HTML diagram using [EMHCL](https://github.com/event-modeling-hcl/eventmodeling-hcl).
+The event model is defined in [`doc/event-model`](doc/event-model/) as a folder of `.em.hcl` files. It can be rendered as an HTML diagram using [EMHCL](https://github.com/event-modeling-hcl/eventmodeling-hcl).
 
 ### Install EMHCL on Linux
 
@@ -166,11 +177,13 @@ The event model is defined in [`doc/event-model/tooyioo.em.hcl`](doc/event-model
 From the repository root, run:
 
 ```bash
-emhcl diagram doc/event-model/tooyioo.em.hcl > doc/event-model/tooyioo.em.html
+emhcl validate doc/event-model
+emhcl diagram doc/event-model -o doc/tooyioo.em.html
 ```
 
-This generates the HTML diagram at `doc/event-model/tooyioo.em.html`. Run the command again whenever the event model changes to regenerate the diagram.
-To update EMHCL, download the latest release and replace the executable in `~/.local/bin`.
+This generates the HTML diagram at `doc/tooyioo.em.html`. The file is ignored by Git, so it is not committed. Run the command again whenever the event model changes.
+
+CI installs a pinned EMHCL version, validates the model, regenerates the canvas, and publishes it to GitHub Pages at `/event-model/`. The installer verifies the release checksum. To update the pinned version, change `EMHCL_VERSION` in [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
 
 
 ## Troubleshooting and development notes

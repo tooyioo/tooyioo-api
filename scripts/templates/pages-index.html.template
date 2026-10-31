@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tooyioo</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 960px; margin: 48px auto; padding: 0 20px; line-height: 1.55; color: #1f2328; }
+        header { padding-bottom: 20px; margin-bottom: 28px; border-bottom: 1px solid #d8dee4; }
+        h1 { margin: 0 0 6px; }
+        .subtitle { margin: 0; color: #59636e; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+        .card { padding: 22px; border: 1px solid #d8dee4; border-radius: 10px; }
+        .card h2 { margin-top: 0; }
+        .card p:last-child { margin-bottom: 0; }
+        a { color: #0969da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .passed { color: #16803c; font-weight: 600; }
+        .failed { color: #d1242f; font-weight: 600; }
+        .unknown { color: #59636e; font-weight: 600; }
+        footer { margin-top: 36px; padding-top: 18px; border-top: 1px solid #d8dee4; color: #59636e; font-size: 0.9rem; }
+        code { font-size: 0.95em; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tooyioo</h1>
+        <p class="subtitle">Project artifacts published from <strong>main</strong>.</p>
+    </header>
+
+    <main class="grid">
+        <section class="card">
+            <h2>Test reports</h2>
+            <p>TUnit vertical-slice and read-model test results.</p>
+            <p>
+                Latest:
+                <span class="{{LATEST_STATUS_CLASS}}">{{LATEST_STATUS}}</span><br>
+                <small>Run {{LATEST_RUN_NUMBER}} · {{LATEST_RUN_DATE}}</small>
+            </p>
+            <p>
+                <a href="tests/">Browse test history →</a><br>
+                <a href="latest/">Open latest report →</a>
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>Event model</h2>
+            <p>Interactive canvas generated from the <code>doc/event-model</code> HCL files.</p>
+            <p>
+                <small>Commit <code>{{SHORT_SHA}}</code> · generated {{GENERATED_AT}}</small>
+            </p>
+            <p><a href="event-model/">Open event model →</a></p>
+        </section>
+    </main>
+
+    <footer>
+        <a href="{{REPOSITORY_URL}}">View the repository on GitHub</a>
+    </footer>
+</body>
+</html>

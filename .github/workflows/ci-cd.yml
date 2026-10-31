@@ -10,6 +10,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # 0.11.0 is the latest release compatible with the current model; 0.12 requires a board block.
+  EMHCL_VERSION: '0.11.0'
+
 jobs:
   test:
     name: Build and Test
@@ -30,25 +38,43 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: Verify test report publisher
-        run: bash scripts/test-publish-test-report.sh
+      - name: Verify pages publisher
+        run: bash scripts/test-publish-pages.sh
+
+      - name: Install EMHCL
+        run: bash scripts/install-emhcl.sh
+
+      - name: Validate and render event model
+        id: event_model
+        run: |
+          set -euo pipefail
+          emhcl validate doc/event-model
+          mkdir -p "${RUNNER_TEMP}/event-model"
+          emhcl diagram doc/event-model -o "${RUNNER_TEMP}/event-model/index.html"
 
       - name: Run tests
         id: tests
         continue-on-error: true
         run: dotnet test --configuration Release --no-build
 
-      - name: Publish test report
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Publish pages
+        if: >-
+          always() &&
+          github.event_name == 'push' &&
+          github.ref == 'refs/heads/main' &&
+          steps.event_model.outcome == 'success' &&
+          steps.tests.outcome != 'skipped' &&
+          steps.tests.outcome != 'cancelled'
         env:
           TEST_RESULT: ${{ steps.tests.outcome }}
+          EVENT_MODEL_PATH: ${{ runner.temp }}/event-model/index.html
           RUN_ID: ${{ github.run_id }}
           RUN_NUMBER: ${{ github.run_number }}
           SHA: ${{ github.sha }}
           SERVER_URL: ${{ github.server_url }}
           REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: bash scripts/publish-test-report.sh
+        run: bash scripts/publish-pages.sh
 
       - name: Fail if tests failed
         if: steps.tests.outcome == 'failure'

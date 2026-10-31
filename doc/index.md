@@ -12,6 +12,7 @@ Use this index to choose the smallest relevant reading set for a task.
 - [Testing](testing.md) explains TUnit vertical slice tests and the reusable test host.
 - [Auth](auth.md) explains identity, JWT claims, and app-owned claims.
 - [Slicent](slicent.md) explains how to work on the local framework.
+- [Event model](event-model/README.md) explains the HCL model layout, local rendering, and Pages publishing.
 
 ## Slice docs
 
