@@ -1,6 +1,7 @@
 ﻿using Funzo;
 using Slicent.Application.Queries;
-using Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
+
 // ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable UnusedType.Global
 // ReSharper disable ClassNeverInstantiated.Global

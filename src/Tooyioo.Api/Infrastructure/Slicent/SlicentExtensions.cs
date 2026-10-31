@@ -6,8 +6,9 @@ using KurrentDB.Client;
 using Slicent;
 using Slicent.Application;
 using Tooyioo.Api.Infrastructure.OpenApi;
+using Tooyioo.BusinessOnboarding.Features.Support;
 using Tooyioo.User.Features.Support;
-using Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Api.Infrastructure.Slicent;
 
@@ -75,7 +76,8 @@ public static class SlicentExtensions
                     })
                     .UseCheckpointStore<MongoCheckpointStore>()
                     .AddEventHandler<UserOnboardingProjector>()
-                    .AddEventHandler<UserProjector>());
+                    .AddEventHandler<UserProjector>()
+                    .AddEventHandler<BusinessOnboardingProjector>());
             
         return builder;
     }

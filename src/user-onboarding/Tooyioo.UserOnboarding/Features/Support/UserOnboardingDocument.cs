@@ -3,7 +3,7 @@
 // ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable ClassNeverInstantiated.Global
 
-namespace Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Support;
+namespace Tooyioo.UserOnboarding.Features.Support;
 
 public sealed record UserOnboardingDocument
     : Document

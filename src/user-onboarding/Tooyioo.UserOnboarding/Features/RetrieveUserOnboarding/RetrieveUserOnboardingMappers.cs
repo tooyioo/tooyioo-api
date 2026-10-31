@@ -2,7 +2,8 @@
 using Slicent.Application;
 using Slicent.Application.Queries;
 using Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Support;
+using Tooyioo.UserOnboarding.Features.Support;
+
 // ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable UnusedType.Global
 

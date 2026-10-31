@@ -3,9 +3,10 @@ using Eventuous.Projections.MongoDB;
 using Eventuous.Subscriptions.Context;
 using MongoDB.Driver;
 using Tooyioo.UserOnboarding.Contracts;
+
 // ReSharper disable ClassNeverInstantiated.Global
 
-namespace Tooyioo.UserOnboarding.Features.RetrieveUserOnboarding.Support;
+namespace Tooyioo.UserOnboarding.Features.Support;
 
 public sealed class UserOnboardingProjector
     : MongoProjector<UserOnboardingDocument>

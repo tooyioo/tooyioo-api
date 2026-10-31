@@ -232,4 +232,22 @@ state_view "retrieve_business_onboarding" {
       description = "The read model exposes the business onboarding details and current status."
     }
   }
+
+  scenario "scenario_02_business_onboarding_is_not_found" {
+    title = "No business onboarding read model is available for the requested ID"
+
+    given {
+      title = "The business onboarding event has not been projected into the Business Onboarding read model"
+      event = event.business_onboarding.business_onboarding_initiated
+    }
+
+    then {
+      title = "The business onboarding cannot be retrieved"
+      error = "business_onboarding_not_found"
+    }
+
+    comment {
+      description = "The query returns business_onboarding_not_found when the Business Onboarding document is absent, including before the initiation event is projected."
+    }
+  }
 }
