@@ -1,6 +1,6 @@
 state_change "complete_user_onboarding" {
   title       = "Complete User Onboarding"
-  description = "POST /user-onboarding/{id}/complete completes an existing onboarding, creates a user ID, and records the accepted terms version. Repeating completion returns the existing user ID without appending another event."
+  description = "POST /user-onboarding/{id}/complete completes an existing onboarding that already has a chosen alias, creates a user ID, and records the accepted terms version. Repeating completion returns the existing user ID without appending another event."
   status      = "done"
 
   screen "complete_user_onboarding_ui" {
@@ -59,7 +59,30 @@ state_change "complete_user_onboarding" {
     }
 
     comment {
-      description = "The handler generates the user ID and appends User Onboarding Completed with the terms and conditions version. It does not check that an alias was chosen."
+      description = "The handler generates the user ID and appends User Onboarding Completed with the terms and conditions version. Completion requires that an alias was already chosen."
+    }
+  }
+
+  scenario "user_onboarding_without_alias_cannot_be_completed" {
+    title = "An onboarding without an alias cannot be completed"
+
+    given {
+      title = "The user onboarding was initiated"
+      event = event.onboarding.user_onboarding_initiated
+    }
+
+    when {
+      title   = "Attempt to complete onboarding without an alias"
+      command = command.complete_user_onboarding
+    }
+
+    then {
+      title = "The onboarding is not completed because no alias was chosen"
+      error = "onboarding_alias_not_chosen"
+    }
+
+    comment {
+      description = "Choosing an alias is a prerequisite for completion. The handler returns a conflict and appends no events."
     }
   }
 

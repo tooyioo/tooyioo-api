@@ -47,6 +47,11 @@ public sealed class CompleteUserOnboardingHandler
             return new CompleteUserOnboardingAlreadyCanceledError();
         }
 
+        if (string.IsNullOrWhiteSpace(userOnboarding.State.Alias))
+        {
+            return new CompleteUserOnboardingAliasNotChosenError();
+        }
+
         var userId = UserId.New();
         
         var userOnboardingEvents =
@@ -77,8 +82,9 @@ public partial class CompleteUserOnboardingCommandResult;
 
 public sealed record CompleteUserOnboardingCommandOkResult(UserOnboardingId UserOnboardingId, string UserId);
 
-[Union<CompleteUserOnboardingAlreadyCanceledError, CompleteUserOnboardingConcurrencyConflict, CompleteUserOnboardingUnexpectedStateError>]
+[Union<CompleteUserOnboardingAlreadyCanceledError, CompleteUserOnboardingAliasNotChosenError, CompleteUserOnboardingConcurrencyConflict, CompleteUserOnboardingUnexpectedStateError>]
 public partial class CompleteUserOnboardingCommandErrorResult;
 public sealed record CompleteUserOnboardingAlreadyCanceledError;
+public sealed record CompleteUserOnboardingAliasNotChosenError;
 public sealed record CompleteUserOnboardingConcurrencyConflict;
 public sealed record CompleteUserOnboardingUnexpectedStateError;

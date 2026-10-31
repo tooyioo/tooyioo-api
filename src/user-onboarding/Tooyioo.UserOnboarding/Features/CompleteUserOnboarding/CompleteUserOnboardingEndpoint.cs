@@ -25,7 +25,7 @@ public sealed class CompleteUserOnboardingEndpoint
                     .WithName("complete-user-onboarding")
                     .WithSummary("Complete user onboarding")
                     .WithDescription(
-                        "Completes onboarding and returns the resulting user. Repeating the request after completion returns the existing user.")
+                        "Completes an onboarding that already has a chosen alias and returns the resulting user. Repeating the request after completion returns the existing user.")
                     .WithTags("user-onboarding"))
             .RequireRouteAuthorization<CompleteUserOnboardingRoute, CompleteUserOnboardingAuthorizer>()
             .WithCommandConventions<CompleteUserOnboardingResponse, HttpProblemDetails>();

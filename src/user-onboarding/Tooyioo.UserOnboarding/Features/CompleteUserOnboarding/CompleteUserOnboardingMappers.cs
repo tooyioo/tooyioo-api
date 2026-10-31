@@ -38,6 +38,10 @@ public static class CompleteUserOnboardingMappers
                         "Could not complete user onboarding because it has been canceled"),
                     _ => commandHttpResponseGenerator.Conflict(
                         context,
+                        "onboarding_alias_not_chosen",
+                        "Could not complete user onboarding because no alias has been chosen"),
+                    _ => commandHttpResponseGenerator.Conflict(
+                        context,
                         "concurrent_update",
                         "Could not complete user onboarding because of a concurrency conflict, please retry"),
                     _ => commandHttpResponseGenerator.Conflict(

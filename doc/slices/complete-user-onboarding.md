@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Complete an existing user onboarding process after the user has accepted a terms and conditions version.
+Complete an existing user onboarding process after the user has chosen an alias and accepted a terms and conditions version.
 
 The slice appends `UserOnboardingCompleted` to the user onboarding process stream and returns the generated Tooyioo user id.
 
@@ -19,6 +19,12 @@ The request body contains:
 - `termsAndConditionsVersion`, required
 
 The endpoint does not depend on Google-specific claims directly. Provider-specific identity is resolved by authentication infrastructure, which enriches the principal with app-owned claims.
+
+## Business rules
+
+- The onboarding must exist.
+- A canceled onboarding cannot be completed.
+- An alias must have been chosen before the onboarding can be completed. Otherwise the command returns `onboarding_alias_not_chosen` and appends no events.
 
 ## Streams and events
 
@@ -46,5 +52,6 @@ If another request appends to the stream between load and append, Eventuous rais
 ## Decisions
 
 - Completion writes only to the user onboarding process stream.
+- Completion requires a previously chosen alias; the handler does not choose or generate an alias.
 - Completion is idempotent once `UserOnboardingCompleted` has been recorded.
 - Completed external identities may still receive `user_onboarding_id` in the principal so idempotent onboarding endpoints can authorize retries.
