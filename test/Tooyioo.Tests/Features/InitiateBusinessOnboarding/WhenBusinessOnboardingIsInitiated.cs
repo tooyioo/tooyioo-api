@@ -10,6 +10,7 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.InitiateBusinessOnboarding;
 
+[Category(TestCategories.HappyPath)]
 public sealed class WhenBusinessOnboardingIsInitiated
     : CommandVerticalSliceTest
 {

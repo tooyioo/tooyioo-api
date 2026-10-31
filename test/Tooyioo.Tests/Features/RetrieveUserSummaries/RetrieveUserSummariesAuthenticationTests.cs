@@ -3,6 +3,7 @@ using Tooyioo.Tests.Support.Auth;
 
 namespace Tooyioo.Tests.Features.RetrieveUserSummaries;
 
+[Category(TestCategories.Authentication)]
 public sealed class RetrieveUserSummariesAuthenticationTests
 {
     [Test]

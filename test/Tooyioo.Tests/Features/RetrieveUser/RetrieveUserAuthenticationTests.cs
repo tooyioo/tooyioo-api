@@ -4,6 +4,7 @@ using Tooyioo.Tests.Support.Extensions;
 
 namespace Tooyioo.Tests.Features.RetrieveUser;
 
+[Category(TestCategories.Authentication)]
 public sealed class RetrieveUserAuthenticationTests
 {
     [Test]

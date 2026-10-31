@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tooyioo.Tests.Support;
 
+[Category(TestCategories.Infrastructure)]
 public sealed class VerticalSliceTestHostInfrastructureTests
 {
     [Test]

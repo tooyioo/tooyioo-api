@@ -9,6 +9,8 @@ using Tooyioo.UserOnboarding;
 
 namespace Tooyioo.Tests.Features.RetrieveUsers;
 
+[Category(TestCategories.HappyPath)]
+[Category(TestCategories.MongoDb)]
 public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestContainer mongoDb)
     : UserReadModelQueryTest(mongoDb)
 {

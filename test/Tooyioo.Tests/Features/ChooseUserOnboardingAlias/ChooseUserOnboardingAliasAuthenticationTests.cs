@@ -6,6 +6,7 @@ using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
+[Category(TestCategories.Authentication)]
 public sealed class ChooseUserOnboardingAliasAuthenticationTests
 {
     [Test]

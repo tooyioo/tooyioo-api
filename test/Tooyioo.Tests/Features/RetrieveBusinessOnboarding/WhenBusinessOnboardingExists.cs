@@ -13,6 +13,8 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.RetrieveBusinessOnboarding;
 
+[Category(TestCategories.HappyPath)]
+[Category(TestCategories.MongoDb)]
 public sealed class WhenBusinessOnboardingExists(MongoTestContainer mongoDb)
     : QueryVerticalSliceTest(mongoDb)
 {

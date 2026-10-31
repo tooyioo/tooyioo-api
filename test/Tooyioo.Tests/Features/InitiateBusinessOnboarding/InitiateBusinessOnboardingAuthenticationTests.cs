@@ -7,6 +7,8 @@ using Tooyioo.Tests.Support.Http;
 
 namespace Tooyioo.Tests.Features.InitiateBusinessOnboarding;
 
+[Category(TestCategories.Authentication)]
+[Category(TestCategories.Authorization)]
 public sealed class InitiateBusinessOnboardingAuthenticationTests
 {
     [Test]

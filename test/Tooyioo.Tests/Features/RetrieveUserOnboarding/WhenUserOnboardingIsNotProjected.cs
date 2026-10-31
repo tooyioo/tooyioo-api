@@ -10,6 +10,8 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.RetrieveUserOnboarding;
 
+[Category(TestCategories.NotFound)]
+[Category(TestCategories.MongoDb)]
 public sealed class WhenUserOnboardingIsNotProjected(MongoTestContainer mongoDb)
     : QueryVerticalSliceTest(mongoDb)
 {

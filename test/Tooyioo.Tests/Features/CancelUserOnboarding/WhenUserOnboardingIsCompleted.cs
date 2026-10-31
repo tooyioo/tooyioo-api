@@ -10,6 +10,7 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.CancelUserOnboarding;
 
+[Category(TestCategories.Conflict)]
 public sealed class WhenUserOnboardingIsCompleted
     : CommandVerticalSliceTest
 {

@@ -10,6 +10,7 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 
+[Category(TestCategories.Validation)]
 public sealed class CompleteUserOnboardingValidationTests
 {
     [Test]

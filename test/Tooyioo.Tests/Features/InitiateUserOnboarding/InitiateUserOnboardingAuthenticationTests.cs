@@ -4,6 +4,7 @@ using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Contracts;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 
+[Category(TestCategories.Authentication)]
 public sealed class InitiateUserOnboardingAuthenticationTests
 {
     [Test]

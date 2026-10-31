@@ -9,6 +9,7 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 
+[Category(TestCategories.HappyPath)]
 public sealed class WhenUserOnboardingIsAlreadyCompleted
     : CommandVerticalSliceTest
 {

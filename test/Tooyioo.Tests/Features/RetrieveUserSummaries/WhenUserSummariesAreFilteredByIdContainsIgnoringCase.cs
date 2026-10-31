@@ -8,6 +8,8 @@ using Tooyioo.UserOnboarding;
 
 namespace Tooyioo.Tests.Features.RetrieveUserSummaries;
 
+[Category(TestCategories.HappyPath)]
+[Category(TestCategories.MongoDb)]
 public sealed class WhenUserSummariesAreFilteredByIdContainsIgnoringCase(MongoTestContainer mongoDb)
     : UserReadModelQueryTest(mongoDb)
 {

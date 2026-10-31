@@ -12,6 +12,8 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.RetrieveBusinessOnboarding;
 
+[Category(TestCategories.NotFound)]
+[Category(TestCategories.MongoDb)]
 public sealed class WhenBusinessOnboardingIsNotProjected(MongoTestContainer mongoDb)
     : QueryVerticalSliceTest(mongoDb)
 {

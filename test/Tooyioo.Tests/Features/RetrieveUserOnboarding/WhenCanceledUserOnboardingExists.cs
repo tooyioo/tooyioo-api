@@ -10,6 +10,8 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.RetrieveUserOnboarding;
 
+[Category(TestCategories.Authorization)]
+[Category(TestCategories.MongoDb)]
 public sealed class WhenCanceledUserOnboardingExists(MongoTestContainer mongoDb)
     : QueryVerticalSliceTest(mongoDb)
 {

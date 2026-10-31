@@ -9,6 +9,7 @@ using static Tooyioo.UserOnboarding.Contracts.UserOnboardingDomainEvents.V1;
 
 namespace Tooyioo.Tests.Support.Events;
 
+[Category(TestCategories.Infrastructure)]
 public sealed class WhenDomainEventsAreSerialized
 {
     [Test]

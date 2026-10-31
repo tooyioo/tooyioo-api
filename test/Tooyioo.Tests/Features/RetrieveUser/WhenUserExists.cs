@@ -12,6 +12,8 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.RetrieveUser;
 
+[Category(TestCategories.HappyPath)]
+[Category(TestCategories.MongoDb)]
 public sealed class WhenUserExists(MongoTestContainer mongoDb)
     : QueryVerticalSliceTest(mongoDb)
 {

@@ -8,6 +8,7 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 
+[Category(TestCategories.HappyPath)]
 public sealed class WhenGoogleIdentityIsUnknown
     : CommandVerticalSliceTest
 {

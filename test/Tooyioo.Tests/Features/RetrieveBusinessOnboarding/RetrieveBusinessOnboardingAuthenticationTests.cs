@@ -7,6 +7,8 @@ using Tooyioo.Tests.Support.Http;
 
 namespace Tooyioo.Tests.Features.RetrieveBusinessOnboarding;
 
+[Category(TestCategories.Authentication)]
+[Category(TestCategories.Authorization)]
 public sealed class RetrieveBusinessOnboardingAuthenticationTests
 {
     [Test]

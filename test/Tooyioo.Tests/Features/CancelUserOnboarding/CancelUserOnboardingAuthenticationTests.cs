@@ -6,6 +6,7 @@ using Tooyioo.UserOnboarding.Features.CancelUserOnboarding.Contracts;
 
 namespace Tooyioo.Tests.Features.CancelUserOnboarding;
 
+[Category(TestCategories.Authentication)]
 public sealed class CancelUserOnboardingAuthenticationTests
 {
     [Test]

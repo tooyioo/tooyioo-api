@@ -10,6 +10,7 @@ using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
+[Category(TestCategories.Authorization)]
 public sealed class WhenAnotherUserTriesToChooseAliasForUserOnboarding
     : CommandVerticalSliceTest
 {
