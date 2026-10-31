@@ -40,7 +40,7 @@ state_change "complete_user_onboarding" {
     }
   }
 
-  scenario "user_onboarding_is_completed" {
+  scenario "scenario_01_user_onboarding_is_completed" {
     title = "Complete an existing user onboarding"
 
     given {
@@ -63,7 +63,7 @@ state_change "complete_user_onboarding" {
     }
   }
 
-  scenario "user_onboarding_without_alias_cannot_be_completed" {
+  scenario "scenario_02_user_onboarding_without_alias_cannot_be_completed" {
     title = "An onboarding without an alias cannot be completed"
 
     given {
@@ -86,7 +86,7 @@ state_change "complete_user_onboarding" {
     }
   }
 
-  scenario "unknown_user_onboarding_cannot_be_completed" {
+  scenario "scenario_03_unknown_user_onboarding_cannot_be_completed" {
     title = "The user onboarding does not exist"
 
     when {
@@ -100,7 +100,7 @@ state_change "complete_user_onboarding" {
     }
   }
 
-  scenario "canceled_user_onboarding_cannot_be_completed" {
+  scenario "scenario_04_canceled_user_onboarding_cannot_be_completed" {
     title = "A canceled onboarding cannot be completed"
 
     given {
@@ -124,7 +124,7 @@ state_change "complete_user_onboarding" {
     }
   }
 
-  scenario "user_onboarding_is_completed_concurrently" {
+  scenario "scenario_05_user_onboarding_is_completed_concurrently" {
     title = "Another request changes the onboarding first"
 
     given {

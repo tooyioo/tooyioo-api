@@ -81,7 +81,7 @@ state_view "retrieve_users" {
     }
   }
 
-  scenario "users_matching_filters_are_retrieved" {
+  scenario "scenario_01_users_matching_filters_are_retrieved" {
     title = "The requested page of users is retrieved"
 
     given {

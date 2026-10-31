@@ -23,7 +23,7 @@ state_view "retrieve_claimed_identity" {
     }
   }
 
-  scenario "external_identity_is_claimed" {
+  scenario "scenario_01_external_identity_is_claimed" {
     title = "External identity claimed view"
 
     given {

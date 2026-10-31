@@ -29,7 +29,7 @@ Tests are the executable acceptance criteria for the HCL event model. Each named
 When the mapping between a test class and an HCL scenario is not obvious, add a comment above the class:
 
 ```csharp
-// HCL scenario: complete_user_onboarding/user_onboarding_without_alias_cannot_be_completed
+// HCL scenario: complete_user_onboarding/scenario_02_user_onboarding_without_alias_cannot_be_completed
 ```
 
 Do not maintain a separate scenario-to-test table; it will drift. The HCL workflow, the test, and the comment are enough.

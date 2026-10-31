@@ -39,7 +39,7 @@ state_change "initiate_business_onboarding" {
     }
   }
 
-  scenario "business_onboarding_is_initiated" {
+  scenario "scenario_01_business_onboarding_is_initiated" {
     title = "An onboarded user starts business onboarding"
 
     when {
@@ -57,7 +57,7 @@ state_change "initiate_business_onboarding" {
     }
   }
 
-  scenario "business_onboarding_id_already_has_events" {
+  scenario "scenario_02_business_onboarding_id_already_has_events" {
     title = "The generated business onboarding ID already has events"
 
     when {
@@ -71,7 +71,7 @@ state_change "initiate_business_onboarding" {
     }
   }
 
-  scenario "business_onboarding_is_initiated_concurrently" {
+  scenario "scenario_03_business_onboarding_is_initiated_concurrently" {
     title = "Another request changes the business onboarding stream first"
 
     when {

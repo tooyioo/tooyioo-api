@@ -169,7 +169,7 @@ state_view "retrieve_user_onboarding_after_alias_chosen" {
     }
   }
 
-  scenario "user_onboarding_shows_chosen_alias" {
+  scenario "scenario_01_user_onboarding_shows_chosen_alias" {
     title = "User onboarding view after alias selection"
 
     given {

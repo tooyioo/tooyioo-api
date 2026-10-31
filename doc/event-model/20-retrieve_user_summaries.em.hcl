@@ -72,7 +72,7 @@ state_view "retrieve_user_summaries" {
     }
   }
 
-  scenario "user_summaries_matching_filters_are_retrieved" {
+  scenario "scenario_01_user_summaries_matching_filters_are_retrieved" {
     title = "The requested page of user summaries is retrieved"
 
     given {

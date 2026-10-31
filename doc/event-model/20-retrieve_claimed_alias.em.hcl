@@ -21,7 +21,7 @@ state_view "retrieve_claimed_alias" {
     }
   }
 
-  scenario "alias_claim_is_projected" {
+  scenario "scenario_01_alias_claim_is_projected" {
     title = "Claimed alias view"
 
     given {

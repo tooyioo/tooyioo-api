@@ -46,7 +46,7 @@ state_change "cancel_user_onboarding" {
     }
   }
 
-  scenario "onboarding_without_alias_is_canceled" {
+  scenario "scenario_01_onboarding_without_alias_is_canceled" {
     title = "Cancel before choosing an alias"
 
     given {
@@ -75,7 +75,7 @@ state_change "cancel_user_onboarding" {
     }
   }
 
-  scenario "onboarding_with_alias_is_canceled" {
+  scenario "scenario_02_onboarding_with_alias_is_canceled" {
     title = "Cancel after choosing an alias"
 
     given {
@@ -123,7 +123,7 @@ state_change "cancel_user_onboarding" {
     }
   }
 
-  scenario "completed_onboarding_cannot_be_canceled" {
+  scenario "scenario_03_completed_onboarding_cannot_be_canceled" {
     title = "A completed onboarding cannot be canceled"
 
     given {
@@ -147,7 +147,7 @@ state_change "cancel_user_onboarding" {
     }
   }
 
-  scenario "unknown_onboarding_cannot_be_canceled" {
+  scenario "scenario_04_unknown_onboarding_cannot_be_canceled" {
     title = "An onboarding that does not exist cannot be canceled"
 
     when {

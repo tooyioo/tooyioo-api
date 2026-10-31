@@ -168,7 +168,7 @@ state_view "retrieve_user_onboarding" {
     }
   }
 
-  scenario "user_onboarding_is_retrieved" {
+  scenario "scenario_01_user_onboarding_is_retrieved" {
     title = "User onboarding view"
 
     given {

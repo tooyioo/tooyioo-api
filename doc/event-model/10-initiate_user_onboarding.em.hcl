@@ -69,7 +69,7 @@ state_change "initiate_user_onboarding" {
     }
   }
 
-  scenario "google_user_onboarding_is_initiated_with_unclaimed_external_identity" {
+  scenario "scenario_01_google_user_onboarding_is_initiated_with_unclaimed_external_identity" {
     title = "The user chooses Google to begin onboarding with an unclaimed external identity"
 
     when {
@@ -92,7 +92,7 @@ state_change "initiate_user_onboarding" {
     }
   }
 
-  scenario "external_identity_is_claimed_concurrently" {
+  scenario "scenario_02_external_identity_is_claimed_concurrently" {
     title = "Another request claims the identity first"
 
     when {
@@ -110,7 +110,7 @@ state_change "initiate_user_onboarding" {
     }
   }
 
-  scenario "new_user_onboarding_id_is_not_empty" {
+  scenario "scenario_03_new_user_onboarding_id_is_not_empty" {
     title = "The generated onboarding ID has unexpected state"
 
     when {

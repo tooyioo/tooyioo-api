@@ -30,7 +30,7 @@ state_view "project_users" {
     }
   }
 
-  scenario "users_are_projected_after_completion" {
+  scenario "scenario_01_users_are_projected_after_completion" {
     title = "Users are projected after an onboarding completes"
 
     given {

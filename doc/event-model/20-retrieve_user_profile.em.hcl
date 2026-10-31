@@ -118,7 +118,7 @@ state_view "retrieve_user_profile" {
     }
   }
 
-  scenario "completed_user_profile_is_retrieved" {
+  scenario "scenario_01_completed_user_profile_is_retrieved" {
     title = "The user sees their profile after onboarding completes"
 
     given {
@@ -136,7 +136,7 @@ state_view "retrieve_user_profile" {
     }
   }
 
-  scenario "user_profile_is_not_available" {
+  scenario "scenario_02_user_profile_is_not_available" {
     title = "No user profile is available for the requested ID"
 
     given {

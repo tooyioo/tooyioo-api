@@ -45,7 +45,7 @@ state_change "choose_user_onboarding_alias" {
     }
   }
 
-  scenario "available_alias_is_claimed" {
+  scenario "scenario_01_available_alias_is_claimed" {
     title = "Choose an available alias"
 
     given {
@@ -73,7 +73,7 @@ state_change "choose_user_onboarding_alias" {
     }
   }
 
-  scenario "alias_is_already_claimed_by_another_onboarding" {
+  scenario "scenario_02_alias_is_already_claimed_by_another_onboarding" {
     title = "Alias is already in use"
 
     given {
@@ -96,7 +96,7 @@ state_change "choose_user_onboarding_alias" {
     }
   }
 
-  scenario "different_alias_was_already_chosen" {
+  scenario "scenario_03_different_alias_was_already_chosen" {
     title = "The onboarding already has another alias"
 
     given {
@@ -119,7 +119,7 @@ state_change "choose_user_onboarding_alias" {
     }
   }
 
-  scenario "unknown_user_onboarding_cannot_choose_alias" {
+  scenario "scenario_04_unknown_user_onboarding_cannot_choose_alias" {
     title = "The user onboarding does not exist"
 
     when {
@@ -133,7 +133,7 @@ state_change "choose_user_onboarding_alias" {
     }
   }
 
-  scenario "canceled_user_onboarding_cannot_choose_alias" {
+  scenario "scenario_05_canceled_user_onboarding_cannot_choose_alias" {
     title = "A canceled onboarding cannot choose an alias"
 
     given {
@@ -157,7 +157,7 @@ state_change "choose_user_onboarding_alias" {
     }
   }
 
-  scenario "completed_user_onboarding_cannot_choose_alias" {
+  scenario "scenario_06_completed_user_onboarding_cannot_choose_alias" {
     title = "A completed onboarding cannot choose an alias"
 
     given {
@@ -181,7 +181,7 @@ state_change "choose_user_onboarding_alias" {
     }
   }
 
-  scenario "alias_is_claimed_concurrently" {
+  scenario "scenario_07_alias_is_claimed_concurrently" {
     title = "Another request claims the alias first"
 
     given {

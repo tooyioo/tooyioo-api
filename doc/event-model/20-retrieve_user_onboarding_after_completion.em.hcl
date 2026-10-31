@@ -170,7 +170,7 @@ state_view "retrieve_user_onboarding_after_completion" {
     }
   }
 
-  scenario "completed_user_onboarding_is_retrieved" {
+  scenario "scenario_01_completed_user_onboarding_is_retrieved" {
     title = "Completed user onboarding view"
 
     given {

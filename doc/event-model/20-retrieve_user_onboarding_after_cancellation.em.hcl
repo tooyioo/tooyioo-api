@@ -170,7 +170,7 @@ state_view "retrieve_user_onboarding_after_cancellation" {
     }
   }
 
-  scenario "canceled_user_onboarding_without_alias_is_retrieved" {
+  scenario "scenario_01_canceled_user_onboarding_without_alias_is_retrieved" {
     title = "Canceled onboarding view without an alias"
 
     given {
@@ -189,7 +189,7 @@ state_view "retrieve_user_onboarding_after_cancellation" {
     }
   }
 
-  scenario "canceled_user_onboarding_with_alias_is_retrieved" {
+  scenario "scenario_02_canceled_user_onboarding_with_alias_is_retrieved" {
     title = "Canceled onboarding view after choosing an alias"
 
     given {

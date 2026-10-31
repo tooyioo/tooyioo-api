@@ -16,6 +16,8 @@ The model targets Event Modeling HCL v0.5.0 and requires `emhcl` 0.12.0 or newer
 
 The `board` block lists workflows in business-story order. Workflows omitted from the board remain valid but render separately as off-board workflows.
 
+Scenario IDs use zero-padded prefixes (`scenario_01`, `scenario_02`, ...). The viewer orders scenarios by ID, so happy paths that return events or read models appear before error scenarios.
+
 ## Install or upgrade EMHCL
 
 Download the **0.12.0 or newer compatible** release from the [EMHCL releases](https://github.com/event-modeling-hcl/eventmodeling-hcl/releases/tag/v0.12.0).
