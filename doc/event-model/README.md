@@ -7,7 +7,7 @@ This folder contains the Tooyioo model as `.em.hcl` files. It is the source of t
 The model targets Event Modeling HCL v0.5.0 and requires `emhcl` 0.12.0 or newer.
 
 - `00-catalog.em.hcl` contains the `board`, actors, and the bounded context.
-- `01-chapters.em.hcl` contains chapter membership. Chapter list order is not story order; `board.workflows` sets the order used by the diagram.
+- `01-chapters.em.hcl` contains chapter membership. Chapter list order is not story order; `board.workflows` sets the order used by the diagram. The viewer orders chapters by chapter ID; zero-padded prefixes such as `chapter_01`, `chapter_02`, ... keep the picker ordered past 10.
 - `10-*.em.hcl` and `20-*.em.hcl` contain one command or view workflow per file.
 - `10-initiate_business_onboarding.em.hcl` starts the Business Onboarding bounded context in Chapter 4.
 - `20-project_users.em.hcl` defines the shared `Users` projection from `UserOnboardingCompleted`. The Chapter 3 directory queries in `20-retrieve_users.em.hcl` and `20-retrieve_user_summaries.em.hcl` query that projection.
