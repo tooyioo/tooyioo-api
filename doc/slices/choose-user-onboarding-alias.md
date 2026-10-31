@@ -1,6 +1,7 @@
 # Choose user onboarding alias
 
-- **Event model:** [10-choose_user_onboarding_alias.em.hcl](../event-model/10-choose_user_onboarding_alias.em.hcl)
+- **Event model:** [01-user_onboarding.em.hcl](../event-model/01-user_onboarding.em.hcl)
+- **Workflow:** `choose_user_onboarding_alias`
 - **Tests:** [ChooseUserOnboardingAlias tests](../../test/Tooyioo.Tests/Features/ChooseUserOnboardingAlias)
 
 ## Decisions

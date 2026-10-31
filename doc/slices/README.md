@@ -39,12 +39,13 @@ Use:
 doc/slices/<slice-name>.md
 ```
 
-Start with links to the model and the tests:
+Start with links to the chapter model, workflow ID, and tests:
 
 ```markdown
 # Complete user onboarding
 
-- **Event model:** `../event-model/<workflow>.em.hcl`
+- **Event model:** `../event-model/<chapter>.em.hcl`
+- **Workflow:** `<workflow_id>`
 - **Tests:** `../../test/Tooyioo.Tests/Features/<Feature>`
 ```
 
@@ -59,7 +60,8 @@ If the slice is not yet modeled, say so explicitly:
 ```markdown
 # Slice name
 
-- **Event model:** `../event-model/<workflow>.em.hcl`
+- **Event model:** `../event-model/<chapter>.em.hcl`
+- **Workflow:** `<workflow_id>`
 - **Tests:** `../../test/Tooyioo.Tests/Features/<Feature>`
 
 ## Decisions

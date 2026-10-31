@@ -1,6 +1,7 @@
 # Initiate user onboarding
 
-- **Event model:** [10-initiate_user_onboarding.em.hcl](../event-model/10-initiate_user_onboarding.em.hcl)
+- **Event model:** [01-user_onboarding.em.hcl](../event-model/01-user_onboarding.em.hcl)
+- **Workflow:** `initiate_user_onboarding`
 - **Tests:** [InitiateUserOnboarding tests](../../test/Tooyioo.Tests/Features/InitiateUserOnboarding)
 
 ## Decisions

@@ -1,6 +1,7 @@
 # Initiate business onboarding
 
-- **Event model:** [10-initiate_business_onboarding.em.hcl](../event-model/10-initiate_business_onboarding.em.hcl)
+- **Event model:** [04-business_onboarding.em.hcl](../event-model/04-business_onboarding.em.hcl)
+- **Workflow:** `initiate_business_onboarding`
 - **Tests:** [InitiateBusinessOnboarding tests](../../test/Tooyioo.Tests/Features/InitiateBusinessOnboarding)
 
 ## Decisions

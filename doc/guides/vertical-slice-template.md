@@ -73,7 +73,7 @@ Avoid turning state into a general entity model.
 
 ## Documentation
 
-Every slice should link to its HCL workflow and its tests. Add a [slice decision record](../slices/README.md) only when the slice has non-obvious decisions, constraints, external assumptions, or open questions; do not restate HCL behavior.
+Every slice should link to its chapter HCL file, name its workflow ID, and link its tests. Add the workflow block to the chapter's `.em.hcl` file; do not create a per-workflow file. Add a [slice decision record](../slices/README.md) only when the slice has non-obvious decisions, constraints, external assumptions, or open questions; do not restate HCL behavior.
 
 ## Tests
 

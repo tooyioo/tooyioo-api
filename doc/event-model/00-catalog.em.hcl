@@ -17,6 +17,7 @@ board {
     workflow.retrieve_users,
     workflow.retrieve_user_summaries,
     workflow.initiate_business_onboarding,
+    workflow.retrieve_business_onboarding
   ]
 }
 
@@ -196,7 +197,7 @@ bounded_context "business_onboarding" {
 
     field "initiated_by" {
       type    = "String"
-      example = "00000000-0000-0000-0000-000000000002"
+      example = "00000000-0000-0000-0000-000000000010"
     }
   }
 }

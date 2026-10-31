@@ -1,6 +1,7 @@
 # Cancel user onboarding
 
-- **Event model:** [10-cancel_user_onboarding.em.hcl](../event-model/10-cancel_user_onboarding.em.hcl)
+- **Event model:** [02-user_onboarding_cancellation.em.hcl](../event-model/02-user_onboarding_cancellation.em.hcl)
+- **Workflow:** `cancel_user_onboarding`
 - **Tests:** [CancelUserOnboarding tests](../../test/Tooyioo.Tests/Features/CancelUserOnboarding)
 
 ## Decisions
