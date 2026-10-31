@@ -47,9 +47,9 @@ jobs:
         id: event_model
         run: |
           set -euo pipefail
-          emhcl validate doc/event-model
+          bash doc/generate-tooyioo-diagram.sh
           mkdir -p "${RUNNER_TEMP}/event-model"
-          emhcl diagram doc/event-model -o "${RUNNER_TEMP}/event-model/index.html"
+          cp doc/tooyioo.em.html "${RUNNER_TEMP}/event-model/index.html"
 
       - name: Run tests
         id: tests

@@ -171,10 +171,20 @@ The event model is defined in [`doc/event-model`](doc/event-model/) as a folder 
    ```bash
    emhcl version
    ```
-   
+
+On Windows, download the `windows_amd64` release, extract `emhcl.exe`, and add its directory to `PATH`. The `.bat` wrapper also requires Git for Windows Bash.
+
 ### Generate the event model diagram
 
 From the repository root, run:
+
+```bash
+./doc/generate-tooyioo-diagram.sh
+```
+
+On Windows, run `doc\generate-tooyioo-diagram.bat`; it invokes the same `.sh` through Git for Windows Bash. From WSL, run the `.sh` directly. Both scripts use `emhcl` from `PATH`.
+
+To run the commands individually:
 
 ```bash
 emhcl validate doc/event-model
