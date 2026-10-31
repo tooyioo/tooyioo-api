@@ -22,6 +22,18 @@ Vertical slice tests should exercise the real behavior path:
 
 They should avoid production infrastructure unless the infrastructure itself is the behavior under test.
 
+## Scenario traceability
+
+Tests are the executable acceptance criteria for the HCL event model. Each named HCL scenario that matters should have a corresponding test.
+
+When the mapping between a test class and an HCL scenario is not obvious, add a comment above the class:
+
+```csharp
+// HCL scenario: complete_user_onboarding/user_onboarding_without_alias_cannot_be_completed
+```
+
+Do not maintain a separate scenario-to-test table; it will drift. The HCL workflow, the test, and the comment are enough.
+
 ## Test host
 
 Use `VerticalSliceTestHost` for application slice tests.

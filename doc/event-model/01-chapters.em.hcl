@@ -1,4 +1,4 @@
-# Each chapter presents one alternative onboarding timeline.
+# Chapters group workflows into readable timelines.
 
 chapter "user_onboarding_happy_path" {
   title = "Chapter 1 - User Onboarding"
@@ -29,5 +29,13 @@ chapter "user_directory" {
   workflows = [
     workflow.retrieve_users,
     workflow.retrieve_user_summaries,
+  ]
+}
+
+# emhcl lists chapters by ID; the z_ prefix keeps Business Onboarding last.
+chapter "z_business_onboarding" {
+  title = "Chapter 4 - Business Onboarding"
+  workflows = [
+    workflow.initiate_business_onboarding,
   ]
 }

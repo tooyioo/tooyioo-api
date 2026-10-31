@@ -92,4 +92,4 @@ Avoid technical or CRUD-style names such as:
 
 Event schemas must remain backward compatible or have an explicit migration strategy.
 
-Persisted event names are declared with `DomainEventType` in the module's contracts assembly. `AddSlicent` creates an event map and JSON serializer per application host from the assemblies passed to it, so test hosts can use separate mappings without changing a process-wide Eventuous map.
+Persisted event names and serialization are defined in [Slicent](slicent.md#event-serialization).

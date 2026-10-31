@@ -61,6 +61,4 @@ Do not register these events in the static Eventuous `TypeMap` or set `EventSeri
 
 ## Testing Slicent
 
-Slicent tests belong in `test/Slicent.Tests`.
-
-They should verify framework behavior without depending on Tooyioo application modules. If a test needs Tooyioo domain types to explain the behavior, it probably belongs in `test/Tooyioo.Tests` instead.
+See [Testing](../guides/testing.md) for test locations and hosts. Slicent tests should verify framework behavior without depending on Tooyioo application modules.

@@ -71,11 +71,13 @@ State classes fold domain events and expose only what the handler needs for deci
 
 Avoid turning state into a general entity model.
 
+## Documentation
+
+Every slice should link to its HCL workflow and its tests. Add a [slice decision record](../slices/README.md) only when the slice has non-obvious decisions, constraints, external assumptions, or open questions; do not restate HCL behavior.
+
 ## Tests
 
-Each slice should have at least one happy-path vertical slice test when the behavior crosses endpoint, auth, mapper, handler, and persistence boundaries.
-
-Use focused unit tests only when they clarify complex pure decision logic that is awkward to exercise through HTTP.
+Use [Testing](testing.md) for test bases, auth, event assertions, and scenario traceability. Each named HCL scenario that matters should have a test.
 
 ## Common mistakes
 

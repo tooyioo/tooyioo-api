@@ -123,6 +123,12 @@ A push to `main` publishes the project pages to GitHub Pages:
 
 The test report and event model are published together in one commit to `gh-pages`, so there is no race between separate deployments. The generated event model HTML is not committed to the repository.
 
+## Documentation model
+
+The canonical artifact table is in [doc/index.md](doc/index.md). In short: the HCL event model is the source of truth for behavior, tests are its executable acceptance criteria, code is the implementation, and slice decision records capture only non-obvious decisions and constraints.
+
+When behavior changes, update HCL first, then tests and code. Update a slice decision record only when a decision changes. See [Slice decision records](doc/slices/README.md) for the template and [AGENTS.md](AGENTS.md) for agent rules.
+
 ## Interacting with the API
 
 ### Scalar
@@ -151,60 +157,13 @@ The collection reads the Google ID token from Bruno's OAuth store:
 
 ## Event model
 
-The event model is defined in [`doc/event-model`](doc/event-model/) as a folder of `.em.hcl` files. It can be rendered as an HTML diagram using [EMHCL](https://github.com/event-modeling-hcl/eventmodeling-hcl).
+The event model lives in [`doc/event-model`](doc/event-model/) and is the source of truth for behavior. See [the event model README](doc/event-model/README.md) for installing or upgrading EMHCL, generating the diagram, and publishing it.
 
-### Install EMHCL on Linux
-
-1. Download **EMHCL 0.12.0 or newer compatible** for Linux AMD64 from the [EMHCL releases](https://github.com/event-modeling-hcl/eventmodeling-hcl/releases/tag/v0.12.0).
-2. Extract the archive if necessary and install the `emhcl` executable in `~/.local/bin`:
-
-   ```bash
-   mkdir -p ~/.local/bin
-   install -m 755 ~/Downloads/emhcl ~/.local/bin/emhcl
-   ```
-3. Ensure `~/.local/bin` is in your `PATH`:
-   ```bash
-   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-   source ~/.bashrc
-   ```
-4. Verify the installation
-   ```bash
-   emhcl version
-   ```
-
-On Windows, download the `windows_amd64` release, extract `emhcl.exe`, and add its directory to `PATH`. The `.bat` wrapper also requires Git for Windows Bash.
-
-### Generate the event model diagram
-
-From the repository root, run:
+Quick render from the repository root:
 
 ```bash
 ./doc/generate-tooyioo-diagram.sh
 ```
-
-On Windows, run `doc\generate-tooyioo-diagram.bat`; it invokes the same `.sh` through Git for Windows Bash. From WSL, run the `.sh` directly. Both scripts use `emhcl` from `PATH`.
-
-To run the commands individually:
-
-```bash
-emhcl validate doc/event-model
-emhcl diagram doc/event-model -o doc/tooyioo.em.html
-```
-
-This generates the HTML diagram at `doc/tooyioo.em.html`. The file is ignored by Git, so it is not committed. Run the command again whenever the event model changes.
-
-CI installs pinned EMHCL `0.12.0`, validates the model, regenerates the canvas, and publishes it to GitHub Pages at `/event-model/`. The installer verifies the release checksum. To update the pinned version, change `EMHCL_VERSION` in [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
-
-The same installer can upgrade a local Ubuntu installation:
-
-```bash
-EMHCL_INSTALL_DIR="$HOME/.local/bin" EMHCL_VERSION=0.12.0 bash scripts/install-emhcl.sh
-hash -r
-emhcl version
-```
-
-This should print `emhcl v0.12.0`. The script verifies the release archive checksum before installing.
-
 
 ## Troubleshooting and development notes
 

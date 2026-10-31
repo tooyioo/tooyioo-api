@@ -16,6 +16,7 @@ board {
     workflow.retrieve_user_onboarding_after_cancellation,
     workflow.retrieve_users,
     workflow.retrieve_user_summaries,
+    workflow.initiate_business_onboarding,
   ]
 }
 
@@ -171,6 +172,31 @@ bounded_context "onboarding" {
     field "user_onboarding_id" {
       type    = "String"
       example = "00000000-0000-0000-0000-000000000001"
+    }
+  }
+}
+
+bounded_context "business_onboarding" {
+  title = "Business Onboarding"
+
+  aggregate "business_onboarding" {
+    title       = "Business Onboarding"
+    description = "Stream of events associated to a business onboarding process."
+  }
+
+  event "business_onboarding_initiated" {
+    title       = "Business Onboarding Initiated"
+    description = "A business onboarding process was initiated for a Tooyioo user."
+    aggregate   = aggregate.business_onboarding
+
+    field "legal_name" {
+      type    = "String"
+      example = "Acme Ltd"
+    }
+
+    field "initiated_by" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-000000000002"
     }
   }
 }

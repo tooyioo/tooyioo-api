@@ -16,7 +16,7 @@ The API boundary should therefore distinguish:
 
 Most endpoints should authorize from app-owned claims on the authenticated principal. They should not depend on Google-specific claims directly.
 
-The main exception is `InitiateUserOnboarding`. That slice must consume external identity and personal-detail claims because its purpose is to turn a trusted external identity into a Tooyioo onboarding process.
+The main exception is the `initiate_user_onboarding` slice. It must consume external identity and personal-detail claims because its purpose is to turn a trusted external identity into a Tooyioo onboarding process.
 
 ## JWT claims
 
@@ -76,8 +76,4 @@ Do not introduce a separate personal-details retriever unless the source is genu
 
 ## Tests
 
-Tests should use real signed JWTs with a test signing key.
-
-The vertical slice test host overrides JWT bearer options so tests do not depend on Google metadata, production issuer validation, or production audience validation.
-
-Keep signing key validation and lifetime validation enabled in tests. This catches malformed token setup without making tests external.
+Auth test guidance lives in [Testing](../guides/testing.md#auth-in-tests).

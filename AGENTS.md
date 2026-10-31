@@ -19,51 +19,19 @@ The business model is subscription-based for merchants, with free usage options 
 
 # Architecture
 
-This repository is a modular monolith targeting .NET 10.
+Modular monolith on .NET 10 using Vertical Slice Architecture, CQRS, and aggregate-less Event Sourcing. Eventuous provides the event-sourcing primitives; Slicent provides local slice conventions.
 
-The architecture follows:
-
-- Vertical Slice Architecture
-- CQRS
-- Aggregate-less Event Sourcing
-- Event-driven design
-- Modular boundaries inside a single deployable backend
-
-Eventuous is the primary Event Sourcing framework.
-
-Slicent is a lightweight framework built on top of Eventuous. It intentionally does not abstract Eventuous away. Instead, it provides conventions, wiring, and contracts for command handlers, query handlers, vertical slice registration, and related application patterns.
-
-Prefer existing Slicent conventions before introducing new abstractions.
+See [Architecture overview](doc/architecture/overview.md), [Event sourcing](doc/architecture/event-sourcing.md), and [Slicent](doc/architecture/slicent.md). Prefer existing Slicent conventions before introducing new abstractions.
 
 ---
 
 # Core Modeling Principle
 
-This project follows an **aggregate-less Event Sourcing approach**, influenced by Greg Young, Adam Dymitruk and Martin Dilger.
+Model business processes, not long-lived entities. Each process has one cohesive set of invariants, one consistency boundary, and one stream, and reconstructs only the state needed to decide the next command.
 
-The primary modeling unit is a **business process**, not a business entity.
+Do not add aggregate classes. The aggregate responsibilities are fulfilled by the stream, folded state, optimistic concurrency, and command handler decision logic.
 
-An event stream represents the execution of a business process rather than the lifetime history of a business object.
-
-The objective is **not** to model everything that has ever happened to an entity. Instead, the objective is to model a single business process with one cohesive purpose and one well-defined consistency boundary.
-
-Each process:
-
-- has a clear beginning and end
-- owns one cohesive set of invariants
-- defines one consistency boundary
-- reconstructs only the state required to make decisions for that process
-
-Streams exist to protect a single consistency boundary.
-
-Long-lived entity streams tend to accumulate unrelated business rules over time, eventually becoming "god aggregates". This modelling style should be avoided.
-
-Although the concept of an aggregate still exists conceptually, explicit aggregate classes are intentionally omitted. Their responsibilities are naturally fulfilled by:
-
-- the event stream
-- optimistic concurrency
-- process state reconstructed from events
-- the command handler
+See [Event sourcing](doc/architecture/event-sourcing.md).
 
 ---
 
@@ -108,12 +76,32 @@ Prefer consistency with the existing codebase over introducing new patterns.
 
 When implementing a feature:
 
-1. Read the relevant specification under `doc/`.
-2. Inspect similar existing vertical slices.
-3. Follow the established conventions.
-4. Keep the slice cohesive.
-5. Add or update tests.
-6. Update documentation whenever behaviour or contracts change.
+1. Read this file and `doc/index.md`.
+2. Read the relevant HCL workflow, its scenarios, and the slice decision record if one exists.
+3. Inspect similar existing vertical slices and their tests.
+4. If behavior changes, update the HCL event model first.
+5. Follow the established conventions and keep the slice cohesive.
+6. Add or update tests for the HCL scenarios.
+7. Run `emhcl validate doc/event-model` and the relevant tests.
+8. Update the slice decision record only if a non-obvious decision or constraint changed.
+
+---
+
+# Documentation and Source of Truth
+
+Artifact ownership and primary audiences are defined in [doc/index.md](doc/index.md). In short: the HCL event model is behavior, tests are executable acceptance, code is implementation, and slice decision records capture decisions.
+
+Rules:
+
+- Do not restate HCL workflows, fields, events, scenarios, errors, or business rules in slice decision records.
+- Every named HCL scenario that matters should have a test.
+- Slice decision records exist only for knowledge that cannot be derived from HCL, tests, or code. Do not create one only because a slice exists.
+- If code and HCL disagree, treat it as a defect. Resolve the disagreement; do not document around it.
+- Change the artifact that owns the knowledge: behavior in HCL first; decisions in the slice decision record; implementation in code; setup in `README.md`.
+- When a slice decision record stops being useful, delete the duplicated text instead of maintaining it.
+- Link each slice decision record to its HCL workflow and test folder.
+
+The detailed template and rules are in [doc/slices/README.md](doc/slices/README.md).
 
 ---
 
@@ -138,99 +126,22 @@ Avoid cross-slice coupling unless there is an explicit shared business concept.
 
 # CQRS Rules
 
-Commands mutate state.
+Commands mutate state. Queries read state. Query handlers must never mutate state.
 
-Queries read state.
+The command handler is the transactional boundary: load process state, evaluate invariants, and append events with expected stream versions. Do not mix command-side and query-side responsibilities.
 
-Query handlers must never mutate state.
-
-Command handlers are responsible for evaluating business rules, enforcing invariants, and producing domain events.
-
-The command handler is the **transactional boundary**.
-
-A command handler may:
-
-- reconstruct state from one or more streams
-- evaluate business rules
-- transactionally append events to one or more streams using the multi-stream append capabilities of Eventuous and KurrentDB
-
-Do not introduce aggregate classes.
-
-The aggregate concept already exists through:
-
-- event streams
-- optimistic concurrency
-- process state
-- consistency boundaries
-
-Do not mix command-side and query-side responsibilities.
+See [Event sourcing](doc/architecture/event-sourcing.md) for multi-stream and process-state details.
 
 ---
 
 # Event Sourcing Rules
 
-## Streams Represent Processes
+Follow [Event sourcing](doc/architecture/event-sourcing.md). Non-negotiable:
 
-An event stream represents the execution of a business process.
-
-It does **not** represent the lifetime history of a business entity.
-
-Streams must therefore be named using **gerunds**, describing the process being executed.
-
-Examples:
-
-- `UserOnboarding`
-- `OrganizationOnboarding`
-- `CampaignConfiguring`
-- `CampaignRunning`
-
-Avoid entity-centric stream names such as:
-
-- `User`
-- `Organization`
-- `Campaign`
-
-A stream should answer:
-
-> How is the process currently executing?
-
-not:
-
-> What happened to this object throughout its lifetime?
-
-## State
-
-State reconstructed from a stream is **short-lived process state**.
-
-Its only purpose is to evaluate the business rules required to continue executing that process.
-
-Do not model long-lived entity state when only process state is required.
-
-## Consistency Boundaries
-
-Each process owns exactly one cohesive set of invariants.
-
-Therefore each process defines exactly one consistency boundary.
-
-A stream exists to protect that consistency boundary.
-
-If unrelated invariants begin appearing within the same stream, this is usually a modeling smell indicating multiple business processes have been combined.
-
-Prefer splitting them into separate process streams.
-
-## Domain Events
-
-Domain changes must be represented as immutable events.
-
-Do not mutate historical events.
-
-Do not introduce CRUD persistence for event-sourced concepts.
-
-Domain event names must describe business facts that have already happened.
-
-Prefer business-meaningful events over technical events.
-
-Event schema evolution must remain backward compatible or include an explicit migration strategy.
+- Streams represent processes, not entity lifetimes. Use process-oriented names.
+- State is short-lived decision state, not a read model or entity model.
+- Each process owns one cohesive set of invariants and one consistency boundary.
+- Events are immutable past-tense facts. Schema changes must stay backward compatible or include a migration strategy.
 
 ---
 
@@ -264,12 +175,15 @@ Avoid:
 Before making changes, agents should:
 
 1. Read this file.
-2. Read `doc/index.md` and the relevant documentation or specifications it points to.
-3. Inspect similar implementations.
-4. Make the smallest coherent change.
-5. Run, or describe, the relevant tests.
-6. Update documentation whenever behaviour changes.
+2. Read `doc/index.md`, the relevant HCL workflow and its scenarios, and the slice decision record if one exists.
+3. Inspect similar implementations and their tests.
+4. If behavior changes, update the HCL event model first.
+5. Make the smallest coherent change in code and tests.
+6. Run `emhcl validate doc/event-model` and the relevant tests.
+7. Update the slice decision record only if a non-obvious decision or constraint changed.
 
 Do not invent missing business rules.
 
 If a business rule is unclear, ask for clarification rather than making assumptions.
+
+Do not duplicate HCL behavior in slice decision records. Do not add a slice decision record only because a slice exists.
