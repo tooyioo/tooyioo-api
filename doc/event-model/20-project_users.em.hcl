@@ -1,12 +1,12 @@
 state_view "project_users" {
   title       = "Project Users"
-  description = "Projects UserOnboardingCompleted into the shared Users read model consumed by the User Directory queries in Chapter 3. This slice makes the projection and its source event explicit."
+  description = "Projects UserOnboardingCompleted into the shared Users read model consumed by the User Directory queries in Chapter 3. The queries add pagination and filters; this slice only defines the projection and its source event."
   status      = "done"
 
   readmodel "users" {
     title       = "Users"
-    description = "Shared persisted User read model populated by UserOnboardingCompleted. The User Directory queries in Chapter 3 read this projection."
-    question    = "Which users have been projected from completed onboardings?"
+    description = "Shared persisted Users read model populated by UserOnboardingCompleted. It is the projection behind GET /users and GET /users/summaries; it is not itself an HTTP resource and does not apply pagination or filters. Those query concerns are defined by Retrieve Users and Retrieve User Summaries in Chapter 3."
+    question    = "Which users have been projected from UserOnboardingCompleted?"
     from        = [event.onboarding.user_onboarding_completed]
 
     field "items" {

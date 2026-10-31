@@ -5,7 +5,7 @@ state_view "retrieve_user_onboarding_after_cancellation" {
 
   readmodel "user_onboarding" {
     title       = "User Onboarding"
-    description = "Persistent User Onboarding read model assembled from onboarding events, including cancellation status and reason."
+    description = "Persistent User Onboarding read model assembled from onboarding events, including cancellation status and reason. It is exposed by GET /user-onboarding/{id} and returns one onboarding; it is not paginated."
     question    = "What is the state of this canceled user onboarding?"
     from = [
       event.onboarding.user_onboarding_initiated,

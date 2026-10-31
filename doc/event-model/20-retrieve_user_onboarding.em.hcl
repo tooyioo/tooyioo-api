@@ -5,7 +5,7 @@ state_view "retrieve_user_onboarding" {
 
   readmodel "user_onboarding" {
     title       = "User Onboarding"
-    description = "Persistent User Onboarding read model assembled from onboarding events."
+    description = "Persistent User Onboarding read model assembled from onboarding events. It is exposed by GET /user-onboarding/{id} and returns one onboarding; it is not paginated."
     question    = "What is the current state of this user onboarding?"
     from = [
       event.onboarding.user_onboarding_initiated

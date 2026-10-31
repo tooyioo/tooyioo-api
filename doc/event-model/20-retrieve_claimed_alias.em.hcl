@@ -5,7 +5,7 @@ state_view "retrieve_claimed_alias" {
 
   readmodel "claimed_alias" {
     title    = "Claimed Alias"
-    description = "In-memory command-side state rehydrated from the Alias Claiming stream."
+    description = "In-memory command-side state rehydrated from the Alias Claiming stream. It is not an HTTP resource and is not paginated."
     question = "Which user onboarding has claimed this alias?"
     from     = [event.onboarding.alias_claimed]
 

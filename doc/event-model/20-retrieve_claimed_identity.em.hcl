@@ -5,7 +5,7 @@ state_view "retrieve_claimed_identity" {
 
   readmodel "claimed_identity" {
     title       = "Claimed Identity"
-    description = "In-memory command-side state rehydrated from the External Identity Claiming stream."
+    description = "In-memory command-side state rehydrated from the External Identity Claiming stream. It is not an HTTP resource and is not paginated."
     question    = "What is the user onboarding that claimed this external identity?"
     from = [
       event.onboarding.external_identity_claimed

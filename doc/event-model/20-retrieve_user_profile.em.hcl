@@ -5,7 +5,7 @@ state_view "retrieve_user_profile" {
 
   readmodel "user" {
     title       = "User"
-    description = "Shared persisted User read model populated by UserOnboardingCompleted."
+    description = "Shared persisted User read model populated by UserOnboardingCompleted. It is exposed by GET /users/{id} and returns one profile; it is not paginated."
     question = "What profile belongs to this user ID?"
     from     = [event.onboarding.user_onboarding_completed]
     to       = [screen.user_profile]

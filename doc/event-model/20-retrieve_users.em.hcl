@@ -5,8 +5,8 @@ state_view "retrieve_users" {
 
   readmodel "users" {
     title       = "Users"
-    description = "Shared persisted Users read model populated by UserOnboardingCompleted. The projection is defined by Project Users in Chapter 1. This query returns paginated items containing user profile and identity details."
-    question    = "Which users match the requested filters?"
+    description = "Shared persisted Users read model populated by UserOnboardingCompleted. The projection is defined by Project Users in Chapter 1. It is exposed by GET /users with pagination and filters and returns user profile and identity details."
+    question    = "Which users from the UserOnboardingCompleted projection match the requested filters?"
     from        = [event.onboarding.user_onboarding_completed]
     to          = [screen.users_search]
 
