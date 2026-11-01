@@ -39,5 +39,6 @@ chapter "chapter_04_business_onboarding" {
   workflows = [
     workflow.initiate_business_onboarding,
     workflow.retrieve_business_onboarding,
+    workflow.record_business_onboarding_address,
   ]
 }

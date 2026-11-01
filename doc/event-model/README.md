@@ -1,6 +1,6 @@
-# Tooyioo event model
+# Event model
 
-This folder contains the Tooyioo model as `.em.hcl` files. It is the source of truth for system behavior. [Slice decision records](../slices/README.md) capture non-obvious decisions and constraints, not a second copy of behavior.
+This folder contains the event model as `.em.hcl` files. It is the source of truth for system behavior. [Slice decision records](../slices/README.md) capture non-obvious decisions and constraints, not a second copy of behavior.
 
 ## Model layout
 
@@ -18,6 +18,16 @@ The model targets Event Modeling HCL v0.5.0 and requires `emhcl` 0.12.0 or newer
 The `board` block lists workflows in business-story order. Workflows omitted from the board remain valid but render separately as off-board workflows.
 
 Scenario IDs use zero-padded prefixes (`scenario_01`, `scenario_02`, ...). The viewer orders scenarios by ID, so happy paths that return events or read models appear before error scenarios.
+
+## Description conventions
+
+- A `state_change` description starts with the HTTP method and route, for example `POST /user-onboarding/initiate`.
+- A `state_view` description starts with `GET <route>` when the read model is exposed over HTTP. Otherwise it states `Internal lookup; not an HTTP endpoint.` or `Internal projection; not an HTTP endpoint.`
+- Name the bounded context explicitly in prose: user onboarding or business onboarding, not bare onboarding.
+
+## Screen fields
+
+A `screen` lists only fields the UI always needs. Persistence metadata such as `created_at`, `last_modified_at`, and `revision` stays in the read model. Internal ownership IDs such as `initiated_by` are read-model-only. State-specific details such as `completed_at`, `canceled_at`, and `cancellation_reason` also stay in the read model; screens show the current `status` instead.
 
 ## Adding a chapter or workflow
 

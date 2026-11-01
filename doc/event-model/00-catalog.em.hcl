@@ -17,7 +17,8 @@ board {
     workflow.retrieve_users,
     workflow.retrieve_user_summaries,
     workflow.initiate_business_onboarding,
-    workflow.retrieve_business_onboarding
+    workflow.retrieve_business_onboarding,
+    workflow.record_business_onboarding_address
   ]
 }
 
@@ -26,7 +27,7 @@ actor "authenticated_user" {
   auth_required = true
 }
 
-bounded_context "onboarding" {
+bounded_context "user_onboarding" {
   title = "User Onboarding"
 
   field_type "user" {
@@ -54,7 +55,7 @@ bounded_context "onboarding" {
 
   event "user_onboarding_initiated" {
     title       = "User Onboarding Initiated"
-    description = "A user onboarding process was initiated with a given external identity Id."
+    description = "A user onboarding process was initiated with a given external identity ID."
     aggregate   = aggregate.user_onboarding
 
     field "name" {
@@ -106,7 +107,7 @@ bounded_context "onboarding" {
 
   event "user_onboarding_completed" {
     title       = "User Onboarding Completed"
-    description = "A given user onboarding is completed."
+    description = "A given user onboarding was completed."
     aggregate   = aggregate.user_onboarding
 
     field "terms_and_conditions_version" {
@@ -156,7 +157,7 @@ bounded_context "onboarding" {
 
   event "external_identity_released" {
     title       = "External Identity Released"
-    description = "An external identity was released when its onboarding was canceled."
+    description = "An external identity was released when its user onboarding was canceled."
     aggregate   = aggregate.external_identity_claiming
 
     field "user_onboarding_id" {
@@ -187,7 +188,7 @@ bounded_context "business_onboarding" {
 
   event "business_onboarding_initiated" {
     title       = "Business Onboarding Initiated"
-    description = "A business onboarding process was initiated for a Tooyioo user."
+    description = "A business onboarding process was initiated for a user."
     aggregate   = aggregate.business_onboarding
 
     field "legal_name" {
@@ -198,6 +199,42 @@ bounded_context "business_onboarding" {
     field "initiated_by" {
       type    = "String"
       example = "00000000-0000-0000-0000-000000000010"
+    }
+  }
+
+  event "business_onboarding_address_recorded" {
+    title       = "Business Onboarding Address Recorded"
+    description = "An address was recorded for a business onboarding."
+    aggregate   = aggregate.business_onboarding
+
+    field "line1" {
+      type    = "String"
+      example = "Avenida San Javier 67"
+    }
+
+    field "line2" {
+      type    = "String"
+      example = "Portal 15, 4ºF"
+    }
+
+    field "town_name" {
+      type    = "String"
+      example = "Málaga"
+    }
+
+    field "post_code" {
+      type    = "String"
+      example = "29140"
+    }
+
+    field "country_subdivision" {
+      type    = "String"
+      example = "Málaga"
+    }
+
+    field "country" {
+      type    = "String"
+      example = "ES"
     }
   }
 }

@@ -6,10 +6,10 @@
 
 ## Decisions
 
-- Alias uniqueness is protected by a separate claiming stream, not by scanning onboardings.
-- The alias claim represents current availability. Releasing an alias makes it claimable again.
-- Choosing the same alias again before a terminal state is idempotent. A different alias cannot replace one already chosen.
-- The onboarding assignment and the global alias claim are one business decision.
+- Alias uniqueness is protected by a separate alias claim stream, not by scanning user onboardings.
+- A claim means the alias is currently reserved by one user onboarding. It does not mean the alias existed historically. Releasing an alias makes it claimable again.
+- Choosing the same alias again before a terminal state is idempotent. A different alias cannot replace the one already chosen.
+- The alias assigned to the user onboarding and the global alias claim are one business decision.
 
 ## Constraints
 

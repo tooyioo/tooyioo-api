@@ -2,14 +2,14 @@
 
 state_view "retrieve_users" {
   title       = "Retrieve Users"
-  description = "Lists users from the shared Users projection using pagination and optional filters for identity, alias, name, email verification, and creation or modification dates. The projection is defined by Project Users in Chapter 1. The query is exposed as GET /users and is available independently of the onboarding profile screen. Each paginated item is a User object; its id is the user_id."
+  description = "GET /users lists users from the shared Users projection using pagination and optional filters for identity, alias, name, email verification, and creation or modification dates. The projection is defined by Project Users in Chapter 1. The query is available independently of the user onboarding profile screen. Each paginated item is a User object; its id is the user_id."
   status      = "done"
 
   readmodel "users" {
     title       = "Users"
     description = "Shared persisted Users read model populated by UserOnboardingCompleted. The projection is defined by Project Users in Chapter 1. It is exposed by GET /users with pagination and filters and returns user profile and identity details."
     question    = "Which users from the UserOnboardingCompleted projection match the requested filters?"
-    from        = [event.onboarding.user_onboarding_completed]
+    from        = [event.user_onboarding.user_onboarding_completed]
     to          = [screen.users_search]
 
     field "page_number" {
@@ -34,7 +34,7 @@ state_view "retrieve_users" {
 
     field "items" {
       cardinality = "List"
-      type        = field_type.onboarding.user
+      type        = field_type.user_onboarding.user
       example = [{
         id                           = "00000000-0000-0000-0000-000000000010"
         alias                        = "joe-bloggs-spain_123"
@@ -79,7 +79,7 @@ state_view "retrieve_users" {
 
     field "items" {
       cardinality = "List"
-      type        = field_type.onboarding.user
+      type        = field_type.user_onboarding.user
     }
   }
 
@@ -87,8 +87,8 @@ state_view "retrieve_users" {
     title = "The requested page of users is retrieved"
 
     given {
-      title = "User profiles have been projected from completed onboardings"
-      event = event.onboarding.user_onboarding_completed
+      title = "User profiles have been projected from completed user onboardings"
+      event = event.user_onboarding.user_onboarding_completed
     }
 
     then {
@@ -100,14 +100,14 @@ state_view "retrieve_users" {
 
 state_view "retrieve_user_summaries" {
   title       = "Retrieve User Summaries"
-  description = "Returns a paginated, lightweight view of users from the same Users projection used by Retrieve Users. The projection is defined by Project Users in Chapter 1. It filters by user ID or alias and is exposed as GET /users/summaries. Each paginated User Summary item's id is the user_id."
+  description = "GET /users/summaries returns a paginated, lightweight view of users from the same Users projection used by Retrieve Users. The projection is defined by Project Users in Chapter 1. It filters by user ID or alias. Each paginated User Summary item's id is the user_id."
   status      = "done"
 
   readmodel "users" {
     title       = "Users"
     description = "Shared persisted Users read model populated by UserOnboardingCompleted. The projection is defined by Project Users in Chapter 1. It is exposed by GET /users/summaries with pagination and filters and returns only user ID, alias, name, and last name."
     question    = "Which user summaries from the UserOnboardingCompleted projection match the requested ID or alias?"
-    from        = [event.onboarding.user_onboarding_completed]
+    from        = [event.user_onboarding.user_onboarding_completed]
     to          = [screen.user_summaries_search]
 
     field "page_number" {
@@ -132,7 +132,7 @@ state_view "retrieve_user_summaries" {
 
     field "items" {
       cardinality = "List"
-      type        = field_type.onboarding.user_summary
+      type        = field_type.user_onboarding.user_summary
       example = [{
         id        = "00000000-0000-0000-0000-000000000010"
         alias     = "joe-bloggs-spain_123"
@@ -168,7 +168,7 @@ state_view "retrieve_user_summaries" {
 
     field "items" {
       cardinality = "List"
-      type        = field_type.onboarding.user_summary
+      type        = field_type.user_onboarding.user_summary
     }
   }
 
@@ -176,8 +176,8 @@ state_view "retrieve_user_summaries" {
     title = "The requested page of user summaries is retrieved"
 
     given {
-      title = "User profiles have been projected from completed onboardings"
-      event = event.onboarding.user_onboarding_completed
+      title = "User profiles have been projected from completed user onboardings"
+      event = event.user_onboarding.user_onboarding_completed
     }
 
     then {
