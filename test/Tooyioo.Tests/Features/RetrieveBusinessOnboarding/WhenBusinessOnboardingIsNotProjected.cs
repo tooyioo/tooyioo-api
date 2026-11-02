@@ -1,14 +1,14 @@
 using System.Net;
 using Slicent.Application;
-using Tooyioo.BusinessOnboarding;
+using Tooyioo.Business;
 using Tooyioo.Common;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.RetrieveBusinessOnboarding;
 
@@ -31,9 +31,9 @@ public sealed class WhenBusinessOnboardingIsNotProjected(MongoTestContainer mong
         _userId = 3.ToGuid().ToString();
         _subject = "google-sub-123";
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_userOnboardingId)
                 .Build());
 

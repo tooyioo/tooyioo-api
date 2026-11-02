@@ -1,3 +1,3 @@
-﻿namespace Tooyioo.Common;
+namespace Tooyioo.Common;
 
-public sealed record ExternalIdentity(string Id, ExternalIdentityProvider Provider, string Issuer);
+public sealed record ExternalIdentity(string Id, string Issuer);

@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -14,11 +14,12 @@ namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 public sealed class ChooseUserOnboardingAliasValidationTests
 {
     [Test]
-    [Arguments("too-short", "abc", "alias_too_short")]
+    [Arguments("too-short", "ab", "alias_too_short")]
     [Arguments("not-provided", null, "alias_required")]
-    [Arguments("too-long", "abcdefghijklmnopqrstuvwxy", "alias_too_long")]
+    [Arguments("too-long", "abcdefghijklmnopqrstuvwxyz12345", "alias_too_long")]
     [Arguments("invalid-format", "jane.bloggs", "alias_invalid_format")]
-    [Arguments("too-long-and-invalid-format", "abcdefghijklmnopqrstuvwxy!", "alias_too_long", "alias_invalid_format")]
+    [Arguments("uppercase", "Jane", "alias_invalid_format")]
+    [Arguments("too-long-and-invalid-format", "abcdefghijklmnopqrstuvwxyz12345!", "alias_too_long", "alias_invalid_format")]
     public async Task Endpoint_rejects_invalid_payloads(
         string _,
         string? alias,
@@ -41,9 +42,9 @@ public sealed class ChooseUserOnboardingAliasValidationTests
                 .WithExternalIdentityId(subject)
                 .Build());
 
-        await host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(userOnboardingId)
                 .Build());
 

@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -33,17 +33,17 @@ public sealed class WhenCanceledUserOnboardingChoosesAlias
             DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(_subject).Build(),
             DomainEvent.UserOnboardingCanceled().Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed().WithUserOnboardingId(_userOnboardingId).Build(),
-            DomainEvent.ExternalIdentityReleased().WithUserOnboardingId(_userOnboardingId).Build());
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed().WithUserOnboardingId(_userOnboardingId).Build(),
+            DomainEvent.UserLoginReleased().WithUserOnboardingId(_userOnboardingId).Build());
 
         _userOnboardingStreamBeforeWhen = await Host.Events
             .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
             .CaptureSnapshot();
 
         _userAliasClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
+            .Stream<UserAliasClaimingState, UserAliasClaimingId>(new UserAliasClaimingId(_alias))
             .CaptureSnapshot();
     }
 
@@ -78,6 +78,6 @@ public sealed class WhenCanceledUserOnboardingChoosesAlias
     [Test]
     public async Task Then_user_alias_claim_stream_has_no_new_events()
         => await Host.Events
-            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
+            .Stream<UserAliasClaimingState, UserAliasClaimingId>(new UserAliasClaimingId(_alias))
             .ShouldHaveNoChangesSince(_userAliasClaimStreamBeforeWhen);
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Queries;
 using Tooyioo.Common;
@@ -21,25 +21,24 @@ public static class RetrieveUserMappers
         : IQueryHttpResponseMapper<RetrieveUserQueryResult, HttpContext, RetrieveUserResponse>
     {
         public IResult Map(
-            RetrieveUserQueryResult queryResult, 
+            RetrieveUserQueryResult queryResult,
             HttpContext context,
             QueryHttpResponseGenerator<RetrieveUserResponse> queryHttpResponseGenerator)
             => queryResult.Match<IResult>(
                 ok => queryHttpResponseGenerator.Ok(new RetrieveUserResponse
                 {
                     Id = ok.Document.Id,
-                    Alias = ok.Document.Alias,
+                    Alias = ok.Document.Alias ?? string.Empty,
                     Name = ok.Document.Name,
                     LastName = ok.Document.LastName,
                     Email = ok.Document.Email,
                     IsEmailVerified = ok.Document.IsEmailVerified,
                     PhoneNumber = ok.Document.PhoneNumber,
+                    Status = ok.Document.Status,
                     CreatedAt = ok.Document.CreatedAt,
                     LastModifiedAt = ok.Document.LastModifiedAt,
-                    ExternalIdentityId = ok.Document.ExternalIdentityId,
-                    ExternalIdentityProvider = ok.Document.ExternalIdentityProvider,
-                    UserOnboardingId = ok.Document.UserOnboardingId,
-                    TermsAndConditionsVersion = ok.Document.TermsAndConditionsVersion
+                    TermsOfServiceVersion = ok.Document.TermsOfServiceVersion ?? string.Empty,
+                    PrivacyPolicyVersion = ok.Document.PrivacyPolicyVersion ?? string.Empty
                 }),
                 notFound => queryHttpResponseGenerator.NotFound(
                     context,

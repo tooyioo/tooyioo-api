@@ -3,32 +3,173 @@
 board {
   workflows = [
     workflow.initiate_user_onboarding,
-    workflow.retrieve_claimed_identity,
+    workflow.retrieve_claimed_user_login,
+    workflow.retrieve_linked_user_logins,
     workflow.retrieve_user_onboarding,
     workflow.choose_user_onboarding_alias,
     workflow.retrieve_claimed_alias,
-    workflow.retrieve_user_onboarding_after_alias_chosen,
     workflow.complete_user_onboarding,
-    workflow.retrieve_user_onboarding_after_completion,
     workflow.project_users,
-    workflow.retrieve_user_profile,
     workflow.cancel_user_onboarding,
-    workflow.retrieve_user_onboarding_after_cancellation,
     workflow.retrieve_users,
     workflow.retrieve_user_summaries,
+    workflow.retrieve_user_profile,
+    workflow.retrieve_user_personal_data,
+    workflow.request_user_personal_data_erasure,
+    workflow.cancel_user_personal_data_erasure,
+    workflow.apply_due_user_personal_data_erasures,
     workflow.initiate_business_onboarding,
     workflow.retrieve_business_onboarding,
-    workflow.record_business_onboarding_address
   ]
 }
 
 actor "authenticated_user" {
-  title         = "Authenticated User"
   auth_required = true
 }
 
-bounded_context "user_onboarding" {
-  title = "User Onboarding"
+actor "system" {
+  auth_required = false
+}
+
+bounded_context "user" {
+  title       = "User"
+  description = "User onboarding, authentication and personal data. One module, several aggregates and streams."
+
+
+  aggregate "user_personal_data" {
+    title       = "User Personal Data"
+  }
+
+  event "user_personal_data_recorded" {
+    title       = "User Personal Data Recorded"
+    description = "A person's identifying data was recorded. Written only at user onboarding initiation."
+    aggregate   = aggregate.user_personal_data
+
+    field "name" {
+      type    = "String"
+      example = "Joe"
+      pii     = true
+    }
+
+    field "last_name" {
+      type    = "String"
+      example = "Bloggs"
+      pii     = true
+    }
+
+    field "email" {
+      type    = "String"
+      example = "joe@test.com"
+      pii     = true
+    }
+
+    field "is_email_verified" {
+      type    = "Boolean"
+      example = true
+    }
+  }
+
+  event "user_personal_data_erasure_requested" {
+    title       = "User Personal Data Erasure Requested"
+    description = "The person asked to be forgotten. The data is still readable until the request is applied, so the request can be canceled during the grace period."
+    aggregate   = aggregate.user_personal_data
+
+    field "reason_code" {
+      type    = "String"
+      example = "user_request"
+    }
+
+    field "erase_after_utc" {
+      type    = "DateTime"
+      example = "2026-11-16T00:00:00.000Z"
+    }
+  }
+
+  event "user_personal_data_erasure_canceled" {
+    title       = "User Personal Data Erasure Canceled"
+    description = "The person changed their mind before the erasure was applied. The personal data was never truncated."
+    aggregate   = aggregate.user_personal_data
+  }
+
+  event "user_personal_data_erasure_applied" {
+    title       = "User Personal Data Erasure Applied"
+    description = "The erasure was executed: user logins were released and the stream was truncated before UserPersonalDataErasureRequested. This event survives the truncation and is what read models use to anonymize."
+    aggregate   = aggregate.user_personal_data
+  }
+
+
+  field_type "linked_user_login" {
+    type = "Custom"
+  }
+
+  aggregate "user_login_claiming" {
+    title       = "User Login Claiming"
+  }
+
+  aggregate "user_login_linking" {
+    title       = "User Login Linking"
+    description = "Stream user_login_linking/{user_id}. Reverse index of the user logins linked to a user, used to release them all when the person is erased."
+  }
+
+  event "user_login_claimed" {
+    title       = "User Login Claimed"
+    description = "A user login was claimed by a user_id. This is the only lookup the token filter needs."
+    aggregate   = aggregate.user_login_claiming
+
+    field "user_id" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-000000000010"
+    }
+
+    field "user_onboarding_id" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-000000000001"
+    }
+  }
+
+  event "user_login_released" {
+    title       = "User Login Released"
+    description = "The user login no longer belongs to a user_id and can be claimed again."
+    aggregate   = aggregate.user_login_claiming
+
+    field "user_id" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-000000000010"
+    }
+  }
+
+  event "user_login_linked" {
+    title       = "User Login Linked"
+    description = "A user login was added to a user's index. Used for multi-login accounts."
+    aggregate   = aggregate.user_login_linking
+
+    field "user_login_key" {
+      type    = "String"
+      example = "5f0c2e..."
+    }
+
+    field "kind" {
+      type    = "String"
+      example = "oidc"
+    }
+
+    field "issuer" {
+      type    = "String"
+      example = "https://accounts.google.com"
+    }
+  }
+
+  event "user_login_unlinked" {
+    title       = "User Login Unlinked"
+    description = "A user login was removed from a user's index."
+    aggregate   = aggregate.user_login_linking
+
+    field "user_login_key" {
+      type    = "String"
+      example = "5f0c2e..."
+    }
+  }
+
 
   field_type "user" {
     type = "Custom"
@@ -40,63 +181,27 @@ bounded_context "user_onboarding" {
 
   aggregate "user_onboarding" {
     title       = "User Onboarding"
-    description = "Stream of events associated to a user onboarding process."
   }
 
-  aggregate "external_identity_claiming" {
-    title       = "External Identity Claiming"
-    description = "Stream of events associated to an external identity claiming process."
-  }
-
-  aggregate "alias_claiming" {
-    title       = "Alias Claiming"
-    description = "Stream of events associated to an alias claiming process."
+  aggregate "user_alias_claiming" {
+    title       = "User Alias Claiming"
+    description = "Stream user_alias_claiming/{alias}. An alias can belong to only one user at a time. Released aliases can be claimed again."
   }
 
   event "user_onboarding_initiated" {
     title       = "User Onboarding Initiated"
-    description = "A user onboarding process was initiated with a given external identity ID."
+    description = "A person started user onboarding. The user_onboarding_id is the stream id; the user_id identifies the person and is recorded once here."
     aggregate   = aggregate.user_onboarding
 
-    field "name" {
+    field "user_id" {
       type    = "String"
-      example = "Joe"
-    }
-
-    field "last_name" {
-      type    = "String"
-      example = "Bloggs"
-    }
-
-    field "email" {
-      type    = "String"
-      example = "joe@test.com"
-    }
-
-    field "is_email_verified" {
-      type    = "Boolean"
-      example = true
-    }
-
-    field "external_identity_id" {
-      type    = "String"
-      example = "abc123"
-    }
-
-    field "external_identity_provider" {
-      type    = "String"
-      example = "Google"
-    }
-
-    field "external_identity_issuer" {
-      type    = "String"
-      example = "https://accounts.google.com"
+      example = "00000000-0000-0000-0000-000000000010"
     }
   }
 
   event "user_onboarding_alias_chosen" {
     title       = "User Onboarding Alias Chosen"
-    description = "An alias was chosen for a given user onboarding."
+    description = "An alias was chosen for the user onboarding."
     aggregate   = aggregate.user_onboarding
 
     field "alias" {
@@ -107,83 +212,61 @@ bounded_context "user_onboarding" {
 
   event "user_onboarding_completed" {
     title       = "User Onboarding Completed"
-    description = "A given user onboarding was completed."
+    description = "The user onboarding was completed and the terms of service and privacy policy versions were accepted. Consent evidence must survive an erasure, so it lives here and not in user_personal_data."
     aggregate   = aggregate.user_onboarding
 
-    field "terms_and_conditions_version" {
+    field "terms_of_service_version" {
       type    = "String"
       example = "1.0.0"
     }
 
-    field "user_id" {
+    field "privacy_policy_version" {
       type    = "String"
-      example = "00000001-0000-0000-0000-000000000000"
+      example = "1.0.0"
     }
   }
 
   event "user_onboarding_canceled" {
     title       = "User Onboarding Canceled"
-    description = "A user onboarding was canceled."
+    description = "The user onboarding was canceled. Only a reason code is stored; free text is not allowed because it could contain PII."
     aggregate   = aggregate.user_onboarding
 
-    field "reason" {
+    field "reason_code" {
       type    = "String"
-      example = "Requested by user"
-    }
-  }
-
-  event "external_identity_claimed" {
-    title       = "External Identity Claimed"
-    description = "An external identity was claimed."
-    aggregate   = aggregate.external_identity_claiming
-
-    field "user_onboarding_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
+      example = "changed_mind"
     }
   }
 
   event "alias_claimed" {
     title       = "Alias Claimed"
-    description = "An alias was claimed during user onboarding."
-    aggregate   = aggregate.alias_claiming
+    description = "An alias was claimed by a user."
+    aggregate   = aggregate.user_alias_claiming
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
-    }
-  }
-
-
-  event "external_identity_released" {
-    title       = "External Identity Released"
-    description = "An external identity was released when its user onboarding was canceled."
-    aggregate   = aggregate.external_identity_claiming
-
-    field "user_onboarding_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
+      example = "00000000-0000-0000-0000-000000000010"
     }
   }
 
   event "alias_released" {
     title       = "Alias Released"
-    description = "An alias was released when its user onboarding was canceled."
-    aggregate   = aggregate.alias_claiming
+    description = "An alias was released by a user and can be claimed again."
+    aggregate   = aggregate.user_alias_claiming
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
+      example = "00000000-0000-0000-0000-000000000010"
     }
   }
 }
 
-bounded_context "business_onboarding" {
-  title = "Business Onboarding"
+bounded_context "business" {
+  title       = "Business"
+  description = "Business onboarding."
+
 
   aggregate "business_onboarding" {
     title       = "Business Onboarding"
-    description = "Stream of events associated to a business onboarding process."
   }
 
   event "business_onboarding_initiated" {
@@ -202,39 +285,6 @@ bounded_context "business_onboarding" {
     }
   }
 
-  event "business_onboarding_address_recorded" {
-    title       = "Business Onboarding Address Recorded"
-    description = "An address was recorded for a business onboarding."
-    aggregate   = aggregate.business_onboarding
 
-    field "line1" {
-      type    = "String"
-      example = "Avenida San Javier 67"
-    }
-
-    field "line2" {
-      type    = "String"
-      example = "Portal 15, 4ºF"
-    }
-
-    field "town_name" {
-      type    = "String"
-      example = "Málaga"
-    }
-
-    field "post_code" {
-      type    = "String"
-      example = "29140"
-    }
-
-    field "country_subdivision" {
-      type    = "String"
-      example = "Málaga"
-    }
-
-    field "country" {
-      type    = "String"
-      example = "ES"
-    }
-  }
 }
+

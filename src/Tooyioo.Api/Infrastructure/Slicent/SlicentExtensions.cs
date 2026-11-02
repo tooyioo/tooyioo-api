@@ -5,10 +5,11 @@ using Eventuous.Subscriptions.Registrations;
 using KurrentDB.Client;
 using Slicent;
 using Slicent.Application;
+using Tooyioo.Api.Infrastructure.Mongo;
 using Tooyioo.Api.Infrastructure.OpenApi;
-using Tooyioo.BusinessOnboarding.Features.Support;
+using Tooyioo.Api.Infrastructure.UserPersonalData;
+using Tooyioo.Business.Features.Support;
 using Tooyioo.User.Features.Support;
-using Tooyioo.UserOnboarding.Features.Support;
 
 namespace Tooyioo.Api.Infrastructure.Slicent;
 
@@ -47,6 +48,14 @@ public static class SlicentExtensions
 
         builder.Services.AddSlicentMongoDb(mongoDbOptions.MongoDb);
 
+        builder.Services.AddHostedService<MongoReadModelIndexInitializer>();
+
+        builder.Services
+            .AddOptions<UserPersonalDataErasureOptions>()
+            .BindConfiguration(UserPersonalDataErasureOptions.SectionName);
+
+        builder.Services.AddHostedService<UserPersonalDataErasureScheduler>();
+
         if (slicentOptions.EventStoreProvider is EventStoreProvider.InMemory)
         {
             return builder;
@@ -75,7 +84,7 @@ public static class SlicentExtensions
                         configureOptions.CheckpointInterval = 10;
                     })
                     .UseCheckpointStore<MongoCheckpointStore>()
-                    .AddEventHandler<UserOnboardingProjector>()
+                    .AddEventHandler<UserPersonalDataProjector>()
                     .AddEventHandler<UserProjector>()
                     .AddEventHandler<BusinessOnboardingProjector>());
             

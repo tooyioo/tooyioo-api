@@ -21,7 +21,10 @@ internal sealed class TestJwtBearerOptions(byte[] signingKey)
         options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
+            // Mirror the production issuer boundary: the parser reads raw iss/sub,
+            // so unsupported issuers must be rejected by JWT validation, not by the parser.
+            ValidateIssuer = true,
+            ValidIssuers = [GoogleIdentityTokenBuilder.Issuer],
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,

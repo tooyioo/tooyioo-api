@@ -1,6 +1,6 @@
 using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Auth;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Contracts;
+using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 

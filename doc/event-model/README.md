@@ -8,10 +8,10 @@ The model targets Event Modeling HCL v0.5.0 and requires `emhcl` 0.12.0 or newer
 
 - `00-catalog.em.hcl` contains the `board`, actors, and bounded contexts.
 - `00-chapters.em.hcl` contains chapter membership. Chapter list order is not story order; `board.workflows` sets the order used by the diagram. The viewer orders chapters by chapter ID; zero-padded prefixes such as `chapter_01`, `chapter_02`, ... keep the picker ordered past 10.
-- `00-hotspots.em.hcl` contains global hotspots.
-- `01-user_onboarding.em.hcl` through `04-business_onboarding.em.hcl` contain one chapter each, with its workflows in board order. The file prefix is for human navigation only; it does not define model order.
-- `04-business_onboarding.em.hcl` starts the Business Onboarding bounded context in Chapter 4.
-- `01-user_onboarding.em.hcl` contains the shared `Users` projection from `UserOnboardingCompleted`; the Chapter 3 directory queries in `03-user_directory.em.hcl` read that projection.
+- `01-user_onboarding.em.hcl` through `05-user_personal_data.em.hcl` contain one chapter each, with its workflows in board order. The file prefix is for human navigation only; it does not define model order.
+- `04-business_onboarding.em.hcl` starts the Business bounded context in Chapter 4.
+- `05-user_personal_data.em.hcl` contains the user personal data and erasure workflows in Chapter 5, including the scheduled apply automation.
+- `01-user_onboarding.em.hcl` contains the shared `Users` projection from the user onboarding and personal data events; the Chapter 3 directory queries in `03-user_directory.em.hcl` read that projection.
 
 `emhcl` treats all direct child `.em.hcl` files as one model; file names and block order no longer define story order. It ignores subfolders, so model files must stay directly in this folder; use `chapter` blocks for grouping. For an older v0.4.0 model, run `emhcl migrate -w <model-or-folder>` before validating.
 
@@ -27,13 +27,13 @@ Scenario IDs use zero-padded prefixes (`scenario_01`, `scenario_02`, ...). The v
 
 ## Screen fields
 
-A `screen` lists only fields the UI always needs. Persistence metadata such as `created_at`, `last_modified_at`, and `revision` stays in the read model. Internal ownership IDs such as `initiated_by` are read-model-only. State-specific details such as `completed_at`, `canceled_at`, and `cancellation_reason` also stay in the read model; screens show the current `status` instead.
+A `screen` lists only fields the UI always needs. Persistence metadata such as `created_at`, `last_modified_at`, and `revision` stays in the read model. Internal ownership IDs such as `initiated_by` are read-model-only. State-specific details such as `completed_at`, `canceled_at`, and `cancellation_reason_code` also stay in the read model; screens show the current `status` instead.
 
 ## Adding a chapter or workflow
 
 The model is a flat folder; EMHCL ignores subfolders. Keep the convention:
 
-- `00-*` are global files: catalog, chapters, and hotspots.
+- `00-*` are global files: catalog and chapters.
 - `NN-<chapter>.em.hcl` contains all workflows for chapter `NN`, in board order.
 - Current convention is one file per chapter, not one file per workflow.
 - File prefixes are for human navigation only; `board.workflows` and `chapter` define model order.

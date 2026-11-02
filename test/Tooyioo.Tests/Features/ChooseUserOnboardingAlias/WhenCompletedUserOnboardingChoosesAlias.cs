@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -38,12 +38,13 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
                 .Build(),
             DomainEvent.UserOnboardingCompleted()
                 .WithUserId(2.ToGuid().ToString())
-                .WithTermsAndConditionsVersion("v1")
+                .WithTermsOfServiceVersion("v1")
+                .WithPrivacyPolicyVersion("v1")
                 .Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_userOnboardingId)
                 .Build());
 
@@ -52,7 +53,7 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
             .CaptureSnapshot();
 
         _aliasClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
+            .Stream<UserAliasClaimingState, UserAliasClaimingId>(new UserAliasClaimingId(_alias))
             .CaptureSnapshot();
     }
 
@@ -88,6 +89,6 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
     [Test]
     public async Task Then_alias_claim_stream_has_no_new_events()
         => await Host.Events
-            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
+            .Stream<UserAliasClaimingState, UserAliasClaimingId>(new UserAliasClaimingId(_alias))
             .ShouldHaveNoChangesSince(_aliasClaimStreamBeforeWhen);
 }

@@ -1,12 +1,17 @@
+using Tooyioo.User.Contracts;
 using Eventuous;
 using Eventuous.Subscriptions;
 using Eventuous.Subscriptions.Context;
 using Eventuous.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
+using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.ReadModels;
+using Tooyioo.User;
+using Tooyioo.User.Features.Support;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Tooyioo.Tests.Support;
@@ -75,6 +80,7 @@ public sealed class VerticalSliceTestHost
         where TState : State<TState, TId>, new()
         where TId : Id
     {
+        events = NormalizeEvents(id, events);
         var stream = await EventStore.LoadStateOrNew<TState, TId>(id, CancellationToken.None);
         await EventStore.StoreStateChanges([stream.ToStateStreamChanges(events)], CancellationToken.None);
     }
@@ -93,6 +99,7 @@ public sealed class VerticalSliceTestHost
         where TState : State<TState, TId>, new()
         where TId : Id
     {
+        events = NormalizeEvents(id, events);
         var stream = await EventStore.LoadStateOrNew<TState, TId>(id, CancellationToken.None);
         var changes = stream.ToStateStreamChanges(events);
         await EventStore.StoreStateChanges([changes], CancellationToken.None);
@@ -123,6 +130,53 @@ public sealed class VerticalSliceTestHost
             _ = await projector.HandleEvent(context);
         }
     }
+
+    private static object[] NormalizeEvents<TId>(TId id, object[] events)
+        where TId : Id
+    {
+        if (id is not UserOnboardingId onboardingId)
+        {
+            return events;
+        }
+
+        return
+        [
+            .. events
+                .Select(evt => evt is UserOnboardingDomainEvents.V1.UserOnboardingInitiated initiated
+                               && string.IsNullOrWhiteSpace(initiated.UserId)
+                    ? new UserOnboardingDomainEvents.V1.UserOnboardingInitiated(onboardingId.Value)
+                    : evt)
+        ];
+    }
+
+    public Task GivenUserPersonalData(
+        UserOnboardingId userId,
+        string name = "Jane",
+        string lastName = "Bloggs",
+        string email = "jane.bloggs@test.com",
+        bool isEmailVerified = false)
+        => Given<UserPersonalDataState, UserPersonalDataId>(
+            new UserPersonalDataId(userId.Value),
+            DomainEvent.UserPersonalDataRecorded()
+                .WithName(name)
+                .WithLastName(lastName)
+                .WithEmail(email)
+                .WithIsEmailVerified(isEmailVerified)
+                .Build());
+
+    public async Task<TResult> SendCommand<TResult>(ICommand<TResult> command)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        return await dispatcher.Send(command, CancellationToken.None);
+    }
+
+    public Task GivenLinkedLogin(UserOnboardingId userId, string subject)
+        => Given<UserLoginLinkingState, UserLoginLinkingId>(
+            new UserLoginLinkingId(userId.Value),
+            DomainEvent.UserLoginLinked()
+                .WithUserLoginKey(subject)
+                .Build());
 
     public async ValueTask DisposeAsync()
     {

@@ -5,8 +5,8 @@ using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.RetrieveUser;
 
@@ -24,12 +24,12 @@ public sealed class WhenUserProfileIsNotProjected(MongoTestContainer mongoDb)
     protected override async Task Given()
     {
         _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
-        _userId = 2.ToGuid().ToString();
+        _userId = _userOnboardingId.Value;
         _subject = "google-sub-123";
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_userOnboardingId)
                 .Build());
 

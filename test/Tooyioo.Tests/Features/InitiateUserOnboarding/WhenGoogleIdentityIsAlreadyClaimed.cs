@@ -3,9 +3,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 
@@ -22,6 +22,8 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
     private string _email = null!;
     private EventStreamSnapshot _userOnboardingStreamBeforeWhen = null!;
     private EventStreamSnapshot _externalIdentityClaimStreamBeforeWhen = null!;
+    private EventStreamSnapshot _personalDataStreamBeforeWhen = null!;
+    private EventStreamSnapshot _userLoginLinkingStreamBeforeWhen = null!;
 
     protected override async Task Given()
     {
@@ -40,10 +42,20 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
                 .WithExternalIdentityId(_subject)
                 .Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_existingUserOnboardingId)
+                .Build());
+
+        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
+            new UserPersonalDataId(_existingUserOnboardingId.Value),
+            DomainEvent.UserPersonalDataRecorded().Build());
+
+        await Host.Given<UserLoginLinkingState, UserLoginLinkingId>(
+            new UserLoginLinkingId(_existingUserOnboardingId.Value),
+            DomainEvent.UserLoginLinked()
+                .WithUserLoginKey(_subject)
                 .Build());
 
         _userOnboardingStreamBeforeWhen = await Host.Events
@@ -51,8 +63,18 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
             .CaptureSnapshot();
 
         _externalIdentityClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-                new ClaimingExternalIdentityId(_subject))
+            .Stream<UserLoginClaimingState, UserLoginClaimingId>(
+                new UserLoginClaimingId(_subject))
+            .CaptureSnapshot();
+
+        _personalDataStreamBeforeWhen = await Host.Events
+            .Stream<UserPersonalDataState, UserPersonalDataId>(
+                new UserPersonalDataId(_existingUserOnboardingId.Value))
+            .CaptureSnapshot();
+
+        _userLoginLinkingStreamBeforeWhen = await Host.Events
+            .Stream<UserLoginLinkingState, UserLoginLinkingId>(
+                new UserLoginLinkingId(_existingUserOnboardingId.Value))
             .CaptureSnapshot();
     }
 
@@ -88,6 +110,20 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
     [Test]
     public async Task Then_external_identity_claim_stream_has_no_new_events()
         => await Host.Events
-            .Stream<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(new ClaimingExternalIdentityId(_subject))
+            .Stream<UserLoginClaimingState, UserLoginClaimingId>(new UserLoginClaimingId(_subject))
             .ShouldHaveNoChangesSince(_externalIdentityClaimStreamBeforeWhen);
+
+    [Test]
+    public async Task Then_personal_data_stream_has_no_new_events()
+        => await Host.Events
+            .Stream<UserPersonalDataState, UserPersonalDataId>(
+                new UserPersonalDataId(_existingUserOnboardingId.Value))
+            .ShouldHaveNoChangesSince(_personalDataStreamBeforeWhen);
+
+    [Test]
+    public async Task Then_user_login_linking_stream_has_no_new_events()
+        => await Host.Events
+            .Stream<UserLoginLinkingState, UserLoginLinkingId>(
+                new UserLoginLinkingId(_existingUserOnboardingId.Value))
+            .ShouldHaveNoChangesSince(_userLoginLinkingStreamBeforeWhen);
 }

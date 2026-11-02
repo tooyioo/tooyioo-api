@@ -4,7 +4,7 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.User.Features.RetrieveUsers.Contract;
-using Tooyioo.UserOnboarding;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.RetrieveUsers;
 
@@ -27,29 +27,29 @@ public sealed class WhenUsersAreFilteredByEmailVerification(MongoTestContainer m
         _janeSubject = "google-sub-jane";
         var johnSubject = "google-sub-john";
         var caseySubject = "google-sub-casey";
-        _johnUserId = "abcdef00-0000-0000-0000-000000000002";
+        _johnUserId = johnUserOnboardingId.Value;
 
-        await GivenExternalIdentityClaimingEvents(
+        await GivenUserLoginClaimingEvents(
             _janeSubject,
-            DomainEvent.ExternalIdentityClaimed()
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(janeUserOnboardingId)
                 .Build());
 
-        await GivenExternalIdentityClaimingEvents(
+        await GivenUserLoginClaimingEvents(
             johnSubject,
-            DomainEvent.ExternalIdentityClaimed()
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(johnUserOnboardingId)
                 .Build());
 
-        await GivenExternalIdentityClaimingEvents(
+        await GivenUserLoginClaimingEvents(
             caseySubject,
-            DomainEvent.ExternalIdentityClaimed()
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(caseyUserOnboardingId)
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
             janeUserOnboardingId,
-            DomainEvent.UserOnboardingInitiated()
+            DomainEvent.UserPersonalDataRecorded()
                 .WithName("Jane")
                 .WithLastName("Bloggs")
                 .WithEmail("jane.bloggs@test.com")
@@ -65,7 +65,7 @@ public sealed class WhenUsersAreFilteredByEmailVerification(MongoTestContainer m
 
         await GivenUserOnboardingEventsWereProjected(
             johnUserOnboardingId,
-            DomainEvent.UserOnboardingInitiated()
+            DomainEvent.UserPersonalDataRecorded()
                 .WithName("John")
                 .WithLastName("Smith")
                 .WithEmail("john.smith@test.com")
@@ -80,7 +80,7 @@ public sealed class WhenUsersAreFilteredByEmailVerification(MongoTestContainer m
 
         await GivenUserOnboardingEventsWereProjected(
             caseyUserOnboardingId,
-            DomainEvent.UserOnboardingInitiated()
+            DomainEvent.UserPersonalDataRecorded()
                 .WithName("Casey")
                 .WithLastName("Bloggins")
                 .WithEmail("casey.bloggins@test.com")

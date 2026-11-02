@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Slicent.Application;
-using Slicent.Application.Authorization;
 using Slicent.Application.Queries;
 using Tooyioo.Common;
 using Tooyioo.User.Features.RetrieveUsers.Contract;
@@ -27,6 +26,5 @@ public sealed class RetrieveUsersEndpoint
                     .WithDescription(
                         "Returns paginated users and supports filtering by profile, identity, email verification, and date ranges.")
                     .WithTags("users"))
-            .RequireRouteAuthorization<RetrieveUsersRoute, RetrieveUsersAuthorizer>()
             .WithQueryConventions<RetrieveUsersResponse, HttpProblemDetails>();
 }

@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -39,9 +39,9 @@ public sealed class WhenAnotherUserTriesToChooseAliasForUserOnboarding
                 .WithExternalIdentityId(_ownerSubject)
                 .Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_ownerSubject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_ownerSubject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_ownerUserOnboardingId)
                 .Build());
 
@@ -54,9 +54,9 @@ public sealed class WhenAnotherUserTriesToChooseAliasForUserOnboarding
                 .WithExternalIdentityId(_anotherSubject)
                 .Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_anotherSubject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_anotherSubject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_anotherUserOnboardingId)
                 .Build());
     }

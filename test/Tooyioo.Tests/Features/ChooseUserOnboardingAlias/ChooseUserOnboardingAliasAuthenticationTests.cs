@@ -1,8 +1,11 @@
+using System.Net;
+using Slicent.Application;
 using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Auth;
 using Tooyioo.Tests.Support.Extensions;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
+using Tooyioo.Tests.Support.Http;
+using Tooyioo.User;
+using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -30,4 +33,25 @@ public sealed class ChooseUserOnboardingAliasAuthenticationTests
 
         await authenticationScenario.ShouldHaveExpectedProblemDetails(response);
     }
+    [Test]
+    [Category(TestCategories.Authorization)]
+    public async Task Endpoint_rejects_authenticated_users_without_user_id()
+    {
+        await using var host = await VerticalSliceTestHost.Start();
+        var userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        var token = host.GoogleIdentityToken()
+            .WithSubject("google-sub-123")
+            .Build();
+
+        using var response = await host.HttpClient.PostJson(
+            $"/user-onboarding/{userOnboardingId.Value}/choose-alias",
+            new ChooseUserOnboardingAliasRequest { Alias = "jane-bloggs" },
+            token);
+
+        var body = await response.ReadJson<HttpProblemDetails>();
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Forbidden);
+        await Assert.That(body.Title).IsEqualTo("forbidden");
+    }
+
 }

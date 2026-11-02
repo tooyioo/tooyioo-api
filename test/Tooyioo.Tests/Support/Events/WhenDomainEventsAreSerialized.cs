@@ -1,11 +1,12 @@
 using Eventuous;
 using Microsoft.Extensions.DependencyInjection;
 using Slicent;
-using Tooyioo.UserOnboarding.Contracts;
-using static Tooyioo.BusinessOnboarding.Contracts.BusinessOnboardingDomainEvents.V1;
-using static Tooyioo.UserOnboarding.Contracts.UserAliasClaimingDomainEvents.V1;
-using static Tooyioo.UserOnboarding.Contracts.ExternalIdentityClaimingDomainEvents.V1;
-using static Tooyioo.UserOnboarding.Contracts.UserOnboardingDomainEvents.V1;
+using static Tooyioo.Business.Contracts.BusinessOnboardingDomainEvents.V1;
+using static Tooyioo.User.Contracts.UserLoginClaimingDomainEvents.V1;
+using static Tooyioo.User.Contracts.UserPersonalDataDomainEvents.V1;
+using static Tooyioo.User.Contracts.UserAliasClaimingDomainEvents.V1;
+using static Tooyioo.User.Contracts.UserLoginLinkingDomainEvents.V1;
+using static Tooyioo.User.Contracts.UserOnboardingDomainEvents.V1;
 
 namespace Tooyioo.Tests.Support.Events;
 
@@ -16,22 +17,29 @@ public sealed class WhenDomainEventsAreSerialized
     public async Task Then_user_onboarding_event_names_round_trips()
     {
         var services = new ServiceCollection();
-        services.AddSlicent(typeof(ContractsAssemblyMarker).Assembly);
+        services.AddSlicent(
+            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
+            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
+            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly);
         await using var provider = services.BuildServiceProvider();
         var serializer = provider.GetRequiredService<IEventSerializer>();
 
         (object Event, string Name)[] cases =
         [
-            (new UserOnboardingInitiated("Ada", "Lovelace", "ada@example.com", 
-                true, "google-1", "Google", "issuer"), 
-                "V1.UserOnboardingInitiated"),
+            (new UserOnboardingInitiated("user-1"), "V1.UserOnboardingInitiated"),
             (new UserOnboardingAliasChosen("ada"), "V1.UserOnboardingAliasChosen"),
-            (new UserOnboardingCompleted("user-1", "v1"), "V1.UserOnboardingCompleted"),
+            (new UserOnboardingCompleted("v1", "v1"), "V1.UserOnboardingCompleted"),
             (new UserOnboardingCanceled("requested"), "V1.UserOnboardingCanceled"),
-            (new UserAliasClaimed("onboarding-1"), "V1.UserAliasClaimed"),
-            (new UserAliasReleased("onboarding-1"), "V1.UserAliasReleased"),
-            (new ExternalIdentityClaimed("onboarding-1"), "V1.ExternalIdentityClaimed"),
-            (new ExternalIdentityReleased("onboarding-1"), "V1.ExternalIdentityReleased")
+            (new UserAliasClaimed("user-1"), "V1.UserAliasClaimed"),
+            (new UserAliasReleased("user-1"), "V1.UserAliasReleased"),
+            (new UserLoginClaimed("user-1", "onboarding-1"), "V1.UserLoginClaimed"),
+            (new UserLoginReleased("user-1"), "V1.UserLoginReleased"),
+            (new UserLoginLinked("credential-key", "oidc", "https://accounts.google.com"), "V1.UserLoginLinked"),
+            (new UserLoginUnlinked("credential-key"), "V1.UserLoginUnlinked"),
+            (new UserPersonalDataRecorded("Ada", "Lovelace", "ada@example.com", true), "V1.UserPersonalDataRecorded"),
+            (new UserPersonalDataErasureRequested("user_request", DateTime.UtcNow), "V1.UserPersonalDataErasureRequested"),
+            (new UserPersonalDataErasureCanceled(), "V1.UserPersonalDataErasureCanceled"),
+            (new UserPersonalDataErasureApplied(), "V1.UserPersonalDataErasureApplied")
         ];
 
         foreach (var (evt, name) in cases)
@@ -49,24 +57,14 @@ public sealed class WhenDomainEventsAreSerialized
     public async Task Then_business_onboarding_event_names_round_trip()
     {
         var services = new ServiceCollection();
-        services.AddSlicent(typeof(Tooyioo.BusinessOnboarding.Contracts.ContractsAssemblyMarker).Assembly);
+        services.AddSlicent(typeof(Tooyioo.Business.Contracts.ContractsAssemblyMarker).Assembly);
         await using var provider = services.BuildServiceProvider();
         var serializer = provider.GetRequiredService<IEventSerializer>();
 
         (object Event, string Name)[] cases =
         [
-            (new BusinessOnboardingInitiated("Acme Ltd", "user-1"), 
-                "V1.BusinessOnboardingInitiated"),
-            (new BusinessOnboardingAddressRecorded("1 Main St", "Unit 2", "Madrid", "28001", "Madrid", "Spain"), 
-                "V1.BusinessOnboardingAddressRecorded"),
-            (new BusinessOnboardingTaxDetailsRecorded("B12345678"), 
-                "V1.BusinessOnboardingTaxDetailsRecorded"),
-            (new BusinessOnboardingContactDetailsRecorded("hello@acme.test", "+34600000000", "https://acme.test"),
-                "V1.BusinessOnboardingContactDetailsRecorded"),
-            (new BusinessOnboardingCompleted("business-1", "v1"), 
-                "V1.BusinessOnboardingCompleted"),
-            (new BusinessOnboardingCanceled("requested"), 
-                "V1.BusinessOnboardingCanceled")
+            (new BusinessOnboardingInitiated("Acme Ltd", "user-1"),
+                "V1.BusinessOnboardingInitiated")
         ];
 
         foreach (var (evt, name) in cases)
@@ -84,25 +82,19 @@ public sealed class WhenDomainEventsAreSerialized
     public async Task Then_existing_web_json_is_readable()
     {
         var services = new ServiceCollection();
-        services.AddSlicent(typeof(ContractsAssemblyMarker).Assembly);
+        services.AddSlicent(
+            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
+            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
+            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly);
         await using var provider = services.BuildServiceProvider();
         var serializer = provider.GetRequiredService<IEventSerializer>();
         var payload = """
-                      {"name":"Ada","lastName":"Lovelace","email":"ada@example.com",
-                      "isEmailVerified":true,"externalIdentityId":"google-1",
-                      "externalIdentityProvider":"Google","externalIdentityIssuer":"issuer"}
+                      {"name":"Ada","lastName":"Lovelace","email":"ada@example.com","isEmailVerified":true}
                       """u8.ToArray();
 
-        var read = serializer.DeserializeEvent(payload, "V1.UserOnboardingInitiated", "application/json");
+        var read = serializer.DeserializeEvent(payload, "V1.UserPersonalDataRecorded", "application/json");
 
         await Assert.That(((DeserializationResult.SuccessfullyDeserialized)read).Payload)
-            .IsEqualTo(new UserOnboardingInitiated(
-                "Ada", 
-                "Lovelace", 
-                "ada@example.com", 
-                true, 
-                "google-1", 
-                "Google", 
-                "issuer"));
+            .IsEqualTo(new UserPersonalDataRecorded("Ada", "Lovelace", "ada@example.com", true));
     }
 }

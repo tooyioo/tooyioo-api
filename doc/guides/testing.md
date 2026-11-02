@@ -26,9 +26,13 @@ They should avoid production infrastructure unless the infrastructure itself is 
 
 `Host.Given` writes events to the in-memory event store. It does **not** run subscriptions or projectors; the read model stays absent unless the test projects it.
 
+`InMemoryEventStore.TruncateStream` removes the event at the truncate position, while KurrentDB's `$tb` keeps it. Do not assert production truncation semantics against the in-memory store; use a KurrentDB integration test for that.
+
 `Host.GivenAndProject<TProjector>` writes the events and explicitly runs the projector.
 
-Auth in the test host resolves app-owned claims from the event store. A query test that needs `user_id` or `user_onboarding_id` must set up the corresponding events even when it intentionally leaves the read model absent. With no events, the request is rejected with `403` before the query can return `404`.
+Auth in the test host resolves the app-owned `user_id` from the `user_login_claiming` stream. A query test that needs `user_id` must set up the user login claim event even when it intentionally leaves the read model absent. With no events, the request is rejected with `403` before the query can return `404`.
+
+The test host replaces `IUserLoginKeyFactory` with a fake that uses the subject itself as the user login key, so tests do not depend on the HMAC pepper. Seed the user login index and the user personal data record with `Host.GivenLinkedLogin` and `Host.GivenUserPersonalData`.
 
 ## Scenario traceability
 
@@ -52,6 +56,8 @@ The host uses the real API `Program.cs` through `WebApplicationFactory`, then ov
 - MongoDB is replaced enough for service registration to validate
 - hosted background services are removed
 - JWT bearer validation is replaced with a test signing key
+
+Each test host creates a physical file watcher for the API appsettings files. The test assembly sets `DOTNET_USE_POLLING_FILE_WATCHER=1` at startup so the suite does not exhaust the Linux inotify instance limit as hosts are created.
 
 The test factory sets `Slicent:EventStoreProvider` to `InMemory` in host configuration before `Program` executes. This avoids registering the KurrentDB client and hosted read-model subscription. MongoDB remains independently configured: query tests provide a real test database, while command tests do not use it. The `Testing` environment alone does not change the default `KurrentDb` event-store provider, so it remains available for local runs that use real Aspire infrastructure.
 
@@ -98,7 +104,7 @@ public sealed class WhenGoogleIdentityIsUnknown : CommandVerticalSliceTest
 
 Use `GoogleIdentityTokenBuilder` to create signed JWTs.
 
-The test JWT is real and signed, but tests do not validate Google issuer metadata or production audience. The test setup keeps signing key and lifetime validation enabled.
+The test JWT is real and signed, but tests do not validate Google issuer metadata or production audience. The test setup keeps signing key and lifetime validation enabled, and validates the issuer against the test issuer so unsupported-issuer scenarios exercise the same boundary as production. The parser only reads the raw `iss` and `sub` claims.
 
 JWT claims should stay honest. If the slice needs personal details from an identity token, read them from `ClaimsPrincipal`; do not create side-channel test-only services for the same data.
 

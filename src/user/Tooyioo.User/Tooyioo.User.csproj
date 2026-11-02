@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -8,14 +8,19 @@
         <LangVersion>latest</LangVersion>
         <!--XML Comments for OpenAPI-->
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <NoWarn>$(NoWarn);1591</NoWarn>
+        <!--
+            Slicent uses its own [DomainEventType] marker and a per-container TypeMapper.
+            Eventuous's EVTC001 only understands [EventType] or a local TypeMapper.AddType call,
+            so it reports a false positive for events declared in the Contracts assemblies.
+        -->
+        <NoWarn>$(NoWarn);1591;EVTC001</NoWarn>
         <!--End of XML Comments for OpenAPI-->
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Slicent\Slicent.csproj" />
         <ProjectReference Include="..\..\Tooyioo.Common\Tooyioo.Common.csproj" />
-        <ProjectReference Include="..\..\user-onboarding\Tooyioo.UserOnboarding.Contracts\Tooyioo.UserOnboarding.Contracts.csproj" />
+        <ProjectReference Include="..\Tooyioo.User.Contracts\Tooyioo.User.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

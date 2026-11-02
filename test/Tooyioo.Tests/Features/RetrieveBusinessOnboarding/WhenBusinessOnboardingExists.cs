@@ -1,15 +1,15 @@
 using System.Net;
-using Tooyioo.BusinessOnboarding;
-using Tooyioo.BusinessOnboarding.Features.RetrieveBusinessOnboarding.Contracts;
-using Tooyioo.BusinessOnboarding.Features.Support;
+using Tooyioo.Business;
+using Tooyioo.Business.Features.RetrieveBusinessOnboarding.Contracts;
+using Tooyioo.Business.Features.Support;
 using Tooyioo.Common;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.RetrieveBusinessOnboarding;
 
@@ -31,13 +31,13 @@ public sealed class WhenBusinessOnboardingExists(MongoTestContainer mongoDb)
     {
         _businessOnboardingId = new BusinessOnboardingId(1.ToGuid().ToString());
         _userOnboardingId = new UserOnboardingId(2.ToGuid().ToString());
-        _userId = 3.ToGuid().ToString();
+        _userId = _userOnboardingId.Value;
         _subject = "google-sub-123";
         _legalName = "Acme Ltd";
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_userOnboardingId)
                 .Build());
 
@@ -98,11 +98,5 @@ public sealed class WhenBusinessOnboardingExists(MongoTestContainer mongoDb)
         await Assert.That(_body.LastModifiedAt).IsEqualTo(_createdAtUtc);
     }
 
-    [Test]
-    public async Task Then_response_has_no_terminal_dates()
-    {
-        await Assert.That(_body.CompletedAt).IsNull();
-        await Assert.That(_body.CanceledAt).IsNull();
-        await Assert.That(_body.CancellationReason).IsNull();
-    }
+
 }

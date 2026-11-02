@@ -3,9 +3,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.ChooseUserOnboardingAlias.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -42,9 +42,9 @@ public sealed class WhenUserOnboardingAliasIsAvailable
                 .WithExternalIdentityId(_subject)
                 .Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_userOnboardingId)
                 .Build());
 
@@ -53,7 +53,7 @@ public sealed class WhenUserOnboardingAliasIsAvailable
             .CaptureSnapshot();
 
         _aliasClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
+            .Stream<UserAliasClaimingState, UserAliasClaimingId>(new UserAliasClaimingId(_alias))
             .CaptureSnapshot();
     }
 
@@ -81,6 +81,10 @@ public sealed class WhenUserOnboardingAliasIsAvailable
         => await Assert.That(_body.UserOnboardingId).IsEqualTo(_userOnboardingId.Value);
 
     [Test]
+    public async Task Then_response_returns_user_id()
+        => await Assert.That(Guid.TryParse(_body.UserId, out _)).IsTrue();
+
+    [Test]
     public async Task Then_user_onboarding_alias_is_chosen()
         => await Host.Events
             .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
@@ -93,7 +97,7 @@ public sealed class WhenUserOnboardingAliasIsAvailable
     [Test]
     public async Task Then_user_alias_is_claimed()
         => await Host.Events
-            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
+            .Stream<UserAliasClaimingState, UserAliasClaimingId>(new UserAliasClaimingId(_alias))
             .ShouldAppendExactly(
                 _aliasClaimStreamBeforeWhen,
                 DomainEvent.UserAliasClaimed()

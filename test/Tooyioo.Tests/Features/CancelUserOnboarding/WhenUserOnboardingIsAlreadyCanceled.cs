@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.CancelUserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.CancelUserOnboarding.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.CancelUserOnboarding;
 
@@ -35,13 +35,13 @@ public sealed class WhenUserOnboardingIsAlreadyCanceled
             DomainEvent.UserOnboardingAliasChosen().WithAlias(_alias).Build(),
             DomainEvent.UserOnboardingCanceled().Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed().WithUserOnboardingId(_userOnboardingId).Build(),
-            DomainEvent.ExternalIdentityReleased().WithUserOnboardingId(_userOnboardingId).Build());
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed().WithUserOnboardingId(_userOnboardingId).Build(),
+            DomainEvent.UserLoginReleased().WithUserOnboardingId(_userOnboardingId).Build());
 
-        await Host.Given<ClaimingUserAliasState, ClaimingUserAliasId>(
-            new ClaimingUserAliasId(_alias),
+        await Host.Given<UserAliasClaimingState, UserAliasClaimingId>(
+            new UserAliasClaimingId(_alias),
             DomainEvent.UserAliasClaimed().WithUserOnboardingId(_userOnboardingId).Build(),
             DomainEvent.UserAliasReleased().WithUserOnboardingId(_userOnboardingId).Build());
 
@@ -50,11 +50,11 @@ public sealed class WhenUserOnboardingIsAlreadyCanceled
             .CaptureSnapshot();
 
         _externalIdentityClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(new ClaimingExternalIdentityId(_subject))
+            .Stream<UserLoginClaimingState, UserLoginClaimingId>(new UserLoginClaimingId(_subject))
             .CaptureSnapshot();
 
         _aliasClaimStreamBeforeWhen = await Host.Events
-            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
+            .Stream<UserAliasClaimingState, UserAliasClaimingId>(new UserAliasClaimingId(_alias))
             .CaptureSnapshot();
     }
 
@@ -66,7 +66,7 @@ public sealed class WhenUserOnboardingIsAlreadyCanceled
 
         _response = await Host.HttpClient.PostJson(
             $"/user-onboarding/{_userOnboardingId.Value}/cancel",
-            new CancelUserOnboardingRequest { Reason = "Retry" },
+            new CancelUserOnboardingRequest { ReasonCode = "Retry" },
             token);
 
         _body = await _response.ReadJson<HttpProblemDetails>();
@@ -89,12 +89,12 @@ public sealed class WhenUserOnboardingIsAlreadyCanceled
     [Test]
     public async Task Then_external_identity_claim_stream_has_no_new_events()
         => await Host.Events
-            .Stream<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(new ClaimingExternalIdentityId(_subject))
+            .Stream<UserLoginClaimingState, UserLoginClaimingId>(new UserLoginClaimingId(_subject))
             .ShouldHaveNoChangesSince(_externalIdentityClaimStreamBeforeWhen);
 
     [Test]
     public async Task Then_user_alias_claim_stream_has_no_new_events()
         => await Host.Events
-            .Stream<ClaimingUserAliasState, ClaimingUserAliasId>(new ClaimingUserAliasId(_alias))
+            .Stream<UserAliasClaimingState, UserAliasClaimingId>(new UserAliasClaimingId(_alias))
             .ShouldHaveNoChangesSince(_aliasClaimStreamBeforeWhen);
 }

@@ -2,7 +2,7 @@
 
 state_change "cancel_user_onboarding" {
   title       = "Cancel User Onboarding"
-  description = "POST /user-onboarding/{id}/cancel cancels an in-progress user onboarding. It writes the User Onboarding and External Identity Claiming streams, and also writes Alias Claiming when the user onboarding has an alias. Completed or unknown user onboardings cannot be canceled."
+  description = "POST /user-onboarding/{user_onboarding_id}/cancel. Cancels an in-progress onboarding, releases its user login and alias, and requests an immediate personal data erasure. Completed or unknown user onboardings cannot be canceled."
   status      = "done"
 
   screen "cancel_user_onboarding_ui" {
@@ -16,24 +16,31 @@ state_change "cancel_user_onboarding" {
       example      = "00000000-0000-0000-0000-000000000001"
     }
 
-    field "reason" {
+    field "reason_code" {
       type    = "String"
-      example = "Changed mind"
+      example = "changed_mind"
     }
   }
 
   command "cancel_user_onboarding" {
     title       = "Cancel User Onboarding"
-    description = "Cancels an in-progress user onboarding and releases its external identity and any alias claim."
-    aggregate   = aggregate.user_onboarding.user_onboarding
+    description = "Cancels an in-progress onboarding, releases its user login and alias, and requests an immediate personal data erasure in one atomic multi-stream append."
+    aggregate   = aggregate.user.user_onboarding
+    api_endpoint = "POST /user-onboarding/{user_onboarding_id}/cancel"
+
     aggregate_dependencies = [
-      aggregate.user_onboarding.external_identity_claiming,
-      aggregate.user_onboarding.alias_claiming,
+      aggregate.user.user_login_claiming,
+      aggregate.user.user_login_linking,
+      aggregate.user.user_alias_claiming,
+      aggregate.user.user_personal_data,
     ]
+
     to = [
-      event.user_onboarding.user_onboarding_canceled,
-      event.user_onboarding.external_identity_released,
-      event.user_onboarding.alias_released,
+      event.user.user_onboarding_canceled,
+      event.user.user_login_released,
+      event.user.user_login_unlinked,
+      event.user.alias_released,
+      event.user.user_personal_data_erasure_requested,
     ]
 
     field "user_onboarding_id" {
@@ -42,9 +49,9 @@ state_change "cancel_user_onboarding" {
       example      = "00000000-0000-0000-0000-000000000001"
     }
 
-    field "reason" {
+    field "reason_code" {
       type    = "String"
-      example = "Changed mind"
+      example = "changed_mind"
     }
   }
 
@@ -53,12 +60,17 @@ state_change "cancel_user_onboarding" {
 
     given {
       title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
+      event = event.user.user_onboarding_initiated
     }
 
     given {
-      title = "The external identity was claimed"
-      event = event.user_onboarding.external_identity_claimed
+      title = "The user login was claimed"
+      event = event.user.user_login_claimed
+    }
+
+    given {
+      title = "The user login is linked to the user"
+      event = event.user.user_login_linked
     }
 
     when {
@@ -68,12 +80,26 @@ state_change "cancel_user_onboarding" {
 
     then {
       title = "The user onboarding is canceled"
-      event = event.user_onboarding.user_onboarding_canceled
+      event = event.user.user_onboarding_canceled
     }
 
     then {
-      title = "The external identity is released"
-      event = event.user_onboarding.external_identity_released
+      title = "The user login is released"
+      event = event.user.user_login_released
+    }
+
+    then {
+      title = "The user login is unlinked"
+      event = event.user.user_login_unlinked
+    }
+
+    then {
+      title = "The personal data erasure is requested"
+      event = event.user.user_personal_data_erasure_requested
+    }
+
+    comment {
+      description = "The cancellation, the user login release/unlink and the erasure request are appended atomically. The erasure request has an immediate due date; the scheduled erasure processor applies it."
     }
   }
 
@@ -82,22 +108,27 @@ state_change "cancel_user_onboarding" {
 
     given {
       title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
+      event = event.user.user_onboarding_initiated
     }
 
     given {
-      title = "The external identity was claimed"
-      event = event.user_onboarding.external_identity_claimed
+      title = "The user login was claimed"
+      event = event.user.user_login_claimed
+    }
+
+    given {
+      title = "The user login is linked to the user"
+      event = event.user.user_login_linked
     }
 
     given {
       title = "An alias was chosen for the user onboarding"
-      event = event.user_onboarding.user_onboarding_alias_chosen
+      event = event.user.user_onboarding_alias_chosen
     }
 
     given {
       title = "The alias was claimed"
-      event = event.user_onboarding.alias_claimed
+      event = event.user.alias_claimed
     }
 
     when {
@@ -107,21 +138,31 @@ state_change "cancel_user_onboarding" {
 
     then {
       title = "The user onboarding is canceled"
-      event = event.user_onboarding.user_onboarding_canceled
+      event = event.user.user_onboarding_canceled
     }
 
     then {
-      title = "The external identity is released"
-      event = event.user_onboarding.external_identity_released
+      title = "The user login is released"
+      event = event.user.user_login_released
+    }
+
+    then {
+      title = "The user login is unlinked"
+      event = event.user.user_login_unlinked
     }
 
     then {
       title = "The alias is released"
-      event = event.user_onboarding.alias_released
+      event = event.user.alias_released
+    }
+
+    then {
+      title = "The personal data erasure is requested"
+      event = event.user.user_personal_data_erasure_requested
     }
 
     comment {
-      description = "The cancellation and both claim releases are appended atomically."
+      description = "The cancellation, the user login release/unlink and the alias release and the erasure request are appended atomically. Repeating the public request is not idempotent because the released user login no longer resolves the user."
     }
   }
 
@@ -130,12 +171,12 @@ state_change "cancel_user_onboarding" {
 
     given {
       title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
+      event = event.user.user_onboarding_initiated
     }
 
     given {
       title = "The user onboarding was completed"
-      event = event.user_onboarding.user_onboarding_completed
+      event = event.user.user_onboarding_completed
     }
 
     when {
@@ -153,7 +194,7 @@ state_change "cancel_user_onboarding" {
     title = "A user onboarding that does not exist cannot be canceled"
 
     when {
-      title   = "Attempt to cancel an unknown user onboarding ID"
+      title   = "Attempt to cancel an unknown user_id"
       command = command.cancel_user_onboarding
     }
 
@@ -162,193 +203,23 @@ state_change "cancel_user_onboarding" {
       error = "onboarding_state_unexpected"
     }
   }
-}
 
-state_view "retrieve_user_onboarding_after_cancellation" {
-  title       = "Retrieve User Onboarding After Cancellation"
-  description = "GET /user-onboarding/{id} returns the persisted User Onboarding projection after cancellation. The read model's id and the screen's user_onboarding_id identify the same user onboarding."
-  status      = "done"
-
-  readmodel "user_onboarding" {
-    title       = "User Onboarding"
-    description = "Persistent User Onboarding read model assembled from user onboarding events, including cancellation status and reason. It is exposed by GET /user-onboarding/{id} and returns one user onboarding; it is not paginated."
-    question    = "What is the state of this canceled user onboarding?"
-    from = [
-      event.user_onboarding.user_onboarding_initiated,
-      event.user_onboarding.user_onboarding_alias_chosen,
-      event.user_onboarding.user_onboarding_canceled,
-    ]
-    to = [screen.retrieve_user_onboarding_ui]
-
-    field "id" {
-      type         = "String"
-      id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "name" {
-      type    = "String"
-      example = "Joe"
-    }
-
-    field "last_name" {
-      type    = "String"
-      example = "Bloggs"
-    }
-
-    field "email" {
-      type    = "String"
-      example = "joe@test.com"
-    }
-
-    field "is_email_verified" {
-      type    = "Boolean"
-      example = true
-    }
-
-    field "alias" {
-      type     = "String"
-      optional = true
-      example  = "joe-1984"
-    }
-
-    field "external_identity_id" {
-      type    = "String"
-      example = "abc123"
-    }
-
-    field "external_identity_provider" {
-      type    = "String"
-      example = "Google"
-    }
-
-    field "external_identity_issuer" {
-      type    = "String"
-      example = "https://accounts.google.com"
-    }
-
-    field "status" {
-      type    = "String"
-      example = "canceled"
-    }
-
-    field "completed_at" {
-      type     = "DateTime"
-      optional = true
-      example  = null
-    }
-
-    field "canceled_at" {
-      type     = "DateTime"
-      optional = true
-      example  = "2026-01-01T00:10:00.123Z"
-    }
-
-    field "cancellation_reason" {
-      type     = "String"
-      optional = true
-      example  = "Changed mind"
-    }
-
-    field "created_at" {
-      type    = "DateTime"
-      example = "2026-01-01T00:00:00.123Z"
-    }
-
-    field "last_modified_at" {
-      type    = "DateTime"
-      example = "2026-01-01T00:10:00.123Z"
-    }
-
-    field "revision" {
-      type    = "Long"
-      example = 2
-    }
-  }
-
-  screen "retrieve_user_onboarding_ui" {
-    title = "User Onboarding"
-    actor = actor.authenticated_user
-
-    field "user_onboarding_id" {
-      type         = "String"
-      id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "name" {
-      type    = "String"
-      example = "Joe"
-    }
-
-    field "last_name" {
-      type    = "String"
-      example = "Bloggs"
-    }
-
-    field "email" {
-      type    = "String"
-      example = "joe@test.com"
-    }
-
-    field "is_email_verified" {
-      type    = "Boolean"
-      example = true
-    }
-
-    field "alias" {
-      type     = "String"
-      optional = true
-      example  = "joe-1984"
-    }
-
-    field "status" {
-      type    = "String"
-      example = "canceled"
-    }
-
-  }
-
-  scenario "scenario_01_canceled_user_onboarding_without_alias_is_retrieved" {
-    title = "Canceled user onboarding view without an alias"
+  scenario "scenario_05_user_onboarding_is_canceled_concurrently" {
+    title = "Another request changes the onboarding first"
 
     given {
       title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
+      event = event.user.user_onboarding_initiated
     }
 
-    given {
-      title = "The user onboarding was canceled"
-      event = event.user_onboarding.user_onboarding_canceled
-    }
-
-    then {
-      title     = "The view shows canceled status and cancellation details"
-      readmodel = readmodel.user_onboarding
-    }
-  }
-
-  scenario "scenario_02_canceled_user_onboarding_with_alias_is_retrieved" {
-    title = "Canceled user onboarding view after choosing an alias"
-
-    given {
-      title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
-    }
-
-    given {
-      title = "An alias was chosen"
-      event = event.user_onboarding.user_onboarding_alias_chosen
-    }
-
-    given {
-      title = "The user onboarding was canceled"
-      event = event.user_onboarding.user_onboarding_canceled
+    when {
+      title   = "Cancel the user onboarding while another request changes it"
+      command = command.cancel_user_onboarding
     }
 
     then {
-      title     = "The view retains the alias and shows canceled status and cancellation details"
-      readmodel = readmodel.user_onboarding
+      title = "This attempt conflicts because the onboarding changed before cancellation was saved"
+      error = "concurrent_update"
     }
   }
 }

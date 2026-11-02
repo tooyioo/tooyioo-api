@@ -12,15 +12,17 @@ var sliceAssemblies =
     new[]
     {
         typeof(Tooyioo.User.SliceAssemblyMarker).Assembly,
-        typeof(Tooyioo.UserOnboarding.SliceAssemblyMarker).Assembly,
-        typeof(Tooyioo.BusinessOnboarding.SliceAssemblyMarker).Assembly
+        typeof(Tooyioo.User.SliceAssemblyMarker).Assembly,
+        typeof(Tooyioo.Business.SliceAssemblyMarker).Assembly
     };
 
 var domainEventAssemblies =
     new[]
     {
-        typeof(Tooyioo.UserOnboarding.Contracts.ContractsAssemblyMarker).Assembly,
-        typeof(Tooyioo.BusinessOnboarding.Contracts.ContractsAssemblyMarker).Assembly
+        typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
+        
+        typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
+        typeof(Tooyioo.Business.Contracts.ContractsAssemblyMarker).Assembly
     };
 
 var allAssemblies = sliceAssemblies.Concat(domainEventAssemblies).ToArray();

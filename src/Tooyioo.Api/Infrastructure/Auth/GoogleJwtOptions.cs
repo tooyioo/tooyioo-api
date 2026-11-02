@@ -8,4 +8,7 @@ public sealed class GoogleJwtOptions
 
     [Required]
     public string ClientId { get; init; } = string.Empty;
+
+    [Required]
+    public string Issuer { get; init; } = string.Empty;
 }

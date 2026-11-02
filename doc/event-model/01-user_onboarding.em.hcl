@@ -2,36 +2,43 @@
 
 state_change "initiate_user_onboarding" {
   title       = "Initiate User Onboarding"
-  description = "POST /user-onboarding/initiate starts a user onboarding for an unclaimed external identity and claims the identity. It writes the User Onboarding and External Identity Claiming streams in one operation. A retry with an already claimed identity returns the existing user onboarding ID without appending events."
+  description = "POST /user-onboarding/initiate. Resolves the user login, mints a user_onboarding_id and a user_id, records the person's PII, links and claims the user login, and starts the onboarding process in one atomic multi-stream append. A retry with an already claimed user login returns the existing ids and appends nothing."
   status      = "done"
 
   screen "initiate_user_onboarding_ui" {
-    title = "Choose an Identity Provider"
+    title = "Initiate User Onboarding"
     actor = actor.authenticated_user
     to    = [command.initiate_user_onboarding]
-
-    field "external_identity_provider" {
-      type    = "String"
-      example = "Google"
-    }
   }
 
   command "initiate_user_onboarding" {
     title       = "Initiate User Onboarding"
-    description = "Personal details and external identity details are extracted from the id_token issued by the selected external_identity_provider. The external identity is used to look up Claimed Identity. If already claimed, the existing user onboarding is returned without appending events; otherwise a user onboarding is initiated and the identity is claimed."
-    aggregate   = aggregate.user_onboarding.user_onboarding
+    description = "Generates the user_onboarding_id and user_id in the mapper, derives user_login_key = HMAC(pepper, kind|issuer|subject) and writes personal data, the user login link, the user login claim and the onboarding initiation atomically."
+    aggregate   = aggregate.user.user_onboarding
+    api_endpoint = "POST /user-onboarding/initiate"
+
     aggregate_dependencies = [
-      aggregate.user_onboarding.external_identity_claiming,
+      aggregate.user.user_personal_data,
+      aggregate.user.user_login_linking,
+      aggregate.user.user_login_claiming,
     ]
+
     to = [
-      event.user_onboarding.user_onboarding_initiated,
-      event.user_onboarding.external_identity_claimed,
+      event.user.user_personal_data_recorded,
+      event.user.user_login_linked,
+      event.user.user_login_claimed,
+      event.user.user_onboarding_initiated,
     ]
 
     field "user_onboarding_id" {
       type         = "String"
       id_attribute = true
       example      = "00000000-0000-0000-0000-000000000001"
+    }
+
+    field "user_id" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-000000000010"
     }
 
     field "name" {
@@ -54,220 +61,247 @@ state_change "initiate_user_onboarding" {
       example = true
     }
 
-    field "external_identity_id" {
-      type         = "String"
-      id_attribute = true
-      example      = "abc123"
-    }
-
-    field "external_identity_provider" {
+    field "user_login_key" {
       type    = "String"
-      example = "Google"
+      example = "5f0c2e..."
     }
 
-    field "external_identity_issuer" {
+    field "kind" {
+      type    = "String"
+      example = "oidc"
+    }
+
+    field "issuer" {
       type    = "String"
       example = "https://accounts.google.com"
     }
   }
 
-  scenario "scenario_01_google_user_onboarding_is_initiated_with_unclaimed_external_identity" {
-    title = "The user chooses Google to begin user onboarding with an unclaimed external identity"
+  scenario "scenario_01_user_onboarding_is_initiated_with_an_unclaimed_user_login" {
+    title = "Start user onboarding with an unclaimed user login"
 
     when {
-      title   = "Initiate user onboarding with the external identity returned by Google"
+      title   = "Initiate user onboarding with the identity returned by Google"
       command = command.initiate_user_onboarding
+    }
+
+    then {
+      title = "The personal data is recorded"
+      event = event.user.user_personal_data_recorded
+    }
+
+    then {
+      title = "The user login is linked to the user"
+      event = event.user.user_login_linked
+    }
+
+    then {
+      title = "The user login is claimed"
+      event = event.user.user_login_claimed
     }
 
     then {
       title = "The user onboarding is initiated"
-      event = event.user_onboarding.user_onboarding_initiated
-    }
-
-    then {
-      title = "The external identity is claimed"
-      event = event.user_onboarding.external_identity_claimed
+      event = event.user.user_onboarding_initiated
     }
 
     comment {
-      description = "When the user initiates user onboarding with a valid external identity that has not been claimed, the system creates the user onboarding and claims the identity. It appends UserOnboardingInitiated and ExternalIdentityClaimed."
+      description = "All four streams are appended atomically with expected versions, so a person never exists without personal data, a user login link and an onboarding process."
     }
   }
 
-  scenario "scenario_02_external_identity_is_claimed_concurrently" {
-    title = "Another request claims the identity first"
+  scenario "scenario_03_released_user_login_is_claimed_again" {
+    title = "A released user login starts a new user"
+
+    given {
+      title = "The user login was claimed by a previous user"
+      event = event.user.user_login_claimed
+    }
+
+    given {
+      title = "The user login was released"
+      event = event.user.user_login_released
+    }
 
     when {
-      title   = "Initiate another user onboarding for the given external identity"
+      title   = "Initiate user onboarding with the released user login"
       command = command.initiate_user_onboarding
     }
 
     then {
-      title = "This attempt conflicts because another request claimed the external identity first"
+      title = "The personal data is recorded for the new user"
+      event = event.user.user_personal_data_recorded
+    }
+
+    then {
+      title = "The user login is linked to the new user"
+      event = event.user.user_login_linked
+    }
+
+    then {
+      title = "The user login is claimed for the new user"
+      event = event.user.user_login_claimed
+    }
+
+    then {
+      title = "The user onboarding is initiated"
+      event = event.user.user_onboarding_initiated
+    }
+
+    comment {
+      description = "Re-registration after a cancellation or erasure mints a new user_id. The previous onboarding streams remain as closed pseudonyms."
+    }
+  }
+
+  scenario "scenario_04_user_login_is_claimed_concurrently" {
+    title = "Another request claims the user login first"
+
+    when {
+      title   = "Initiate another user onboarding for the given user login"
+      command = command.initiate_user_onboarding
+    }
+
+    then {
+      title = "This attempt conflicts because another request claimed the user login first"
       error = "concurrent_update"
     }
 
     comment {
-      description = "This attempt returns a concurrency conflict. Retrying is safe: once the committed identity claim is visible, the same external identity returns its existing user onboarding ID without appending events."
+      description = "Retrying is safe: once the committed claim is visible, the same user login returns its existing user_id without appending events."
     }
   }
 
-  scenario "scenario_03_new_user_onboarding_id_is_not_empty" {
-    title = "The generated user onboarding ID has unexpected state"
+  scenario "scenario_05_generated_user_id_already_has_events" {
+    title = "The generated user_id already has events"
 
     when {
-      title   = "Initiate user onboarding with a generated ID that already has events"
+      title   = "Initiate user onboarding with a generated user_id that already has events"
       command = command.initiate_user_onboarding
     }
 
     then {
-      title = "The generated user onboarding ID is already associated with an existing process"
+      title = "The generated user_id is already associated with an existing process"
       error = "onboarding_state_unexpected"
     }
   }
 }
 
-state_view "retrieve_claimed_identity" {
-  title       = "Retrieve Claimed Identity"
-  description = "Internal lookup; not an HTTP endpoint. Initiate User Onboarding uses it to determine whether the external identity is already claimed and, if so, which user onboarding owns it."
+state_view "retrieve_claimed_user_login" {
+  title       = "Retrieve Claimed User Login"
+  description = "Internal lookup; not an HTTP endpoint. The token filter derives the user login key, reads this state and adds the user_id claim. A released user login resolves to no user."
   status      = "done"
 
-  readmodel "claimed_identity" {
-    title       = "Claimed Identity"
-    description = "In-memory command-side state rehydrated from the External Identity Claiming stream. It is not an HTTP resource and is not paginated."
-    question    = "What is the user onboarding that claimed this external identity?"
+  readmodel "claimed_user_login" {
+    title       = "Claimed User Login"
+    description = "In-memory command-side state rehydrated from the user login claiming stream."
+    question    = "Which user_id, if any, is this user login claimed by?"
+
     from = [
-      event.user_onboarding.external_identity_claimed
+      event.user.user_login_claimed,
+      event.user.user_login_released,
     ]
 
-    field "external_identity_id" {
+    field "user_login_key" {
       type         = "String"
       id_attribute = true
-      example      = "abc123"
+      example      = "5f0c2e..."
+    }
+
+    field "user_id" {
+      type     = "String"
+      optional = true
+      example  = "00000000-0000-0000-0000-000000000010"
     }
 
     field "user_onboarding_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
+      type     = "String"
+      optional = true
+      example  = "00000000-0000-0000-0000-000000000001"
+    }
+
+    field "is_claimed" {
+      type    = "Boolean"
+      example = true
     }
   }
+}
 
-  scenario "scenario_01_external_identity_is_claimed" {
-    title = "External identity claimed view"
+state_view "retrieve_linked_user_logins" {
+  title       = "Retrieve Linked User Logins"
+  description = "Internal lookup; not an HTTP endpoint. Command-side state used by cancellation and erasure to release every user login, and by a future link/unlink slice. It is in memory, like the claimed user login state; it does not need a Mongo read model."
+  status      = "done"
 
-    given {
-      title = "The external identity is claimed"
-      event = event.user_onboarding.external_identity_claimed
+  readmodel "linked_user_logins" {
+    title       = "Linked User Logins"
+    description = "In-memory command-side state rehydrated from the user login linking stream."
+    question    = "Which user logins are linked to this user?"
+
+    from = [
+      event.user.user_login_linked,
+      event.user.user_login_unlinked,
+    ]
+
+    field "user_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
-    then {
-      title     = "The user onboarding Id is projected into the external identity view"
-      readmodel = readmodel.claimed_identity
-    }
-
-    comment {
-      description = "The view exposes the association between an external identity and a user onboarding Id"
+    field "logins" {
+      cardinality = "List"
+      type        = field_type.user.linked_user_login
+      example = [{
+        user_login_key = "5f0c2e..."
+        kind           = "oidc"
+        issuer         = "https://accounts.google.com"
+      }]
     }
   }
 }
 
 state_view "retrieve_user_onboarding" {
   title       = "Retrieve User Onboarding"
-  description = "GET /user-onboarding/{id} returns the persisted User Onboarding projection. The read model's id and the screen's user_onboarding_id identify the same user onboarding."
+  description = "GET /user-onboarding/{user_onboarding_id} reads the user onboarding state directly from the stream and joins the User Personal Data state. It is not a Mongo projection."
   status      = "done"
 
   readmodel "user_onboarding" {
     title       = "User Onboarding"
-    description = "Persistent User Onboarding read model assembled from user onboarding events. It is exposed by GET /user-onboarding/{id} and returns one user onboarding; it is not paginated."
+    description = "In-memory User Onboarding state view rehydrated from the onboarding process stream. No PII."
     question    = "What is the current state of this user onboarding?"
     from = [
-      event.user_onboarding.user_onboarding_initiated
+      event.user.user_onboarding_initiated,
+      event.user.user_onboarding_alias_chosen,
+      event.user.user_onboarding_completed,
+      event.user.user_onboarding_canceled,
     ]
     to = [screen.retrieve_user_onboarding_ui]
 
-    field "id" {
+    field "user_onboarding_id" {
       type         = "String"
       id_attribute = true
       example      = "00000000-0000-0000-0000-000000000001"
     }
 
-    field "name" {
+    field "user_id" {
       type    = "String"
-      example = "Joe"
-    }
-
-    field "last_name" {
-      type    = "String"
-      example = "Bloggs"
-    }
-
-    field "email" {
-      type    = "String"
-      example = "joe@test.com"
-    }
-
-    field "is_email_verified" {
-      type    = "Boolean"
-      example = true
+      example = "00000000-0000-0000-0000-000000000010"
     }
 
     field "alias" {
       type     = "String"
       optional = true
-      example  = null
-    }
-
-    field "external_identity_id" {
-      type    = "String"
-      example = "abc123"
-    }
-
-    field "external_identity_provider" {
-      type    = "String"
-      example = "Google"
-    }
-
-    field "external_identity_issuer" {
-      type    = "String"
-      example = "https://accounts.google.com"
+      example  = "joe-1984"
     }
 
     field "status" {
       type    = "String"
-      example = "in_progress"
+      example = "completed"
     }
 
-    field "completed_at" {
-      type     = "DateTime"
-      optional = true
-      example  = null
-    }
-
-    field "canceled_at" {
-      type     = "DateTime"
-      optional = true
-      example  = null
-    }
-
-    field "cancellation_reason" {
+    field "cancellation_reason_code" {
       type     = "String"
       optional = true
-      example  = null
-    }
-
-    field "created_at" {
-      type    = "DateTime"
-      example = "2026-01-01T00:00:00.123Z"
-    }
-
-    field "last_modified_at" {
-      type    = "DateTime"
-      example = "2026-01-01T00:00:00.123Z"
-    }
-
-    field "revision" {
-      type    = "Long"
-      example = 1
+      example  = "changed_mind"
     }
   }
 
@@ -281,6 +315,17 @@ state_view "retrieve_user_onboarding" {
       example      = "00000000-0000-0000-0000-000000000001"
     }
 
+    field "user_id" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-000000000010"
+    }
+
+    field "alias" {
+      type     = "String"
+      optional = true
+      example  = "joe-1984"
+    }
+
     field "name" {
       type    = "String"
       example = "Joe"
@@ -301,59 +346,71 @@ state_view "retrieve_user_onboarding" {
       example = true
     }
 
-    field "alias" {
-      type     = "String"
-      optional = true
-      example  = null
-    }
-
     field "status" {
       type    = "String"
-      example = "in_progress"
+      example = "completed"
     }
-
   }
 
-  scenario "scenario_01_user_onboarding_is_retrieved" {
-    title = "User onboarding view"
+  scenario "scenario_01_completed_user_onboarding_is_retrieved" {
+    title = "Completed user onboarding view"
 
     given {
-      title = "A user onboarding is initiated"
-      event = event.user_onboarding.user_onboarding_initiated
+      title = "The user onboarding was initiated"
+      event = event.user.user_onboarding_initiated
+    }
+
+    given {
+      title = "An alias was chosen"
+      event = event.user.user_onboarding_alias_chosen
+    }
+
+    given {
+      title = "The user onboarding was completed"
+      event = event.user.user_onboarding_completed
     }
 
     then {
-      title     = "The user onboarding details are projected into the user onboarding document"
+      title     = "The view shows completed status and completion time"
       readmodel = readmodel.user_onboarding
-    }
-
-    comment {
-      description = "The read model exposes the user onboarding details and current status."
     }
   }
 
-  scenario "scenario_02_user_onboarding_is_not_found" {
-    title = "No user onboarding read model is available for the requested ID"
+  scenario "scenario_02_canceled_user_onboarding_is_retrieved" {
+    title = "Canceled user onboarding view"
 
     given {
-      title = "The user onboarding event has not been projected into the User Onboarding read model"
-      event = event.user_onboarding.user_onboarding_initiated
+      title = "The user onboarding was canceled"
+      event = event.user.user_onboarding_canceled
+    }
+
+    then {
+      title     = "The view shows canceled status and a masked identity"
+      readmodel = readmodel.user_onboarding
+    }
+  }
+
+  scenario "scenario_03_unknown_user_onboarding_is_not_found" {
+    title = "No user onboarding state exists for the requested id"
+
+    given {
+      title = "A user login exists but no user onboarding was initiated"
+      event = event.user.user_login_claimed
     }
 
     then {
       title = "The user onboarding cannot be retrieved"
       error = "user_onboarding_not_found"
     }
-
-    comment {
-      description = "The query returns user_onboarding_not_found when the User Onboarding document is absent, including before the initiation event is projected. The other User Onboarding state views share this endpoint and read model."
-    }
   }
+
 }
+
+
 
 state_change "choose_user_onboarding_alias" {
   title       = "Choose User Onboarding Alias"
-  description = "POST /user-onboarding/{id}/choose-alias chooses an alias for the user onboarding. An alias can belong to only one user onboarding at a time. The command writes the User Onboarding and Alias Claiming streams in one operation. Choosing the same alias again returns OK without appending events; choosing an alias that another user onboarding already uses is rejected."
+  description = "POST /user-onboarding/{user_onboarding_id}/choose-alias. Claims an alias for the user. The alias is 3-30 lowercase letters, numbers, dashes or underscores. Choosing the same alias again is idempotent; choosing an alias owned by another user is rejected."
   status      = "done"
 
   screen "choose_user_onboarding_alias_ui" {
@@ -375,14 +432,17 @@ state_change "choose_user_onboarding_alias" {
 
   command "choose_user_onboarding_alias" {
     title       = "Choose User Onboarding Alias"
-    description = "Chooses an alias for the given user onboarding. The alias must not be in use by another user onboarding."
-    aggregate   = aggregate.user_onboarding.user_onboarding
+    description = "Writes a 3-30 character lowercase alias on the onboarding process and claims it for the user in one atomic append."
+    aggregate   = aggregate.user.user_onboarding
+    api_endpoint = "POST /user-onboarding/{user_onboarding_id}/choose-alias"
+
     aggregate_dependencies = [
-      aggregate.user_onboarding.alias_claiming,
+      aggregate.user.user_alias_claiming,
     ]
+
     to = [
-      event.user_onboarding.user_onboarding_alias_chosen,
-      event.user_onboarding.alias_claimed,
+      event.user.user_onboarding_alias_chosen,
+      event.user.alias_claimed,
     ]
 
     field "user_onboarding_id" {
@@ -392,91 +452,106 @@ state_change "choose_user_onboarding_alias" {
     }
 
     field "alias" {
-      type         = "String"
-      id_attribute = true
-      example      = "joe-1984"
+      type    = "String"
+      example = "joe-1984"
     }
   }
 
-  scenario "scenario_01_available_alias_is_claimed" {
+  scenario "scenario_01_alias_is_available_and_is_claimed" {
     title = "Choose an available alias"
 
     given {
-      title = "The user onboarding exists"
-      event = event.user_onboarding.user_onboarding_initiated
+      title = "The user onboarding was initiated"
+      event = event.user.user_onboarding_initiated
     }
 
     when {
-      title   = "Choose an alias that is not claimed"
+      title   = "Choose an available alias"
       command = command.choose_user_onboarding_alias
     }
 
     then {
-      title = "The alias is chosen for the user onboarding"
-      event = event.user_onboarding.user_onboarding_alias_chosen
+      title = "The alias is chosen"
+      event = event.user.user_onboarding_alias_chosen
     }
 
     then {
-      title = "The alias is claimed globally"
-      event = event.user_onboarding.alias_claimed
+      title = "The alias is claimed"
+      event = event.user.alias_claimed
     }
 
     comment {
-      description = "The alias is available and the user onboarding has no alias. Both events are appended in one multi-stream operation."
+      description = "The onboarding and alias claim streams are appended atomically with expected versions."
     }
   }
 
-  scenario "scenario_02_alias_is_already_claimed_by_another_user_onboarding" {
-    title = "Alias is already in use"
+  scenario "scenario_03_a_different_alias_cannot_replace_the_chosen_one" {
+    title = "A different alias is chosen after one was already chosen"
 
     given {
-      title = "Another user onboarding has claimed the alias"
-      event = event.user_onboarding.alias_claimed
+      title = "The alias was already chosen"
+      event = event.user.user_onboarding_alias_chosen
     }
 
     when {
-      title   = "Choose the same alias for this user onboarding"
+      title   = "Choose a different alias"
       command = command.choose_user_onboarding_alias
     }
 
     then {
-      title = "The alias remains claimed by another user onboarding and cannot be chosen"
-      error = "alias_already_claimed"
-    }
-
-    comment {
-      description = "The existing alias claim points to a different user onboarding. The command returns an already-in-use error without appending events."
-    }
-  }
-
-  scenario "scenario_03_different_alias_was_already_chosen" {
-    title = "The user onboarding already has another alias"
-
-    given {
-      title = "A different alias was chosen for this user onboarding"
-      event = event.user_onboarding.user_onboarding_alias_chosen
-    }
-
-    when {
-      title   = "Choose a new alias for the same user onboarding"
-      command = command.choose_user_onboarding_alias
-    }
-
-    then {
-      title = "The user onboarding keeps its existing alias; the requested replacement is rejected"
+      title = "The existing alias is kept and the different alias is rejected"
       error = "alias_already_chosen"
     }
+  }
 
-    comment {
-      description = "The newly requested alias is available, but this user onboarding already has a different alias. The handler rejects replacement without appending events."
+  scenario "scenario_04_alias_is_already_claimed_by_another_user" {
+    title = "The alias is owned by another user"
+
+    given {
+      title = "The user onboarding was initiated"
+      event = event.user.user_onboarding_initiated
+    }
+
+    given {
+      title = "Another user claimed the alias"
+      event = event.user.alias_claimed
+    }
+
+    when {
+      title   = "Choose the alias owned by another user"
+      command = command.choose_user_onboarding_alias
+    }
+
+    then {
+      title = "The alias claim points to another user"
+      error = "alias_already_claimed"
     }
   }
 
-  scenario "scenario_04_unknown_user_onboarding_cannot_choose_alias" {
+  scenario "scenario_05_alias_cannot_be_chosen_outside_an_in_progress_onboarding" {
+    title = "The onboarding is completed or canceled"
+
+    given {
+      title = "The user onboarding was canceled"
+      event = event.user.user_onboarding_canceled
+    }
+
+    when {
+      title   = "Choose an alias"
+      command = command.choose_user_onboarding_alias
+    }
+
+    then {
+      title = "The alias cannot be chosen because the onboarding is no longer in progress"
+      error = "onboarding_not_in_progress"
+    }
+  }
+
+  scenario "scenario_06_unknown_user_onboarding_cannot_choose_an_alias" {
     title = "The user onboarding does not exist"
 
     when {
-      title   = "Choose an alias for an unknown user onboarding ID"
+      title   = "Choose an alias for an unknown user_id"
       command = command.choose_user_onboarding_alias
     }
 
@@ -486,88 +561,40 @@ state_change "choose_user_onboarding_alias" {
     }
   }
 
-  scenario "scenario_05_canceled_user_onboarding_cannot_choose_alias" {
-    title = "A canceled user onboarding cannot choose an alias"
+  scenario "scenario_07_the_alias_is_chosen_concurrently" {
+    title = "Another request changes the onboarding first"
 
     given {
       title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
-    }
-
-    given {
-      title = "The user onboarding was canceled"
-      event = event.user_onboarding.user_onboarding_canceled
+      event = event.user.user_onboarding_initiated
     }
 
     when {
-      title   = "Attempt to choose an alias for the canceled user onboarding"
+      title   = "Choose an alias while another request changes the onboarding"
       command = command.choose_user_onboarding_alias
     }
 
     then {
-      title = "A user onboarding that is no longer in progress cannot be assigned an alias"
-      error = "onboarding_not_in_progress"
-    }
-  }
-
-  scenario "scenario_06_completed_user_onboarding_cannot_choose_alias" {
-    title = "A completed user onboarding cannot choose an alias"
-
-    given {
-      title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
-    }
-
-    given {
-      title = "The user onboarding was completed"
-      event = event.user_onboarding.user_onboarding_completed
-    }
-
-    when {
-      title   = "Choose an alias after the user onboarding was completed"
-      command = command.choose_user_onboarding_alias
-    }
-
-    then {
-      title = "A user onboarding that is no longer in progress cannot be assigned an alias"
-      error = "onboarding_not_in_progress"
-    }
-  }
-
-  scenario "scenario_07_alias_is_claimed_concurrently" {
-    title = "Another request claims the alias first"
-
-    given {
-      title = "The user onboarding exists"
-      event = event.user_onboarding.user_onboarding_initiated
-    }
-
-    when {
-      title   = "Choose an alias while another request claims it"
-      command = command.choose_user_onboarding_alias
-    }
-
-    then {
-      title = "This attempt conflicts because the alias claim changed before it was saved"
+      title = "This attempt conflicts because the onboarding changed before the alias was saved"
       error = "concurrent_update"
-    }
-
-    comment {
-      description = "This attempt returns a concurrency conflict. Retrying is safe: if the same user onboarding claimed the alias, the retry succeeds without another event; if another user onboarding claimed it, the retry reports that the alias is in use."
     }
   }
 }
 
 state_view "retrieve_claimed_alias" {
   title       = "Retrieve Claimed Alias"
-  description = "Internal lookup; not an HTTP endpoint. Choose User Onboarding Alias uses it to determine whether an alias is already used by another user onboarding and, if so, which user onboarding owns it."
+  description = "Internal lookup; not an HTTP endpoint. Command-side state rehydrated from the User Alias Claiming stream."
   status      = "done"
 
   readmodel "claimed_alias" {
     title       = "Claimed Alias"
-    description = "In-memory command-side state rehydrated from the Alias Claiming stream. It is not an HTTP resource and is not paginated."
-    question    = "Which user onboarding owns this alias?"
-    from        = [event.user_onboarding.alias_claimed]
+    description = "In-memory command-side state rehydrated from the User Alias Claiming stream."
+    question    = "Which user_id, if any, currently owns this alias?"
+
+    from = [
+      event.user.alias_claimed,
+      event.user.alias_released,
+    ]
 
     field "alias" {
       type         = "String"
@@ -575,202 +602,17 @@ state_view "retrieve_claimed_alias" {
       example      = "joe-1984"
     }
 
-    field "user_onboarding_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
-    }
-  }
-
-  scenario "scenario_01_alias_claim_is_projected" {
-    title = "Claimed alias view"
-
-    given {
-      title = "The alias is claimed"
-      event = event.user_onboarding.alias_claimed
-    }
-
-    then {
-      title     = "The alias resolves to its user onboarding"
-      readmodel = readmodel.claimed_alias
-    }
-
-    comment {
-      description = "The alias is the Alias Claiming stream ID; Alias Claimed supplies the associated user onboarding ID."
-    }
-  }
-}
-
-state_view "retrieve_user_onboarding_after_alias_chosen" {
-  title       = "Retrieve User Onboarding After Alias Chosen"
-  description = "GET /user-onboarding/{id} returns the persisted User Onboarding projection after the alias is chosen. The read model's id and the screen's user_onboarding_id identify the same user onboarding."
-  status      = "done"
-
-  readmodel "user_onboarding" {
-    title       = "User Onboarding"
-    description = "Persistent User Onboarding read model assembled from user onboarding events. It is exposed by GET /user-onboarding/{id} and returns one user onboarding; it is not paginated."
-    question    = "What are the current user onboarding details after an alias is chosen?"
-    from = [
-      event.user_onboarding.user_onboarding_initiated,
-      event.user_onboarding.user_onboarding_alias_chosen,
-    ]
-    to = [screen.retrieve_user_onboarding_ui]
-
-    field "id" {
-      type         = "String"
-      id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "name" {
-      type    = "String"
-      example = "Joe"
-    }
-
-    field "last_name" {
-      type    = "String"
-      example = "Bloggs"
-    }
-
-    field "email" {
-      type    = "String"
-      example = "joe@test.com"
-    }
-
-    field "is_email_verified" {
-      type    = "Boolean"
-      example = true
-    }
-
-    field "alias" {
+    field "user_id" {
       type     = "String"
       optional = true
-      example  = "joe-1984"
-    }
-
-    field "external_identity_id" {
-      type    = "String"
-      example = "abc123"
-    }
-
-    field "external_identity_provider" {
-      type    = "String"
-      example = "Google"
-    }
-
-    field "external_identity_issuer" {
-      type    = "String"
-      example = "https://accounts.google.com"
-    }
-
-    field "status" {
-      type    = "String"
-      example = "in_progress"
-    }
-
-    field "completed_at" {
-      type     = "DateTime"
-      optional = true
-      example  = null
-    }
-
-    field "canceled_at" {
-      type     = "DateTime"
-      optional = true
-      example  = null
-    }
-
-    field "cancellation_reason" {
-      type     = "String"
-      optional = true
-      example  = null
-    }
-
-    field "created_at" {
-      type    = "DateTime"
-      example = "2026-01-01T00:00:00.123Z"
-    }
-
-    field "last_modified_at" {
-      type    = "DateTime"
-      example = "2026-01-01T00:05:00.123Z"
-    }
-
-    field "revision" {
-      type    = "Long"
-      example = 2
-    }
-  }
-
-  screen "retrieve_user_onboarding_ui" {
-    title = "User Onboarding"
-    actor = actor.authenticated_user
-
-    field "user_onboarding_id" {
-      type         = "String"
-      id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "name" {
-      type    = "String"
-      example = "Joe"
-    }
-
-    field "last_name" {
-      type    = "String"
-      example = "Bloggs"
-    }
-
-    field "email" {
-      type    = "String"
-      example = "joe@test.com"
-    }
-
-    field "is_email_verified" {
-      type    = "Boolean"
-      example = true
-    }
-
-    field "alias" {
-      type     = "String"
-      optional = true
-      example  = "joe-1984"
-    }
-
-    field "status" {
-      type    = "String"
-      example = "in_progress"
-    }
-
-  }
-
-  scenario "scenario_01_user_onboarding_shows_chosen_alias" {
-    title = "User onboarding view after alias selection"
-
-    given {
-      title = "The user onboarding is initiated"
-      event = event.user_onboarding.user_onboarding_initiated
-    }
-
-    given {
-      title = "An alias is chosen"
-      event = event.user_onboarding.user_onboarding_alias_chosen
-    }
-
-    then {
-      title     = "The user onboarding shows the chosen alias"
-      readmodel = readmodel.user_onboarding
-    }
-
-    comment {
-      description = "The same User Onboarding projection now includes the chosen alias, a later modification time, and a higher revision."
+      example  = "00000000-0000-0000-0000-000000000010"
     }
   }
 }
 
 state_change "complete_user_onboarding" {
   title       = "Complete User Onboarding"
-  description = "POST /user-onboarding/{id}/complete completes an existing user onboarding that already has a chosen alias, creates a user ID, and records the accepted terms and conditions version. Repeating completion returns the existing user ID without appending another event."
+  description = "POST /user-onboarding/{user_onboarding_id}/complete. Completes an onboarding that already has an alias and records the accepted terms of service and privacy policy versions. No id is minted here: both ids already exist."
   status      = "done"
 
   screen "complete_user_onboarding_ui" {
@@ -784,7 +626,12 @@ state_change "complete_user_onboarding" {
       example      = "00000000-0000-0000-0000-000000000001"
     }
 
-    field "terms_and_conditions_version" {
+    field "terms_of_service_version" {
+      type    = "String"
+      example = "1.0.0"
+    }
+
+    field "privacy_policy_version" {
       type    = "String"
       example = "1.0.0"
     }
@@ -792,10 +639,12 @@ state_change "complete_user_onboarding" {
 
   command "complete_user_onboarding" {
     title       = "Complete User Onboarding"
-    description = "Completes the given user onboarding after an alias is chosen and records the accepted terms and conditions version."
-    aggregate   = aggregate.user_onboarding.user_onboarding
+    description = "Appends UserOnboardingCompleted to the process stream with the accepted terms of service and privacy policy versions. Consent evidence must survive an erasure."
+    aggregate   = aggregate.user.user_onboarding
+    api_endpoint = "POST /user-onboarding/{user_onboarding_id}/complete"
+
     to = [
-      event.user_onboarding.user_onboarding_completed
+      event.user.user_onboarding_completed,
     ]
 
     field "user_onboarding_id" {
@@ -804,63 +653,84 @@ state_change "complete_user_onboarding" {
       example      = "00000000-0000-0000-0000-000000000001"
     }
 
-    field "terms_and_conditions_version" {
+    field "terms_of_service_version" {
+      type    = "String"
+      example = "1.0.0"
+    }
+
+    field "privacy_policy_version" {
       type    = "String"
       example = "1.0.0"
     }
   }
 
   scenario "scenario_01_user_onboarding_is_completed" {
-    title = "Complete an existing user onboarding"
+    title = "Complete an onboarding with a chosen alias"
 
     given {
       title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
+      event = event.user.user_onboarding_initiated
+    }
+
+    given {
+      title = "An alias was chosen"
+      event = event.user.user_onboarding_alias_chosen
     }
 
     when {
-      title   = "Accept terms and complete user onboarding"
+      title   = "Complete the user onboarding"
       command = command.complete_user_onboarding
     }
 
     then {
-      title = "The user onboarding is completed and a user ID is assigned"
-      event = event.user_onboarding.user_onboarding_completed
-    }
-
-    comment {
-      description = "The handler generates the user ID and appends User Onboarding Completed with the terms and conditions version. Completion requires that an alias was already chosen."
+      title = "The user onboarding is completed"
+      event = event.user.user_onboarding_completed
     }
   }
 
   scenario "scenario_02_user_onboarding_without_alias_cannot_be_completed" {
-    title = "A user onboarding without an alias cannot be completed"
+    title = "Complete an onboarding without an alias"
 
     given {
       title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
+      event = event.user.user_onboarding_initiated
     }
 
     when {
-      title   = "Attempt to complete user onboarding without an alias"
+      title   = "Complete the user onboarding"
       command = command.complete_user_onboarding
     }
 
     then {
-      title = "The user onboarding is not completed because no alias was chosen"
+      title = "The onboarding cannot be completed without an alias"
       error = "onboarding_alias_not_chosen"
-    }
-
-    comment {
-      description = "Choosing an alias is a prerequisite for completion. The handler returns a conflict and appends no events."
     }
   }
 
-  scenario "scenario_03_unknown_user_onboarding_cannot_be_completed" {
+  scenario "scenario_03_canceled_user_onboarding_cannot_be_completed" {
+    title = "Complete a canceled onboarding"
+
+    given {
+      title = "The user onboarding was canceled"
+      event = event.user.user_onboarding_canceled
+    }
+
+    when {
+      title   = "Complete the canceled user onboarding"
+      command = command.complete_user_onboarding
+    }
+
+    then {
+      title = "The canceled onboarding remains canceled"
+      error = "onboarding_already_canceled"
+    }
+  }
+
+  scenario "scenario_05_unknown_user_onboarding_cannot_be_completed" {
     title = "The user onboarding does not exist"
 
     when {
-      title   = "Complete an unknown user onboarding ID"
+      title   = "Complete an unknown user_id"
       command = command.complete_user_onboarding
     }
 
@@ -870,315 +740,80 @@ state_change "complete_user_onboarding" {
     }
   }
 
-  scenario "scenario_04_canceled_user_onboarding_cannot_be_completed" {
-    title = "A canceled user onboarding cannot be completed"
+  scenario "scenario_06_user_onboarding_is_completed_concurrently" {
+    title = "Another request changes the onboarding first"
 
     given {
       title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
-    }
-
-    given {
-      title = "The user onboarding was canceled"
-      event = event.user_onboarding.user_onboarding_canceled
+      event = event.user.user_onboarding_initiated
     }
 
     when {
-      title   = "Attempt to complete the canceled user onboarding"
+      title   = "Complete the user onboarding while another request changes it"
       command = command.complete_user_onboarding
     }
 
     then {
-      title = "A canceled user onboarding cannot be completed"
-      error = "onboarding_already_canceled"
-    }
-  }
-
-  scenario "scenario_05_user_onboarding_is_completed_concurrently" {
-    title = "Another request changes the user onboarding first"
-
-    given {
-      title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
-    }
-
-    when {
-      title   = "Complete user onboarding while another request changes it"
-      command = command.complete_user_onboarding
-    }
-
-    then {
-      title = "This attempt conflicts because the user onboarding changed before completion was saved"
+      title = "This attempt conflicts because the onboarding changed before completion was saved"
       error = "concurrent_update"
-    }
-
-    comment {
-      description = "This attempt returns a concurrency conflict. Retrying is safe: if another request completed the user onboarding, the retry returns its existing user ID without appending another event; if cancellation won, the retry reports that the user onboarding is canceled."
-    }
-  }
-}
-
-state_view "retrieve_user_onboarding_after_completion" {
-  title       = "Retrieve User Onboarding After Completion"
-  description = "GET /user-onboarding/{id} returns the persisted User Onboarding projection after completion. The read model's id and the screen's user_onboarding_id identify the same user onboarding."
-  status      = "done"
-
-  readmodel "user_onboarding" {
-    title       = "User Onboarding"
-    description = "Persistent User Onboarding read model assembled from user onboarding events. It is exposed by GET /user-onboarding/{id} and returns one user onboarding; it is not paginated."
-    question    = "What are the completed user onboarding details?"
-    from = [
-      event.user_onboarding.user_onboarding_initiated,
-      event.user_onboarding.user_onboarding_alias_chosen,
-      event.user_onboarding.user_onboarding_completed,
-    ]
-    to = [screen.retrieve_user_onboarding_ui]
-
-    field "id" {
-      type         = "String"
-      id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "name" {
-      type    = "String"
-      example = "Joe"
-    }
-
-    field "last_name" {
-      type    = "String"
-      example = "Bloggs"
-    }
-
-    field "email" {
-      type    = "String"
-      example = "joe@test.com"
-    }
-
-    field "is_email_verified" {
-      type    = "Boolean"
-      example = true
-    }
-
-    field "alias" {
-      type     = "String"
-      optional = true
-      example  = "joe-1984"
-    }
-
-    field "external_identity_id" {
-      type    = "String"
-      example = "abc123"
-    }
-
-    field "external_identity_provider" {
-      type    = "String"
-      example = "Google"
-    }
-
-    field "external_identity_issuer" {
-      type    = "String"
-      example = "https://accounts.google.com"
-    }
-
-    field "status" {
-      type    = "String"
-      example = "completed"
-    }
-
-    field "completed_at" {
-      type     = "DateTime"
-      optional = true
-      example  = "2026-01-01T00:10:00.123Z"
-    }
-
-    field "canceled_at" {
-      type     = "DateTime"
-      optional = true
-      example  = null
-    }
-
-    field "cancellation_reason" {
-      type     = "String"
-      optional = true
-      example  = null
-    }
-
-    field "created_at" {
-      type    = "DateTime"
-      example = "2026-01-01T00:00:00.123Z"
-    }
-
-    field "last_modified_at" {
-      type    = "DateTime"
-      example = "2026-01-01T00:10:00.123Z"
-    }
-
-    field "revision" {
-      type    = "Long"
-      example = 3
-    }
-  }
-
-  screen "retrieve_user_onboarding_ui" {
-    title = "User Onboarding"
-    actor = actor.authenticated_user
-
-    field "user_onboarding_id" {
-      type         = "String"
-      id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "name" {
-      type    = "String"
-      example = "Joe"
-    }
-
-    field "last_name" {
-      type    = "String"
-      example = "Bloggs"
-    }
-
-    field "email" {
-      type    = "String"
-      example = "joe@test.com"
-    }
-
-    field "is_email_verified" {
-      type    = "Boolean"
-      example = true
-    }
-
-    field "alias" {
-      type     = "String"
-      optional = true
-      example  = "joe-1984"
-    }
-
-    field "status" {
-      type    = "String"
-      example = "completed"
-    }
-
-  }
-
-  scenario "scenario_01_completed_user_onboarding_is_retrieved" {
-    title = "Completed user onboarding view"
-
-    given {
-      title = "The user onboarding was initiated"
-      event = event.user_onboarding.user_onboarding_initiated
-    }
-
-    given {
-      title = "An alias was chosen"
-      event = event.user_onboarding.user_onboarding_alias_chosen
-    }
-
-    given {
-      title = "The user onboarding was completed"
-      event = event.user_onboarding.user_onboarding_completed
-    }
-
-    then {
-      title     = "The view shows completed status and completion time"
-      readmodel = readmodel.user_onboarding
-    }
-
-    comment {
-      description = "This is the same User Onboarding document after its completion event. The chosen alias is present in this example, although the completion handler does not require it."
     }
   }
 }
 
 state_view "project_users" {
   title       = "Project Users"
-  description = "Internal projection; not an HTTP endpoint. Projects UserOnboardingCompleted into the shared Users read model consumed by the User Directory queries in Chapter 3. The queries add pagination and filters; this slice only defines the projection and its source event."
+  description = "Internal projection; not an HTTP endpoint. Projects the user's personal data copy, alias and onboarding completion into the shared Users read model consumed by the directory queries."
   status      = "done"
 
   readmodel "users" {
     title       = "Users"
-    description = "Shared persisted Users read model populated by UserOnboardingCompleted. It is the projection behind GET /users and GET /users/summaries; it is not itself an HTTP resource and does not apply pagination or filters. Those query concerns are defined by Retrieve Users and Retrieve User Summaries in Chapter 3."
-    question    = "Which users have been projected from UserOnboardingCompleted?"
-    from        = [event.user_onboarding.user_onboarding_completed]
+    description = "Persisted Users read model consumed by the directory queries. Holds a copy of the PII for search and anonymizes it on UserPersonalDataErasureApplied."
+    question    = "Which users match the requested filters?"
 
-    field "items" {
-      cardinality = "List"
-      type        = field_type.user_onboarding.user
-      example = [{
-        id                           = "00000000-0000-0000-0000-000000000010"
-        alias                        = "joe-bloggs-spain_123"
-        name                         = "Joe"
-        last_name                    = "Bloggs"
-        email                        = "joe@test.com"
-        is_email_verified            = true
-        phone_number                 = "+34644000000"
-        external_id                  = "google-sub-123"
-        external_provider            = "Google"
-        user_onboarding_id           = "00000000-0000-0000-0000-000000000001"
-        created_at                   = "2026-01-01T12:05:00.000Z"
-        last_modified_at             = "2026-01-01T12:05:00.000Z"
-        terms_and_conditions_version = "v1"
-      }]
-    }
-  }
+    from = [
+      event.user.user_personal_data_recorded,
+      event.user.user_onboarding_alias_chosen,
+      event.user.user_onboarding_completed,
+      event.user.user_onboarding_canceled,
+      event.user.user_personal_data_erasure_applied,
+    ]
 
-  scenario "scenario_01_users_are_projected_after_completion" {
-    title = "Users are projected after a user onboarding completes"
-
-    given {
-      title = "The user onboarding was completed"
-      event = event.user_onboarding.user_onboarding_completed
-    }
-
-    then {
-      title     = "The Users read model contains the completed user"
-      readmodel = readmodel.users
-    }
-
-    comment {
-      description = "The projection is shared by the User Directory queries in Chapter 3. Those queries declare their own Users read model shape for pagination and filtering."
-    }
-  }
-}
-
-state_view "retrieve_user_profile" {
-  title       = "Retrieve User Profile"
-  description = "GET /users/{id} returns the persisted User profile projection created after user onboarding completes. The User read model's id is the user_id from UserOnboardingCompleted; the profile screen labels it user_id."
-  status      = "done"
-
-  readmodel "user" {
-    title       = "User"
-    description = "Shared persisted User read model populated by UserOnboardingCompleted. It is exposed by GET /users/{id} and returns one profile; it is not paginated."
-    question    = "What profile belongs to this user ID?"
-    from        = [event.user_onboarding.user_onboarding_completed]
-    to          = [screen.user_profile]
-
-    field "id" {
+    field "user_onboarding_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000010"
+      example      = "00000000-0000-0000-0000-000000000001"
+    }
+
+    field "user_id" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-000000000010"
     }
 
     field "alias" {
-      type    = "String"
-      example = "joe-bloggs-spain_123"
+      type     = "String"
+      optional = true
+      example  = "joe-1984"
     }
 
     field "name" {
-      type    = "String"
-      example = "Joe"
+      type     = "String"
+      optional = true
+      pii      = true
+      example  = "Joe"
     }
 
     field "last_name" {
-      type    = "String"
-      example = "Bloggs"
+      type     = "String"
+      optional = true
+      pii      = true
+      example  = "Bloggs"
     }
 
     field "email" {
-      type    = "String"
-      example = "joe@test.com"
+      type     = "String"
+      optional = true
+      pii      = true
+      example  = "joe@test.com"
     }
 
     field "is_email_verified" {
@@ -1191,111 +826,36 @@ state_view "retrieve_user_profile" {
       example = ""
     }
 
-    field "external_identity_id" {
+    field "status" {
       type    = "String"
-      example = "google-sub-123"
+      example = "completed"
     }
 
-    field "external_identity_provider" {
-      type    = "String"
-      example = "Google"
+    field "terms_of_service_version" {
+      type     = "String"
+      optional = true
+      example  = "1.0.0"
     }
 
-    field "user_onboarding_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
+    field "privacy_policy_version" {
+      type     = "String"
+      optional = true
+      example  = "1.0.0"
     }
 
     field "created_at" {
       type    = "DateTime"
-      example = "2026-01-01T12:05:00.000Z"
+      example = "2026-11-01T00:00:00.000Z"
     }
 
     field "last_modified_at" {
       type    = "DateTime"
-      example = "2026-01-01T12:05:00.000Z"
+      example = "2026-11-01T00:10:00.000Z"
     }
 
-    field "terms_and_conditions_version" {
-      type    = "String"
-      example = "v1"
-    }
-  }
-
-  screen "user_profile" {
-    title = "User Profile"
-    actor = actor.authenticated_user
-
-    field "user_id" {
-      type         = "String"
-      id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000010"
-    }
-
-    field "alias" {
-      type    = "String"
-      example = "joe-bloggs-spain_123"
-    }
-
-    field "name" {
-      type    = "String"
-      example = "Joe"
-    }
-
-    field "last_name" {
-      type    = "String"
-      example = "Bloggs"
-    }
-
-    field "email" {
-      type    = "String"
-      example = "joe@test.com"
-    }
-
-    field "is_email_verified" {
-      type    = "Boolean"
-      example = true
-    }
-
-    field "phone_number" {
-      type    = "String"
-      example = ""
-    }
-  }
-
-  scenario "scenario_01_completed_user_profile_is_retrieved" {
-    title = "The user sees their profile after user onboarding completes"
-
-    given {
-      title = "The user onboarding was completed and assigned a user ID"
-      event = event.user_onboarding.user_onboarding_completed
-    }
-
-    then {
-      title     = "The User read model contains the completed user's profile"
-      readmodel = readmodel.user
-    }
-
-    comment {
-      description = "The completion response supplies the user ID used to retrieve this profile. The User projector consumes UserOnboardingCompleted and retrieves the remaining profile details from the user onboarding process."
-    }
-  }
-
-  scenario "scenario_02_user_profile_is_not_available" {
-    title = "No user profile is available for the requested ID"
-
-    given {
-      title = "The User read model does not contain the requested user"
-      event = event.user_onboarding.user_onboarding_completed
-    }
-
-    then {
-      title = "The user profile cannot be retrieved"
-      error = "profile_not_found"
-    }
-
-    comment {
-      description = "The profile query returns profile_not_found when the User document is absent, including while the completion event has not yet been projected."
+    field "revision" {
+      type    = "Long"
+      example = 3
     }
   }
 }

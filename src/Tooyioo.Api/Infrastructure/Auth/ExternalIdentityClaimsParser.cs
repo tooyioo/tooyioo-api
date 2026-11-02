@@ -1,35 +1,26 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Tooyioo.Common;
 
 namespace Tooyioo.Api.Infrastructure.Auth;
 
 internal static class ExternalIdentityClaimsParser
 {
+    /// <summary>
+    /// Reads the raw external identity claims. Issuer validation is the JWT middleware's
+    /// responsibility; mapping the issuer to a provider happens in the user login key factory.
+    /// </summary>
     public static ExternalIdentity Parser(ClaimsPrincipal claimsPrincipal)
     {
-        const string googleIssuer = "accounts.google.com";
-        
-        var issuerOption = claimsPrincipal.GetClaim(Claims.Issuer);
-        if (!issuerOption.IsSome(out var iss))
+        if (!claimsPrincipal.GetClaim(Claims.Issuer).IsSome(out var issuer))
         {
             throw new InvalidOperationException($"JWT is missing the '{Claims.Issuer}' claim");
         }
 
-        var isGoogleIssuer =
-            iss.Equals(googleIssuer, StringComparison.OrdinalIgnoreCase)
-            || iss.Equals($"https://{googleIssuer}", StringComparison.OrdinalIgnoreCase);
-
-        var externalIdentityProvider = isGoogleIssuer 
-            ? ExternalIdentityProvider.Google 
-            : throw new InvalidOperationException("Unsupported issuer");
-        
-        var subjectOption = claimsPrincipal.GetClaim(Claims.Sub);
-        if (!subjectOption.IsSome(out var sub))
+        if (!claimsPrincipal.GetClaim(Claims.Sub).IsSome(out var subject))
         {
             throw new InvalidOperationException($"JWT is missing the '{Claims.Sub}' claim");
         }
 
-        var externalIdentity = new ExternalIdentity(sub, externalIdentityProvider, iss);
-        return externalIdentity;
+        return new ExternalIdentity(subject, issuer);
     }
 }

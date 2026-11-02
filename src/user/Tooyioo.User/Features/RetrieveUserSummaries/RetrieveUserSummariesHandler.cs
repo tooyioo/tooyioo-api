@@ -38,7 +38,7 @@ public sealed record RetrieveUserSummariesQuery
     {
         get
         {
-            var filter = base.Filter;
+            var filter = base.Filter.AndAlso(x => x.Status == UserDocument.StatusCompleted);
 
             if (Id is not null)
             {
@@ -47,7 +47,7 @@ public sealed record RetrieveUserSummariesQuery
 
             if (Alias is not null)
             {
-                filter = filter.AndAlso(x => x.Alias.Contains(Alias, StringComparison.CurrentCultureIgnoreCase));
+                filter = filter.AndAlso(x => x.Alias!.Contains(Alias, StringComparison.CurrentCultureIgnoreCase));
             }
 
             return filter;

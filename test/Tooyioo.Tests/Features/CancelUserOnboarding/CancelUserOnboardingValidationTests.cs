@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.CancelUserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.CancelUserOnboarding.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.CancelUserOnboarding;
 
@@ -14,9 +14,9 @@ namespace Tooyioo.Tests.Features.CancelUserOnboarding;
 public sealed class CancelUserOnboardingValidationTests
 {
     [Test]
-    [Arguments("not-provided", null, "reason_required")]
-    [Arguments("empty", 0, "reason_required")]
-    [Arguments("too-long", CancelUserOnboardingRequest.ReasonMaxLength + 1, "reason_too_long")]
+    [Arguments("not-provided", null, "reason_code_required")]
+    [Arguments("empty", 0, "reason_code_required")]
+    [Arguments("too-long", CancelUserOnboardingRequest.ReasonCodeMaxLength + 1, "reason_code_too_long")]
     public async Task Endpoint_rejects_invalid_payloads(
         string _,
         int? reasonLength,
@@ -31,9 +31,9 @@ public sealed class CancelUserOnboardingValidationTests
             userOnboardingId,
             DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(subject).Build());
 
-        await host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(subject),
-            DomainEvent.ExternalIdentityClaimed().WithUserOnboardingId(userOnboardingId).Build());
+        await host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(subject),
+            DomainEvent.UserLoginClaimed().WithUserOnboardingId(userOnboardingId).Build());
 
         var userOnboardingStreamBeforeWhen = await host.Events
             .Stream<UserOnboardingState, UserOnboardingId>(userOnboardingId)
@@ -52,7 +52,7 @@ public sealed class CancelUserOnboardingValidationTests
 
         object request = reason is null
             ? new { }
-            : new CancelUserOnboardingRequest { Reason = reason };
+            : new CancelUserOnboardingRequest { ReasonCode = reason };
 
         using var response = await host.HttpClient.PostJson(
             $"/user-onboarding/{userOnboardingId.Value}/cancel",
@@ -61,7 +61,7 @@ public sealed class CancelUserOnboardingValidationTests
 
         var body = await response.ReadJson<HttpProblemDetails>();
         var errorsForReason =
-            body.Errors is not null && body.Errors.TryGetValue("reason", out var errors)
+            body.Errors is not null && body.Errors.TryGetValue("reasonCode", out var errors)
                 ? errors
                 : [];
 

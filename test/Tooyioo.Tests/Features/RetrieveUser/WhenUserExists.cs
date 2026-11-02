@@ -1,5 +1,4 @@
 using System.Net;
-using Tooyioo.Common;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
@@ -7,8 +6,7 @@ using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
 using Tooyioo.User.Features.RetrieveUser.Contract;
 using Tooyioo.User.Features.Support;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.RetrieveUser;
 
@@ -23,37 +21,44 @@ public sealed class WhenUserExists(MongoTestContainer mongoDb)
     private UserOnboardingId _userOnboardingId = null!;
     private string _userId = null!;
     private string _subject = null!;
-    private string _termsAndConditionsVersion = null!;
+    private string _termsOfServiceVersion = null!;
+    private string _privacyPolicyVersion = null!;
 
     protected override async Task Given()
     {
         _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
-        _userId = 2.ToGuid().ToString();
+        _userId = _userOnboardingId.Value;
         _subject = "google-sub-123";
-        _termsAndConditionsVersion = "v1";
+        _termsOfServiceVersion = "v1";
+        _privacyPolicyVersion = "1.0.0";
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_userOnboardingId)
+                .Build());
+
+        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
+            new UserPersonalDataId(_userOnboardingId.Value),
+            DomainEvent.UserPersonalDataRecorded()
+                .WithName("Jane")
+                .WithLastName("Bloggs")
+                .WithEmail("jane.bloggs@test.com")
+                .WithIsEmailVerified(true)
                 .Build());
 
         await Host.GivenAndProject<UserProjector, UserOnboardingState, UserOnboardingId>(
             _userOnboardingId,
             _createdAtUtc,
             DomainEvent.UserOnboardingInitiated()
-                .WithName("Jane")
-                .WithLastName("Bloggs")
-                .WithEmail("jane.bloggs@test.com")
-                .WithIsEmailVerified(true)
-                .WithExternalIdentityId(_subject)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen()
                 .WithAlias("jane-bloggs")
                 .Build(),
             DomainEvent.UserOnboardingCompleted()
                 .WithUserId(_userId)
-                .WithTermsAndConditionsVersion(_termsAndConditionsVersion)
+                .WithTermsOfServiceVersion(_termsOfServiceVersion)
+                .WithPrivacyPolicyVersion(_privacyPolicyVersion)
                 .Build());
     }
 
@@ -83,10 +88,9 @@ public sealed class WhenUserExists(MongoTestContainer mongoDb)
         await Assert.That(_body.Email).IsEqualTo("jane.bloggs@test.com");
         await Assert.That(_body.IsEmailVerified).IsTrue();
         await Assert.That(_body.Alias).IsEqualTo("jane-bloggs");
-        await Assert.That(_body.ExternalIdentityId).IsEqualTo(_subject);
-        await Assert.That(_body.ExternalIdentityProvider).IsEqualTo(nameof(ExternalIdentityProvider.Google));
-        await Assert.That(_body.UserOnboardingId).IsEqualTo(_userOnboardingId.Value);
-        await Assert.That(_body.TermsAndConditionsVersion).IsEqualTo(_termsAndConditionsVersion);
+        await Assert.That(_body.Status).IsEqualTo("completed");
+        await Assert.That(_body.TermsOfServiceVersion).IsEqualTo(_termsOfServiceVersion);
+        await Assert.That(_body.PrivacyPolicyVersion).IsEqualTo(_privacyPolicyVersion);
     }
 
     [Test]

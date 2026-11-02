@@ -1,6 +1,6 @@
 using System.Net;
 using Slicent.Application;
-using Tooyioo.BusinessOnboarding.Features.InitiateBusinessOnboarding.Contracts;
+using Tooyioo.Business.Features.InitiateBusinessOnboarding.Contracts;
 using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Auth;
 using Tooyioo.Tests.Support.Http;

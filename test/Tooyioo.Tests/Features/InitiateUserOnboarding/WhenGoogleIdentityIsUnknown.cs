@@ -2,9 +2,9 @@ using System.Net;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.InitiateUserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 
@@ -47,8 +47,12 @@ public sealed class WhenGoogleIdentityIsUnknown
         => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
     [Test]
-    public async Task Then_response_contains_user_onboarding_id()
+    public async Task? Then_response_contains_user_onboarding_id()
         => await Assert.That(Guid.TryParse(_body.UserOnboardingId, out _)).IsTrue();
+    
+    [Test]
+    public async Task Then_response_contains_user_id()
+        => await Assert.That(Guid.TryParse(_body.UserId, out _)).IsTrue();
 
     [Test]
     public async Task Then_user_onboarding_events_are_saved()
@@ -56,6 +60,7 @@ public sealed class WhenGoogleIdentityIsUnknown
             .Stream<UserOnboardingState, UserOnboardingId>(new UserOnboardingId(_body.UserOnboardingId))
             .ShouldContainExactly(
                 DomainEvent.UserOnboardingInitiated()
+                    .WithUserId(_body.UserId)
                     .WithName(_name)
                     .WithLastName(_lastName)
                     .WithEmail(_email)
@@ -66,9 +71,31 @@ public sealed class WhenGoogleIdentityIsUnknown
     [Test]
     public async Task Then_external_identity_is_claimed()
         => await Host.Events
-            .Stream<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(new ClaimingExternalIdentityId(_subject))
+            .Stream<UserLoginClaimingState, UserLoginClaimingId>(new UserLoginClaimingId(_subject))
             .ShouldContainExactly(
-                DomainEvent.ExternalIdentityClaimed()
+                DomainEvent.UserLoginClaimed()
+                    .WithUserId(_body.UserId)
                     .WithUserOnboardingId(_body.UserOnboardingId)
+                    .Build());
+
+    [Test]
+    public async Task Then_personal_data_is_recorded()
+        => await Host.Events
+            .Stream<UserPersonalDataState, UserPersonalDataId>(new UserPersonalDataId(_body.UserId))
+            .ShouldContainExactly(
+                DomainEvent.UserPersonalDataRecorded()
+                    .WithName(_name)
+                    .WithLastName(_lastName)
+                    .WithEmail(_email)
+                    .WithIsEmailVerified(true)
+                    .Build());
+
+    [Test]
+    public async Task Then_user_login_is_linked()
+        => await Host.Events
+            .Stream<UserLoginLinkingState, UserLoginLinkingId>(new UserLoginLinkingId(_body.UserId))
+            .ShouldContainExactly(
+                DomainEvent.UserLoginLinked()
+                    .WithUserLoginKey(_subject)
                     .Build());
 }

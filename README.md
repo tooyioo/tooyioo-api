@@ -45,6 +45,12 @@ The `tooyioo-web` OAuth client must contain this authorized redirect URI:
 http://localhost:8000/scalar/oauth/callback
 ```
 
+#### User login pepper
+
+The API derives pseudonymous user login keys with a single long-lived pepper (`UserLogin.Pepper`). The value committed in `appsettings.json` is a known development placeholder, not a secret. Replace it in every real environment with a 32+ byte random value from the platform secret store (`openssl rand -base64 32`), set locally with `dotnet user-secrets set "UserLogin:Pepper" "<value>" --project src/Tooyioo.Api`, or as `UserLogin__Pepper` in production. Keep the same value across API replicas and back it up: if it changes or is lost, no stored user login can be resolved. Rotation is not implemented; it would require a user login migration.
+
+`Google.Issuer` is the Google issuer used by the JWT middleware. The user login key uses the validated token issuer; there is no separate allowlist or display name. Changing the issuer re-keys existing user logins, so treat it as a migration.
+
 ### 2. Start Podman
 
 On macOS and Windows, start the Podman machine:

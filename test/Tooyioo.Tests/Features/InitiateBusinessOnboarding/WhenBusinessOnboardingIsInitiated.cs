@@ -1,12 +1,12 @@
 using System.Net;
-using Tooyioo.BusinessOnboarding;
-using Tooyioo.BusinessOnboarding.Features.InitiateBusinessOnboarding.Contracts;
+using Tooyioo.Business;
+using Tooyioo.Business.Features.InitiateBusinessOnboarding.Contracts;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.InitiateBusinessOnboarding;
 
@@ -24,7 +24,7 @@ public sealed class WhenBusinessOnboardingIsInitiated
     protected override async Task Given()
     {
         _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
-        _userId = 2.ToGuid().ToString();
+        _userId = _userOnboardingId.Value;
         _subject = "google-sub-123";
         _legalName = "Acme Ltd";
 
@@ -35,12 +35,13 @@ public sealed class WhenBusinessOnboardingIsInitiated
                 .Build(),
             DomainEvent.UserOnboardingCompleted()
                 .WithUserId(_userId)
-                .WithTermsAndConditionsVersion("v1")
+                .WithTermsOfServiceVersion("v1")
+                .WithPrivacyPolicyVersion("v1")
                 .Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_userOnboardingId)
                 .Build());
     }

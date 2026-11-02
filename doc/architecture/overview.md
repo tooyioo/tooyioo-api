@@ -15,7 +15,12 @@ The system uses:
 
 Application behavior belongs in feature slices under module projects, for example:
 
-- `src/user-onboarding/Tooyioo.UserOnboarding`
+- `src/user/Tooyioo.User` for user onboarding, authentication, personal data and the user directory
+- `src/user/Tooyioo.User.Contracts` for the user events
+- `src/business/Tooyioo.Business` for business onboarding
+- `src/business/Tooyioo.Business.Contracts` for the business events
+
+Modules only reference each other through their `*.Contracts`; feature slices stay inside their module. The `User` module contains the onboarding, authentication, personal-data and directory slices, and its initiation command writes all user streams in one append. `Business` is separate. The only implementation references are in the API composition root.
 
 HTTP hosting, infrastructure wiring, authentication, OpenAPI, observability, and production service registration belong in:
 

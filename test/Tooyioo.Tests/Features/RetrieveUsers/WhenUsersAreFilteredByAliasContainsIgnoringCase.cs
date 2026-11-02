@@ -5,7 +5,7 @@ using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.User.Features.RetrieveUsers.Contract;
-using Tooyioo.UserOnboarding;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.RetrieveUsers;
 
@@ -27,34 +27,34 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
         var johnUserOnboardingId = new UserOnboardingId(102.ToGuid().ToString());
         var caseyUserOnboardingId = new UserOnboardingId(103.ToGuid().ToString());
 
-        _janeUserId = 201.ToGuid().ToString();
-        _johnUserId = 202.ToGuid().ToString();
-        _caseyUserId = 301.ToGuid().ToString();
+        _janeUserId = janeUserOnboardingId.Value;
+        _johnUserId = johnUserOnboardingId.Value;
+        _caseyUserId = caseyUserOnboardingId.Value;
         _janeSubject = "google-sub-jane";
         const string johnSubject = "google-sub-john";
         const string caseySubject = "google-sub-casey";
 
-        await GivenExternalIdentityClaimingEvents(
+        await GivenUserLoginClaimingEvents(
             _janeSubject,
-            DomainEvent.ExternalIdentityClaimed()
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(janeUserOnboardingId)
                 .Build());
 
-        await GivenExternalIdentityClaimingEvents(
+        await GivenUserLoginClaimingEvents(
             johnSubject,
-            DomainEvent.ExternalIdentityClaimed()
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(johnUserOnboardingId)
                 .Build());
 
-        await GivenExternalIdentityClaimingEvents(
+        await GivenUserLoginClaimingEvents(
             caseySubject,
-            DomainEvent.ExternalIdentityClaimed()
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(caseyUserOnboardingId)
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
             janeUserOnboardingId,
-            DomainEvent.UserOnboardingInitiated()
+            DomainEvent.UserPersonalDataRecorded()
                 .WithName("Jane")
                 .WithLastName("Bloggs")
                 .WithEmail("jane.bloggs@test.com")
@@ -69,7 +69,7 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
 
         await GivenUserOnboardingEventsWereProjected(
             johnUserOnboardingId,
-            DomainEvent.UserOnboardingInitiated()
+            DomainEvent.UserPersonalDataRecorded()
                 .WithName("John")
                 .WithLastName("Smith")
                 .WithEmail("john.smith@test.com")
@@ -84,7 +84,7 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
 
         await GivenUserOnboardingEventsWereProjected(
             caseyUserOnboardingId,
-            DomainEvent.UserOnboardingInitiated()
+            DomainEvent.UserPersonalDataRecorded()
                 .WithName("Casey")
                 .WithLastName("Bloggins")
                 .WithEmail("casey.bloggins@test.com")

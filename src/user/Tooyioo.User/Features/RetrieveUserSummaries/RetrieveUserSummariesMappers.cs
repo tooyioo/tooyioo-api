@@ -42,7 +42,7 @@ public static class RetrieveUserSummariesMappers
                     => new RetrieveUserSummariesResponseItem
                     {
                         Id = x.Id,
-                        Alias = x.Alias,
+                        Alias = x.Alias ?? string.Empty,
                         Name = x.Name,
                         LastName = x.LastName
                     })

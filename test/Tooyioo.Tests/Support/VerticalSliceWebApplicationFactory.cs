@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Tooyioo.Common;
 using Tooyioo.Tests.Support.Auth;
 
 namespace Tooyioo.Tests.Support;
@@ -64,6 +65,9 @@ internal sealed class VerticalSliceWebApplicationFactory(
             services.AddSingleton(mongoClient);
             services.AddSingleton<IMongoDatabase>(_ =>
                 mongoClient.GetDatabase(mongoDatabase?.DatabaseName ?? "TooyiooVerticalSliceTests"));
+
+            services.RemoveAll<IUserLoginKeyFactory>();
+            services.AddSingleton<IUserLoginKeyFactory, TestUserLoginKeyFactory>();
 
             services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(new TestJwtBearerOptions(signingKey));
 

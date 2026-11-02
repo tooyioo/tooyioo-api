@@ -50,18 +50,17 @@ public static class RetrieveUsersMappers
                     => new RetrieveUsersResponseItem
                     {
                         Id = x.Id,
-                        Alias = x.Alias,
+                        Alias = x.Alias ?? string.Empty,
                         Name = x.Name,
                         LastName = x.LastName,
                         Email = x.Email,
                         IsEmailVerified = x.IsEmailVerified,
                         PhoneNumber = x.PhoneNumber,
-                        ExternalId = x.ExternalIdentityId,
-                        ExternalProvider = x.ExternalIdentityProvider,
-                        UserOnboardingId = x.UserOnboardingId,
+                        Status = x.Status,
                         CreatedAt = x.CreatedAt,
                         LastModifiedAt = x.LastModifiedAt,
-                        TermsAndConditionsVersion = x.TermsAndConditionsVersion
+                        TermsOfServiceVersion = x.TermsOfServiceVersion ?? string.Empty,
+                        PrivacyPolicyVersion = x.PrivacyPolicyVersion ?? string.Empty
                     })
             });
         }

@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.CompleteUserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 
@@ -14,12 +14,17 @@ namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 public sealed class CompleteUserOnboardingValidationTests
 {
     [Test]
-    [Arguments("not-provided", null, "terms_and_conditions_version_required")]
-    [Arguments("empty", 0, "terms_and_conditions_version_required")]
-    [Arguments("too-long", CompleteUserOnboardingRequest.TermsAndConditionsVersionMaxLength + 1, "terms_and_conditions_version_too_long")]
+    [Arguments("terms-not-provided", null, 2, "termsOfServiceVersion", "terms_of_service_version_required")]
+    [Arguments("terms-empty", 0, 2, "termsOfServiceVersion", "terms_of_service_version_required")]
+    [Arguments("terms-too-long", CompleteUserOnboardingRequest.VersionMaxLength + 1, 2, "termsOfServiceVersion", "terms_of_service_version_too_long")]
+    [Arguments("privacy-not-provided", 2, null, "privacyPolicyVersion", "privacy_policy_version_required")]
+    [Arguments("privacy-empty", 2, 0, "privacyPolicyVersion", "privacy_policy_version_required")]
+    [Arguments("privacy-too-long", 2, CompleteUserOnboardingRequest.VersionMaxLength + 1, "privacyPolicyVersion", "privacy_policy_version_too_long")]
     public async Task Endpoint_rejects_invalid_payloads(
         string _,
-        int? termsAndConditionsVersionLength,
+        int? termsOfServiceVersionLength,
+        int? privacyPolicyVersionLength,
+        string field,
         params string[] expectedErrors)
     {
         await using var host = await VerticalSliceTestHost.Start();
@@ -37,25 +42,34 @@ public sealed class CompleteUserOnboardingValidationTests
             .WithSubject(subject)
             .Build();
 
-        string? termsAndConditionsVersion = termsAndConditionsVersionLength switch
-        {
-            null => null,
-            0 => string.Empty,
-            _ => new string('v', termsAndConditionsVersionLength.Value)
-        };
+        var payload = new Dictionary<string, object?>();
 
-        object request = termsAndConditionsVersion is null
-            ? new { }
-            : new CompleteUserOnboardingRequest { TermsAndConditionsVersion = termsAndConditionsVersion };
+        if (termsOfServiceVersionLength is not null)
+        {
+            payload["termsOfServiceVersion"] = termsOfServiceVersionLength switch
+            {
+                0 => string.Empty,
+                _ => new string('v', termsOfServiceVersionLength.Value)
+            };
+        }
+
+        if (privacyPolicyVersionLength is not null)
+        {
+            payload["privacyPolicyVersion"] = privacyPolicyVersionLength switch
+            {
+                0 => string.Empty,
+                _ => new string('v', privacyPolicyVersionLength.Value)
+            };
+        }
 
         using var response = await host.HttpClient.PostJson(
             $"/user-onboarding/{userOnboardingId.Value}/complete",
-            request,
+            payload,
             token);
 
         var body = await response.ReadJson<HttpProblemDetails>();
-        var errorsForTermsAndConditionsVersion =
-            body.Errors is not null && body.Errors.TryGetValue("termsAndConditionsVersion", out var errors)
+        var errorsForField =
+            body.Errors is not null && body.Errors.TryGetValue(field, out var errors)
                 ? errors
                 : [];
 
@@ -64,7 +78,7 @@ public sealed class CompleteUserOnboardingValidationTests
 
         foreach (var expectedError in expectedErrors)
         {
-            await Assert.That(errorsForTermsAndConditionsVersion.Contains(expectedError)).IsTrue();
+            await Assert.That(errorsForField.Contains(expectedError)).IsTrue();
         }
 
         await host.Events
@@ -89,9 +103,9 @@ public sealed class CompleteUserOnboardingValidationTests
                 .WithAlias("jane-bloggs")
                 .Build());
 
-        await host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(userOnboardingId)
                 .Build());
     }

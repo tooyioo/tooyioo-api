@@ -1,12 +1,12 @@
 using System.Net;
 using Slicent.Application;
-using Tooyioo.BusinessOnboarding.Features.InitiateBusinessOnboarding.Contracts;
+using Tooyioo.Business.Features.InitiateBusinessOnboarding.Contracts;
 using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.InitiateBusinessOnboarding;
 
@@ -33,9 +33,9 @@ public sealed class InitiateBusinessOnboardingValidationTests
             DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(subject).Build(),
             DomainEvent.UserOnboardingCompleted().WithUserId(userId).Build());
 
-        await host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(subject),
-            DomainEvent.ExternalIdentityClaimed().WithUserOnboardingId(userOnboardingId).Build());
+        await host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(subject),
+            DomainEvent.UserLoginClaimed().WithUserOnboardingId(userOnboardingId).Build());
 
         var token = host.GoogleIdentityToken()
             .WithSubject(subject)

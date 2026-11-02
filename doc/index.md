@@ -40,6 +40,7 @@ Do not duplicate behavior in slice decision records. See [Slice decision records
 - [Complete user onboarding](slices/complete-user-onboarding.md) records completion decisions, including the alias prerequisite and idempotency behavior.
 - [Cancel user onboarding](slices/cancel-user-onboarding.md) records terminal-state and claim-release decisions.
 - [Choose user onboarding alias](slices/choose-user-onboarding-alias.md) records alias-claim availability and multi-stream consistency decisions.
+- [User personal data erasure](slices/user-personal-data-erasure.md) records the single PII record, the truncate-based erasure, the grace period and the user login release decisions.
 
 ## Agent workflow
 

@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.CompleteUserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 
@@ -41,7 +41,11 @@ public sealed class WhenAnotherUserTriesToCompleteUserOnboarding
 
         _response = await Host.HttpClient.PostJson(
             $"/user-onboarding/{_ownerUserOnboardingId.Value}/complete",
-            new CompleteUserOnboardingRequest { TermsAndConditionsVersion = "v1" },
+            new CompleteUserOnboardingRequest
+            {
+                TermsOfServiceVersion = "v1",
+                PrivacyPolicyVersion = "v1"
+            },
             anotherUserToken);
 
         _body = await _response.ReadJson<HttpProblemDetails>();
@@ -78,9 +82,9 @@ public sealed class WhenAnotherUserTriesToCompleteUserOnboarding
                 .WithAlias("jane-bloggs")
                 .Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(userOnboardingId)
                 .Build());
     }

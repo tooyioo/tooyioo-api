@@ -6,13 +6,13 @@
 
 ## Decisions
 
-- Claiming streams represent current availability, not historical existence. A claim followed by a release makes the external identity or alias available for reuse.
-- Cancellation is terminal. Once the external identity claim is released, public onboarding endpoints can no longer resolve a `user_onboarding_id` claim for the canceled onboarding.
-- The cancellation reason is stored on the onboarding process stream. Release events only record the owning user onboarding id.
-- The alias claim is released only when the onboarding actually has an alias.
+- Cancellation is terminal and immediately requests the personal data erasure: the erasure request is appended atomically with the cancellation, so a canceled onboarding never exists without a pending or applied erasure.
+- The user login and the alias (when one exists) are released in the same atomic append. Releasing the user login is what allows the same provider account to sign up again.
+- The cancellation reason is a bounded reason code, not free text. Free text could contain PII and would be written to a stream that is retained.
+- The public endpoint is not idempotent after a successful cancellation because the released user login no longer resolves the user. The handler is still defensively idempotent if invoked directly with an already canceled stream.
+- The erasure is applied by the scheduled processor, not by the cancel command. This keeps the command free of destructive side effects and makes the erasure retryable.
 
 ## Constraints
 
-- Auth: the authenticated principal must contain the matching app-owned `user_onboarding_id` claim.
-- Multi-stream consistency: cancellation and all owned claim releases are one expected-version write. Any concurrent change returns a conflict.
-- Idempotency: the public endpoint is not idempotent after a successful cancellation because the claims are released. The handler still treats an already-canceled stream as defensively idempotent if invoked directly.
+- Auth: the route carries the `user_onboarding_id`; the authorizer loads the onboarding state and checks its `user_id` against the app-owned `user_id` claim. There is no `user_onboarding_id` claim.
+- Multi-stream consistency: the cancellation, the user login and alias releases, and the erasure request are one expected-version write. A concurrent change returns a conflict.

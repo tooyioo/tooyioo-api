@@ -3,9 +3,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.UserOnboarding;
-using Tooyioo.UserOnboarding.Features.CompleteUserOnboarding.Contracts;
-using Tooyioo.UserOnboarding.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 
@@ -17,14 +17,16 @@ public sealed class WhenUserOnboardingCanBeCompleted
     private CompleteUserOnboardingResponse _body = null!;
     private UserOnboardingId _userOnboardingId = null!;
     private string _subject = null!;
-    private string _termsAndConditionsVersion = null!;
+    private string _termsOfServiceVersion = null!;
+    private string _privacyPolicyVersion = null!;
     private EventStreamSnapshot _userOnboardingStreamBeforeWhen = null!;
 
     protected override async Task Given()
     {
         _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
         _subject = "google-sub-123";
-        _termsAndConditionsVersion = "v1";
+        _termsOfServiceVersion = "v1";
+        _privacyPolicyVersion = "1.0.0";
 
         await Host.Given<UserOnboardingState, UserOnboardingId>(
             _userOnboardingId,
@@ -38,9 +40,9 @@ public sealed class WhenUserOnboardingCanBeCompleted
                 .WithAlias("jane-bloggs")
                 .Build());
 
-        await Host.Given<ClaimingExternalIdentityState, ClaimingExternalIdentityId>(
-            new ClaimingExternalIdentityId(_subject),
-            DomainEvent.ExternalIdentityClaimed()
+        await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
+            new UserLoginClaimingId(_subject),
+            DomainEvent.UserLoginClaimed()
                 .WithUserOnboardingId(_userOnboardingId)
                 .Build());
 
@@ -57,7 +59,11 @@ public sealed class WhenUserOnboardingCanBeCompleted
 
         _response = await Host.HttpClient.PostJson(
             $"/user-onboarding/{_userOnboardingId.Value}/complete",
-            new CompleteUserOnboardingRequest { TermsAndConditionsVersion = _termsAndConditionsVersion },
+            new CompleteUserOnboardingRequest
+            {
+                TermsOfServiceVersion = _termsOfServiceVersion,
+                PrivacyPolicyVersion = _privacyPolicyVersion
+            },
             token);
 
         _body = await _response.ReadJson<CompleteUserOnboardingResponse>();
@@ -83,6 +89,7 @@ public sealed class WhenUserOnboardingCanBeCompleted
                 _userOnboardingStreamBeforeWhen,
                 DomainEvent.UserOnboardingCompleted()
                     .WithUserId(_body.UserId)
-                    .WithTermsAndConditionsVersion(_termsAndConditionsVersion)
+                    .WithTermsOfServiceVersion(_termsOfServiceVersion)
+                    .WithPrivacyPolicyVersion(_privacyPolicyVersion)
                     .Build());
 }
