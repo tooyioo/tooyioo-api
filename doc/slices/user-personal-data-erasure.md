@@ -12,7 +12,7 @@
 - Canceling onboarding requests an immediate erasure. A user-initiated erasure uses the configured grace period (14 days by default) and can be canceled during it.
 - Applying the erasure appends `UserPersonalDataErasureApplied`, releases every user login from the `user_login_linking` index, and then truncates the stream before the `UserPersonalDataErasureRequested` event. The request and applied events survive; the PII disappears.
 - The stream is truncated instead of deleted. A tombstone would make the stream name permanently unusable and would prevent a later re-registration; truncation keeps the erasure facts and the identity reusable.
-- The scheduled processor polls the `user_personal_data` read model for due requests and is idempotent. If the truncate fails after the append, the state is already erased and the retry truncates again.
+- The scheduled erasure is not an event handler. It polls a due-erasure read model (`due_user_personal_data_erasures` in the HCL; `UserPersonalDataDocument` filtered by request/due state in code) and is idempotent. The automation is modeled with the read model between the request event and the external-triggered command, not as a processor directly subscribed to `UserPersonalDataErasureRequested`. If the truncate fails after the append, the state is already erased and the retry truncates again.
 - Read models may copy PII for search, but every projection that consumes `UserPersonalDataRecorded` must also consume `UserPersonalDataErasureApplied` and anonymize the copy. Otherwise a projection rebuild would re-materialize PII.
 - User login claims are retained as pseudonymous anti-abuse records. Erasure releases them; a re-registration mints a new `user_id`.
 

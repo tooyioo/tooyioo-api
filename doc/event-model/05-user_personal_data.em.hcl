@@ -404,8 +404,36 @@ state_change "cancel_user_personal_data_erasure" {
 
 automation "apply_due_user_personal_data_erasures" {
   title       = "Apply Due User Personal Data Erasures"
-  description = "Scheduled job; not an HTTP endpoint. Every few seconds it queries the User Personal Data read model for requests whose erase_after_utc has passed and applies them idempotently."
+  description = "Scheduled job; not an HTTP endpoint. Every few seconds it queries the due erasures read model for requests whose erase_after_utc has passed and applies them idempotently."
   status      = "done"
+
+  readmodel "due_user_personal_data_erasures" {
+    title       = "Due User Personal Data Erasures"
+    description = "View read by the scheduled erasure processor. It contains erasure requests whose grace period has ended."
+    question    = "Which personal data erasure requests are due?"
+
+    from = [
+      event.user.user_personal_data_erasure_requested,
+      event.user.user_personal_data_erasure_canceled,
+      event.user.user_personal_data_erasure_applied,
+    ]
+
+    field "user_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-000000000010"
+    }
+
+    field "status" {
+      type    = "String"
+      example = "erasure_requested"
+    }
+
+    field "erase_after_utc" {
+      type    = "DateTime"
+      example = "2026-11-16T00:00:00.000Z"
+    }
+  }
 
   command "apply_user_personal_data_erasure" {
     title       = "Apply User Personal Data Erasure"
@@ -431,18 +459,7 @@ automation "apply_due_user_personal_data_erasures" {
     }
   }
 
-  processor "user_personal_data_erasure_scheduler" {
-    title       = "Personal data erasure scheduler"
-    description = "Wakes up periodically and invokes the apply command for each due request."
 
-    from = [
-      event.user.user_personal_data_erasure_requested,
-    ]
-
-    to = [
-      command.apply_user_personal_data_erasure,
-    ]
-  }
 
   scenario "scenario_01_due_erasure_is_applied" {
     title = "Apply an erasure whose grace period ended"
@@ -453,8 +470,8 @@ automation "apply_due_user_personal_data_erasures" {
     }
 
     given {
-      title = "An erasure was requested"
-      event = event.user.user_personal_data_erasure_requested
+      title     = "The due erasures view contains the request"
+      readmodel = readmodel.due_user_personal_data_erasures
     }
 
     when {
