@@ -1,7 +1,7 @@
 # tooyioo-api
 
 [![CI/CD](https://github.com/tooyioo/tooyioo-api/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/tooyioo/tooyioo-api/actions/workflows/ci-cd.yml)
-[![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![.NET 11](https://img.shields.io/badge/.NET-11-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![Tests](https://img.shields.io/badge/tests-TUnit-512BD4?logo=dotnet&logoColor=white)](https://tunit.dev/)
 [![Test Reports](https://img.shields.io/badge/test%20reports-history-2ea44f?logo=github)](https://tooyioo.github.io/tooyioo-api/tests/)
 [![Event Model](https://img.shields.io/badge/event%20model-view-b15b28)](https://tooyioo.github.io/tooyioo-api/event-model/)
@@ -10,7 +10,7 @@ Event Source application with vertical slice approach.
 
 ## Prerequisites
 
-- .NET 10 SDK
+- .NET 11 SDK
 - Podman 6.1.0+
 - Access to the `tooyioo` project in [Google Cloud Console](https://console.cloud.google.com/)
 - EMHCL 0.12.0+ on `PATH` for event model validation and rendering, on Windows or Linux. Same `emhcl` command on both; not required to run the API. See [event model setup](doc/event-model/README.md) for installation.

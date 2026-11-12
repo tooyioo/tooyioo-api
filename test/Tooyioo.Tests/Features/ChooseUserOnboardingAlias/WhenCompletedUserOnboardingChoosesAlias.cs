@@ -73,8 +73,8 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
     }
 
     [Test]
-    public async Task Then_response_is_conflict()
-        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.Conflict);
+    public async Task Then_response_is_unprocessable_entity()
+        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.UnprocessableEntity);
 
     [Test]
     public async Task Then_response_title_says_onboarding_is_not_in_progress()

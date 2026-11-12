@@ -71,8 +71,8 @@ public sealed class WhenUserOnboardingIsCompleted
     }
 
     [Test]
-    public async Task Then_response_is_conflict()
-        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.Conflict);
+    public async Task Then_response_is_unprocessable_entity()
+        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.UnprocessableEntity);
 
     [Test]
     public async Task Then_response_explains_onboarding_is_already_completed()
