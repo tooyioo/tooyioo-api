@@ -36,6 +36,7 @@ public sealed class HttpProblemDetails
     private const string BadRequestType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.1";
     private const string NotFoundType  = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.5";
     private const string ConflictType  = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10";
+    private const string UnprocessableEntityType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.21";
     private const string UnauthorizedType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.2";
     private const string ForbiddenType    = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.4";
     
@@ -72,6 +73,18 @@ public sealed class HttpProblemDetails
             ctx,
             status: StatusCodes.Status409Conflict,
             type: ConflictType,
+            title: title,
+            detail: detail,
+            errors: null);
+
+    internal static HttpProblemDetails UnprocessableEntity(
+        HttpContext ctx,
+        string title,
+        string? detail = null)
+        => Create(
+            ctx,
+            status: StatusCodes.Status422UnprocessableEntity,
+            type: UnprocessableEntityType,
             title: title,
             detail: detail,
             errors: null);

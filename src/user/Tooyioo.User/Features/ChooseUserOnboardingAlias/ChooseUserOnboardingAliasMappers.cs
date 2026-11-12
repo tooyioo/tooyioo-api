@@ -30,15 +30,15 @@ public static class ChooseUserOnboardingAliasMappers
             => commandResult.Match<IResult>(
                 ok => commandHttpResponseGenerator.Ok(new ChooseUserOnboardingAliasResponse { UserId = ok.UserId.Value, UserOnboardingId = ok.UserOnboardingId.Value }),
                 err => err.Match<IResult>(
-                    aliasAlreadyClaimedError => commandHttpResponseGenerator.Conflict(
+                    aliasAlreadyClaimedError => commandHttpResponseGenerator.UnprocessableEntity(
                         context,
                         "alias_already_claimed",
                         $"The provided user onboarding alias is already in use by user {aliasAlreadyClaimedError.UserId.Value}"),
-                    aliasAlreadyChosenError => commandHttpResponseGenerator.Conflict(
+                    aliasAlreadyChosenError => commandHttpResponseGenerator.UnprocessableEntity(
                         context,
                         "alias_already_chosen",
                         $"A different alias {aliasAlreadyChosenError.ExistingAlias} had already been chosen for this onboarding"),
-                    _ => commandHttpResponseGenerator.Conflict(
+                    _ => commandHttpResponseGenerator.UnprocessableEntity(
                         context,
                         "onboarding_not_in_progress",
                         "Could not choose user onboarding alias because onboarding is no longer in progress"),

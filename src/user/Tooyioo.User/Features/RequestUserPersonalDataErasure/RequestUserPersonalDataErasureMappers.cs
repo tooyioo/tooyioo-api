@@ -37,7 +37,7 @@ public static class RequestUserPersonalDataErasureMappers
                         context,
                         "user_personal_data_not_found",
                         "Could not find personal data for the given user"),
-                    _ => commandHttpResponseGenerator.Conflict(
+                    _ => commandHttpResponseGenerator.UnprocessableEntity(
                         context,
                         "user_personal_data_already_erased",
                         "The personal data has already been erased"),

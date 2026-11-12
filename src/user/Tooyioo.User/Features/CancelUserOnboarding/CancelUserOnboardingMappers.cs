@@ -31,7 +31,7 @@ public static class CancelUserOnboardingMappers
                     UserOnboardingId = ok.UserOnboardingId.Value
                 }),
                 err => err.Match<IResult>(
-                    _ => commandHttpResponseGenerator.Conflict(
+                    _ => commandHttpResponseGenerator.UnprocessableEntity(
                         context,
                         "onboarding_already_completed",
                         "Could not cancel user onboarding because it has already been completed"),

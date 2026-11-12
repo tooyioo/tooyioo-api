@@ -151,6 +151,18 @@ See [Event sourcing](doc/architecture/event-sourcing.md) for multi-stream and pr
 
 ---
 
+# API Error Statuses
+
+Map command errors to HTTP status codes in the endpoint response mapper. Keep the event model focused on business outcomes; it does not own HTTP status codes.
+
+- `400 Bad Request`: the request representation or format is invalid. The client must correct the payload format before resubmitting.
+- `422 Unprocessable Entity`: the request is well-formed but fails validation or a business rule. The client must change the payload or correct the underlying business data before resubmitting. This can include rules evaluated against process or stream state.
+- `409 Conflict`: the request conflicts with current state and the same payload may succeed after that state changes. Use this for optimistic concurrency conflicts and similar retryable state conflicts.
+
+When choosing between `409` and `422`, decide based on the expected client action: retrying the same request after refreshing, waiting, or resolving a concurrent update points to `409`; changing the request or correcting business data points to `422`. Do not classify every state-dependent rule as `409` merely because the handler evaluated stream state.
+
+---
+
 # Event Sourcing Rules
 
 Follow [Event sourcing](doc/architecture/event-sourcing.md). Non-negotiable:

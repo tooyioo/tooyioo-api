@@ -35,11 +35,11 @@ public static class CompleteUserOnboardingMappers
                         UserOnboardingId = ok.UserOnboardingId.Value
                     }),
                 err => err.Match<IResult>(
-                    _ => commandHttpResponseGenerator.Conflict(
+                    _ => commandHttpResponseGenerator.UnprocessableEntity(
                         context,
                         "onboarding_already_canceled",
                         "Could not complete user onboarding because it has been canceled"),
-                    _ => commandHttpResponseGenerator.Conflict(
+                    _ => commandHttpResponseGenerator.UnprocessableEntity(
                         context,
                         "onboarding_alias_not_chosen",
                         "Could not complete user onboarding because no alias has been chosen"),
