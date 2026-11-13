@@ -17,29 +17,21 @@ Event Source application with vertical slice approach.
 
 ## Getting started
 
-### 1. Configure Google OAuth for Scalar
+### 1. Configure local secrets
 
-The API uses the `tooyioo-web` OAuth client from the `tooyioo` Google Cloud project.
+The app requires two local secrets. `appsettings.json` has visible placeholders for both; replace them with User Secrets before starting the API. Never put real secret values in `appsettings.json` or source control.
 
-The Google Client ID is already configured in `appsettings.json` and is used by the API to validate Google ID tokens.
+#### Scalar Google OAuth client secret
 
-Scalar also uses this OAuth client to authenticate with Google when testing the API locally. This requires the OAuth client secret, which must not be committed to source control.
+The API uses the `tooyioo-web` OAuth client from the `tooyioo` Google Cloud project. Its public Client ID is in `appsettings.json`; Scalar also needs the OAuth client secret to sign in.
 
-From `src/Tooyioo.Api`, configure the client secret using .NET User Secrets:
+From Command Prompt at the repository root, configure the client secret:
 
-```bash
-dotnet user-secrets set "Scalar:GoogleOAuth:ClientSecret" "<google-oauth-client-secret>"
+```cmd
+dotnet user-secrets set "Scalar:GoogleOAuth:ClientSecret" "<google-oauth-client-secret>" --project src/Tooyioo.Api
 ```
 
-The secret can be obtained from the `tooyioo-web` OAuth client in Google Cloud Console.
-
-Verify the local configuration:
-
-```bash
-dotnet user-secrets list
-```
-
-The `tooyioo-web` OAuth client must contain this authorized redirect URI:
+Get the secret from the `tooyioo-web` OAuth client in Google Cloud Console. The client must contain this authorized redirect URI:
 
 ```text
 http://localhost:8000/scalar/oauth/callback
@@ -47,7 +39,19 @@ http://localhost:8000/scalar/oauth/callback
 
 #### User login pepper
 
-The API derives pseudonymous user login keys with a single long-lived pepper (`UserLogin.Pepper`). The value committed in `appsettings.json` is a known development placeholder, not a secret. Replace it in every real environment with a 32+ byte random value from the platform secret store (`openssl rand -base64 32`), set locally with `dotnet user-secrets set "UserLogin:Pepper" "<value>" --project src/Tooyioo.Api`, or as `UserLogin__Pepper` in production. Keep the same value across API replicas and back it up: if it changes or is lost, no stored user login can be resolved. Rotation is not implemented; it would require a user login migration.
+`UserLogin.Pepper` is a secret used to derive pseudonymous user login keys. The API will fail startup validation until you configure a Base64 value containing at least 32 random bytes. For a fresh local setup, generate one with OpenSSL:
+
+```bash
+openssl rand -base64 32
+```
+
+Copy the generated value and save it from Command Prompt:
+
+```cmd
+dotnet user-secrets set "UserLogin:Pepper" "<generated-base64-pepper>" --project src/Tooyioo.Api
+```
+
+In production, configure `UserLogin__Pepper` through the platform secret store. Keep the value identical across API replicas and back it up. If it changes or is lost, existing user logins can no longer be resolved. Pepper rotation is not currently implemented; it would require a migration.
 
 `Google.Issuer` is the Google issuer used by the JWT middleware. The user login key uses the validated token issuer; there is no separate allowlist or display name. Changing the issuer re-keys existing user logins, so treat it as a migration.
 

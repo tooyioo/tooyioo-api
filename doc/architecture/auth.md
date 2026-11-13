@@ -32,7 +32,13 @@ user_login_key = HMAC-SHA256(pepper, "oidc|" + issuer + "|" + subject)
 - A claimed user login resolves to its `user_id`; a released or unknown user login resolves to no user.
 - The raw `sub` is never stored. Stream names end up in `$all`, backups, and logs, so the key is a keyed hash, not plaintext.
 - The issuer comes from the validated token and is matched exactly by the JWT middleware (`Google.Issuer`). Changing an issuer re-keys existing user logins, so it is a one-time user-login migration, not a re-architecture.
-- The pepper is a single long-lived deployment secret. It lives in the platform secret store (or `dotnet user-secrets` locally), must be identical across replicas, and must be backed up. Losing it or changing it means no existing user login can be resolved. It is never stored in the event store. There is no rotation or versioning yet; rotating would require a user login migration.
+- The pepper is a single long-lived deployment value. It lives in the platform secret store (or `dotnet user-secrets` locally), must be identical across replicas, and must be backed up. Losing it or changing it means no existing user login can be resolved. It is never stored in the event store. Routine rotation is not planned; keeping the value stable and recoverable is more important to this system than rotating it on a schedule.
+
+### Pepper exposure and rotation
+
+The pepper is not an authentication credential. Disclosure by itself does not let someone sign in as a user or write to KurrentDB. It lets someone who knows a provider subject calculate that login's deterministic stream key. This primarily weakens the pseudonymity of login identifiers, especially if the event store or its identifiers are also exposed. Protect the event store and API credentials as the primary security boundary.
+
+If the pepper is exposed, assess whether the event store or related identifiers were exposed as well, and prevent further disclosure of the value. A pepper-only exposure does not require an automatic emergency rotation. If rotation is chosen, plan it as a migration: the raw provider subject is deliberately not stored, so existing keys cannot be re-derived offline. The API would need a versioned key scheme and a transition period that can resolve old and new keys, then migrate a login when its user authenticates again. Update both login-claiming and user-login-linking streams safely, and retain the old pepper until migration is complete. Dormant users cannot be migrated from the stored HMAC keys alone.
 
 The token filter reads the raw `iss` and `sub`. It does not normalize them. The JWT middleware's `ValidIssuers` is the issuer security boundary. The user login key factory uses the raw validated `iss` as the key input; it does not normalize it. The raw claim is never mutated.
 

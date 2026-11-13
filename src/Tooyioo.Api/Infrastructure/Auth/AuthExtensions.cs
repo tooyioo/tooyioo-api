@@ -1,10 +1,12 @@
 using System.Security.Claims;
+using System.Reflection;
 using Funzo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Tooyioo.Api.Infrastructure.OpenApi;
 using Tooyioo.Common;
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMethodReturnValue.Global
@@ -24,13 +26,18 @@ public static class AuthExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        builder.Services
+        var userLoginOptions = builder.Services
             .AddOptions<UserLoginOptions>()
             .BindConfiguration(UserLoginOptions.SectionName)
-            .ValidateDataAnnotations()
-            .Validate(o => IsValidPepper(o.Pepper),
-                "The pepper must be a base64 string of at least 32 bytes.")
-            .ValidateOnStart();
+            .ValidateDataAnnotations();
+
+        if (!Assembly.GetEntryAssembly().IsOpenApiGenerationLaunch())
+        {
+            userLoginOptions
+                .Validate(o => IsValidPepper(o.Pepper),
+                    "The pepper must be a base64 string of at least 32 bytes.")
+                .ValidateOnStart();
+        }
 
         builder.Services
             .AddSingleton<IUserLoginKeyFactory, HmacUserLoginKeyFactory>()

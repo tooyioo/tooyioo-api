@@ -43,7 +43,8 @@ internal sealed class VerticalSliceWebApplicationFactory(
         {
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Google:ClientId"] = "tooyioo-tests"
+                ["Google:ClientId"] = "tooyioo-tests",
+                ["UserLogin:Pepper"] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
             });
         });
 
