@@ -11,12 +11,12 @@ internal static class ExternalIdentityClaimsParser
     /// </summary>
     public static ExternalIdentity Parser(ClaimsPrincipal claimsPrincipal)
     {
-        if (!claimsPrincipal.GetClaim(Claims.Issuer).IsSome(out var issuer))
+        if (claimsPrincipal.GetClaim(Claims.Issuer) is not { } issuer)
         {
             throw new InvalidOperationException($"JWT is missing the '{Claims.Issuer}' claim");
         }
 
-        if (!claimsPrincipal.GetClaim(Claims.Sub).IsSome(out var subject))
+        if (claimsPrincipal.GetClaim(Claims.Sub) is not { } subject)
         {
             throw new InvalidOperationException($"JWT is missing the '{Claims.Sub}' claim");
         }

@@ -1,5 +1,4 @@
 using Eventuous;
-using Funzo;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Business.Contracts;
@@ -66,13 +65,11 @@ public sealed record InitiateBusinessOnboardingCommand(
     UserId InitiatedBy)
     : ICommand<InitiateBusinessOnboardingCommandResult>;
 
-[Result<InitiateBusinessOnboardingOkResult, InitiateBusinessOnboardingCommandErrorResult>]
-public partial class InitiateBusinessOnboardingCommandResult;
+public union InitiateBusinessOnboardingCommandResult(
+    InitiateBusinessOnboardingOkResult,
+    InitiateBusinessOnboardingConcurrencyError,
+    InitiateBusinessOnboardingUnexpectedStateError);
 
 public sealed record InitiateBusinessOnboardingOkResult(BusinessOnboardingId BusinessOnboardingId);
-
-[Union<InitiateBusinessOnboardingConcurrencyError, InitiateBusinessOnboardingUnexpectedStateError>]
-public partial class InitiateBusinessOnboardingCommandErrorResult;
-
 public sealed record InitiateBusinessOnboardingConcurrencyError;
 public sealed record InitiateBusinessOnboardingUnexpectedStateError;

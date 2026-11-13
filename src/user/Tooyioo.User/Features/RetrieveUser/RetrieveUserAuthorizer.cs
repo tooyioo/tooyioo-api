@@ -17,8 +17,7 @@ public sealed class RetrieveUserAuthorizer
         HttpContext http, 
         CancellationToken ct)
     {
-        var userIdOption = claimsPrincipal.GetClaim(Claims.UserId);
-        if (!userIdOption.IsSome(out var userId))
+        if (claimsPrincipal.GetClaim(Claims.UserId) is not { } userId)
         {
             return Task.FromResult(false);
         }

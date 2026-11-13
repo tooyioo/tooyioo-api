@@ -27,29 +27,36 @@ public static class ChooseUserOnboardingAliasMappers
             ChooseUserOnboardingAliasCommandResult commandResult,
             HttpContext context,
             CommandHttpResponseGenerator<ChooseUserOnboardingAliasResponse> commandHttpResponseGenerator)
-            => commandResult.Match<IResult>(
-                ok => commandHttpResponseGenerator.Ok(new ChooseUserOnboardingAliasResponse { UserId = ok.UserId.Value, UserOnboardingId = ok.UserOnboardingId.Value }),
-                err => err.Match<IResult>(
-                    aliasAlreadyClaimedError => commandHttpResponseGenerator.UnprocessableEntity(
+            => commandResult switch
+            {
+                ChooseUserOnboardingAliasCommandOkResult ok => commandHttpResponseGenerator.Ok(
+                    new ChooseUserOnboardingAliasResponse
+                    {
+                        UserId = ok.UserId.Value,
+                        UserOnboardingId = ok.UserOnboardingId.Value
+                    }),
+                ChooseUserOnboardingAliasAlreadyClaimedError aliasAlreadyClaimedError =>
+                    commandHttpResponseGenerator.UnprocessableEntity(
                         context,
                         "alias_already_claimed",
                         $"The provided user onboarding alias is already in use by user {aliasAlreadyClaimedError.UserId.Value}"),
-                    aliasAlreadyChosenError => commandHttpResponseGenerator.UnprocessableEntity(
+                ChooseUserOnboardingAliasAlreadyChosenError aliasAlreadyChosenError =>
+                    commandHttpResponseGenerator.UnprocessableEntity(
                         context,
                         "alias_already_chosen",
                         $"A different alias {aliasAlreadyChosenError.ExistingAlias} had already been chosen for this onboarding"),
-                    _ => commandHttpResponseGenerator.UnprocessableEntity(
-                        context,
-                        "onboarding_not_in_progress",
-                        "Could not choose user onboarding alias because onboarding is no longer in progress"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "concurrent_update",
-                        "Could not choose user onboarding alias because of a concurrency conflict, please retry"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "onboarding_state_unexpected",
-                        "Could not choose user onboarding alias because of an unexpected state conflict, please retry")
-                ));
+                ChooseUserOnboardingAliasNotInProgressError => commandHttpResponseGenerator.UnprocessableEntity(
+                    context,
+                    "onboarding_not_in_progress",
+                    "Could not choose user onboarding alias because onboarding is no longer in progress"),
+                ChooseUserOnboardingAliasConcurrencyConflictError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "concurrent_update",
+                    "Could not choose user onboarding alias because of a concurrency conflict, please retry"),
+                ChooseUserOnboardingAliasUnexpectedStateError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "onboarding_state_unexpected",
+                    "Could not choose user onboarding alias because of an unexpected state conflict, please retry")
+            };
     }
 }

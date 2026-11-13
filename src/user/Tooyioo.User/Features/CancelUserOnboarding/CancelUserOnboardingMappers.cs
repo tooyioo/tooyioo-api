@@ -24,25 +24,26 @@ public static class CancelUserOnboardingMappers
             CancelUserOnboardingCommandResult commandResult,
             HttpContext context,
             CommandHttpResponseGenerator<CancelUserOnboardingResponse> commandHttpResponseGenerator)
-            => commandResult.Match<IResult>(
-                ok => commandHttpResponseGenerator.Ok(new CancelUserOnboardingResponse
-                {
-                    UserId = ok.UserId.Value,
-                    UserOnboardingId = ok.UserOnboardingId.Value
-                }),
-                err => err.Match<IResult>(
-                    _ => commandHttpResponseGenerator.UnprocessableEntity(
-                        context,
-                        "onboarding_already_completed",
-                        "Could not cancel user onboarding because it has already been completed"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "concurrent_update",
-                        "Could not cancel user onboarding because of a concurrency conflict, please retry"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "onboarding_state_unexpected",
-                        "Could not cancel user onboarding because of an unexpected state conflict, please retry")
-                ));
+            => commandResult switch
+            {
+                CancelUserOnboardingCommandOkResult ok => commandHttpResponseGenerator.Ok(
+                    new CancelUserOnboardingResponse
+                    {
+                        UserId = ok.UserId.Value,
+                        UserOnboardingId = ok.UserOnboardingId.Value
+                    }),
+                CancelUserOnboardingAlreadyCompletedError => commandHttpResponseGenerator.UnprocessableEntity(
+                    context,
+                    "onboarding_already_completed",
+                    "Could not cancel user onboarding because it has already been completed"),
+                CancelUserOnboardingConcurrencyConflictError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "concurrent_update",
+                    "Could not cancel user onboarding because of a concurrency conflict, please retry"),
+                CancelUserOnboardingUnexpectedStateError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "onboarding_state_unexpected",
+                    "Could not cancel user onboarding because of an unexpected state conflict, please retry")
+            };
     }
 }

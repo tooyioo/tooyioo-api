@@ -17,11 +17,8 @@ public static class RetrieveBusinessOnboardingMappers
             RetrieveBusinessOnboardingRoute route,
             HttpContext context)
         {
-            var userIdOption = context.User.GetClaim(Claims.UserId);
-            if (!userIdOption.IsSome(out var userId))
-            {
-                throw new InvalidOperationException($"JWT is missing the '{Claims.UserId}' claim");
-            }
+            var userId = context.User.GetClaim(Claims.UserId)
+                ?? throw new InvalidOperationException($"JWT is missing the '{Claims.UserId}' claim");
 
             return new RetrieveBusinessOnboardingQuery(
                 new BusinessOnboardingId(route.BusinessOnboardingId.ToString()),
@@ -37,20 +34,23 @@ public static class RetrieveBusinessOnboardingMappers
             RetrieveBusinessOnboardingQueryResult queryResult,
             HttpContext context,
             QueryHttpResponseGenerator<RetrieveBusinessOnboardingResponse> queryHttpResponseGenerator)
-            => queryResult.Match<IResult>(
-                ok => queryHttpResponseGenerator.Ok(new RetrieveBusinessOnboardingResponse
-                {
-                    BusinessOnboardingId = ok.Document.Id,
-                    LegalName = ok.Document.LegalName,
-                    InitiatedBy = ok.Document.InitiatedBy,
-                    Status = RetrieveBusinessOnboardingResponse.StatusInProgress,
-                    CreatedAt = ok.Document.CreatedAt,
-                    LastModifiedAt = ok.Document.LastModifiedAt
-                }),
-                notFound => queryHttpResponseGenerator.NotFound(
+            => queryResult switch
+            {
+                RetrieveBusinessOnboardingQueryOkResult ok => queryHttpResponseGenerator.Ok(
+                    new RetrieveBusinessOnboardingResponse
+                    {
+                        BusinessOnboardingId = ok.Document.Id,
+                        LegalName = ok.Document.LegalName,
+                        InitiatedBy = ok.Document.InitiatedBy,
+                        Status = RetrieveBusinessOnboardingResponse.StatusInProgress,
+                        CreatedAt = ok.Document.CreatedAt,
+                        LastModifiedAt = ok.Document.LastModifiedAt
+                    }),
+                RetrieveBusinessOnboardingQueryNotFoundResult notFound => queryHttpResponseGenerator.NotFound(
                     context,
                     "business_onboarding_not_found",
-                    $"Could not find business onboarding with Id {notFound.Id}"));
+                    $"Could not find business onboarding with Id {notFound.Id}")
+            };
 
 
     }

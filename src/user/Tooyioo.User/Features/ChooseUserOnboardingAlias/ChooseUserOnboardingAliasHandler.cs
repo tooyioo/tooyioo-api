@@ -1,5 +1,4 @@
 using Eventuous;
-using Funzo;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Common;
@@ -91,13 +90,15 @@ public sealed class ChooseUserOnboardingAliasHandler
 public sealed record ChooseUserOnboardingAliasCommand(UserOnboardingId UserOnboardingId, string Alias)
     : ICommand<ChooseUserOnboardingAliasCommandResult>;
 
-[Result<ChooseUserOnboardingAliasCommandOkResult, ChooseUserOnboardingAliasCommandErrorResult>]
-public partial class ChooseUserOnboardingAliasCommandResult;
+public union ChooseUserOnboardingAliasCommandResult(
+    ChooseUserOnboardingAliasCommandOkResult,
+    ChooseUserOnboardingAliasAlreadyClaimedError,
+    ChooseUserOnboardingAliasAlreadyChosenError,
+    ChooseUserOnboardingAliasNotInProgressError,
+    ChooseUserOnboardingAliasConcurrencyConflictError,
+    ChooseUserOnboardingAliasUnexpectedStateError);
 
 public sealed record ChooseUserOnboardingAliasCommandOkResult(UserId UserId, UserOnboardingId UserOnboardingId);
-
-[Union<ChooseUserOnboardingAliasAlreadyClaimedError, ChooseUserOnboardingAliasAlreadyChosenError, ChooseUserOnboardingAliasNotInProgressError, ChooseUserOnboardingAliasConcurrencyConflictError, ChooseUserOnboardingAliasUnexpectedStateError>]
-public partial class ChooseUserOnboardingAliasCommandErrorResult;
 public sealed record ChooseUserOnboardingAliasAlreadyClaimedError(UserId UserId);
 public sealed record ChooseUserOnboardingAliasAlreadyChosenError(string ExistingAlias);
 public sealed record ChooseUserOnboardingAliasNotInProgressError;

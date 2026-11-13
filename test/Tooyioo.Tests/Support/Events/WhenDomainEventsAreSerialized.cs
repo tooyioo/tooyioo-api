@@ -18,9 +18,9 @@ public sealed class WhenDomainEventsAreSerialized
     {
         var services = new ServiceCollection();
         services.AddSlicent(
-            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
-            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
-            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly);
+            typeof(User.Contracts.ContractsAssemblyMarker).Assembly,
+            typeof(User.Contracts.ContractsAssemblyMarker).Assembly,
+            typeof(User.Contracts.ContractsAssemblyMarker).Assembly);
         await using var provider = services.BuildServiceProvider();
         var serializer = provider.GetRequiredService<IEventSerializer>();
 
@@ -57,7 +57,7 @@ public sealed class WhenDomainEventsAreSerialized
     public async Task Then_business_onboarding_event_names_round_trip()
     {
         var services = new ServiceCollection();
-        services.AddSlicent(typeof(Tooyioo.Business.Contracts.ContractsAssemblyMarker).Assembly);
+        services.AddSlicent(typeof(Business.Contracts.ContractsAssemblyMarker).Assembly);
         await using var provider = services.BuildServiceProvider();
         var serializer = provider.GetRequiredService<IEventSerializer>();
 
@@ -83,9 +83,9 @@ public sealed class WhenDomainEventsAreSerialized
     {
         var services = new ServiceCollection();
         services.AddSlicent(
-            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
-            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly,
-            typeof(Tooyioo.User.Contracts.ContractsAssemblyMarker).Assembly);
+            typeof(User.Contracts.ContractsAssemblyMarker).Assembly,
+            typeof(User.Contracts.ContractsAssemblyMarker).Assembly,
+            typeof(User.Contracts.ContractsAssemblyMarker).Assembly);
         await using var provider = services.BuildServiceProvider();
         var serializer = provider.GetRequiredService<IEventSerializer>();
         var payload = """

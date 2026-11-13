@@ -12,7 +12,7 @@ public sealed class WhenErasureWasNeverRequested
     : CommandVerticalSliceTest
 {
     private UserOnboardingId _userId = null!;
-    private ApplyUserPersonalDataErasureCommandResult _result = null!;
+    private ApplyUserPersonalDataErasureCommandResult _result;
 
     protected override async Task Given()
     {
@@ -30,13 +30,7 @@ public sealed class WhenErasureWasNeverRequested
     [Test]
     public async Task Then_the_erasure_is_not_applied()
     {
-        var isNotRequested = _result.Match(
-            _ => false,
-            error => error.Match(
-                _ => false,
-                _ => true,
-                _ => false,
-                _ => false));
+        var isNotRequested = _result is ApplyUserPersonalDataErasureNotRequestedError;
 
         await Assert.That(isNotRequested).IsTrue();
     }

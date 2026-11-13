@@ -1,8 +1,6 @@
 using Eventuous;
-using Funzo;
 using Slicent.Application.Queries;
 using Slicent.EventStore;
-using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.Support;
 
 // ReSharper disable ConvertToPrimaryConstructor
@@ -48,15 +46,16 @@ public sealed class RetrieveUserOnboardingHandler
         return new RetrieveUserOnboardingQueryOkResult(
             query.UserOnboardingId,
             userOnboarding.State,
-            personalData.IsSome(out var details) ? details : null);
+            personalData);
     }
 }
 
 public sealed record RetrieveUserOnboardingQuery(UserOnboardingId UserOnboardingId)
     : IQuery<RetrieveUserOnboardingQueryResult>;
 
-[Result<RetrieveUserOnboardingQueryOkResult, RetrieveUserOnboardingQueryNotFoundResult>]
-public partial class RetrieveUserOnboardingQueryResult;
+public union RetrieveUserOnboardingQueryResult(
+    RetrieveUserOnboardingQueryOkResult,
+    RetrieveUserOnboardingQueryNotFoundResult);
 
 public sealed record RetrieveUserOnboardingQueryOkResult(
     UserOnboardingId UserOnboardingId,

@@ -1,15 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Eventuous.Testing" Version="0.17.0" />
-        <PackageReference Include="TUnit" Version="1.83.8" />
+        <PackageReference Include="TUnit" Version="1.84.0" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,5 +1,4 @@
 using Eventuous;
-using Funzo;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Common;
@@ -82,13 +81,14 @@ public sealed record CompleteUserOnboardingCommand(
     string PrivacyPolicyVersion)
     : ICommand<CompleteUserOnboardingCommandResult>;
 
-[Result<CompleteUserOnboardingCommandOkResult, CompleteUserOnboardingCommandErrorResult>]
-public partial class CompleteUserOnboardingCommandResult;
+public union CompleteUserOnboardingCommandResult(
+    CompleteUserOnboardingCommandOkResult,
+    CompleteUserOnboardingAlreadyCanceledError,
+    CompleteUserOnboardingAliasNotChosenError,
+    CompleteUserOnboardingConcurrencyConflict,
+    CompleteUserOnboardingUnexpectedStateError);
 
 public sealed record CompleteUserOnboardingCommandOkResult(UserId UserId, UserOnboardingId UserOnboardingId);
-
-[Union<CompleteUserOnboardingAlreadyCanceledError, CompleteUserOnboardingAliasNotChosenError, CompleteUserOnboardingConcurrencyConflict, CompleteUserOnboardingUnexpectedStateError>]
-public partial class CompleteUserOnboardingCommandErrorResult;
 public sealed record CompleteUserOnboardingAlreadyCanceledError;
 public sealed record CompleteUserOnboardingAliasNotChosenError;
 public sealed record CompleteUserOnboardingConcurrencyConflict;

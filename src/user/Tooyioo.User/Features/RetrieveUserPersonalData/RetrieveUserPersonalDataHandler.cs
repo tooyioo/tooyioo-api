@@ -1,4 +1,3 @@
-using Funzo;
 using Slicent.Application.Queries;
 using Tooyioo.User.Features.Support;
 using Tooyioo.Common;
@@ -35,8 +34,9 @@ public sealed class RetrieveUserPersonalDataHandler
 public sealed record RetrieveUserPersonalDataQuery(UserId UserId)
     : DocumentFilter<UserPersonalDataDocument>, IQuery<RetrieveUserPersonalDataQueryResult>;
 
-[Result<RetrieveUserPersonalDataQueryOkResult, RetrieveUserPersonalDataQueryNotFoundResult>]
-public partial class RetrieveUserPersonalDataQueryResult;
+public union RetrieveUserPersonalDataQueryResult(
+    RetrieveUserPersonalDataQueryOkResult,
+    RetrieveUserPersonalDataQueryNotFoundResult);
 
 public sealed record RetrieveUserPersonalDataQueryOkResult(UserPersonalDataDocument Document);
 public sealed record RetrieveUserPersonalDataQueryNotFoundResult(UserId UserId);

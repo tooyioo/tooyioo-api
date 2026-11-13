@@ -1,5 +1,4 @@
 using Eventuous;
-using Funzo;
 using Slicent.EventStore;
 using Tooyioo.Common;
 // ReSharper disable ConvertToPrimaryConstructor
@@ -22,7 +21,7 @@ internal sealed class UserLoginResolver
         _keyFactory = keyFactory;
     }
 
-    public async ValueTask<Option<UserId>> Resolve(ExternalIdentity externalIdentity, CancellationToken cancellationToken)
+    public async ValueTask<UserId?> Resolve(ExternalIdentity externalIdentity, CancellationToken cancellationToken)
     {
         var userLoginKey = _keyFactory.ForOidc(externalIdentity.Issuer, externalIdentity.Id);
 
@@ -31,7 +30,7 @@ internal sealed class UserLoginResolver
                 new UserLoginClaimingId(userLoginKey.Key), cancellationToken);
 
         return claiming.State.UserId is { } userId
-            ? Option.Some(new UserId(userId))
-            : Option<UserId>.None;
+            ? new UserId(userId)
+            : null;
     }
 }

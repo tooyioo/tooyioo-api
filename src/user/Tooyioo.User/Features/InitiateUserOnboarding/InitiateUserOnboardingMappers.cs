@@ -48,21 +48,22 @@ public static class InitiateUserOnboardingMappers
             InitiateUserOnboardingCommandResult commandResult,
             HttpContext context,
             CommandHttpResponseGenerator<InitiateUserOnboardingResponse> commandHttpResponseGenerator)
-            => commandResult.Match<IResult>(
-                ok => commandHttpResponseGenerator.Ok(new InitiateUserOnboardingResponse
-                {
-                    UserId = ok.UserId.Value,
-                    UserOnboardingId = ok.UserOnboardingId.Value
-                }),
-                err => err.Match<IResult>(
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "concurrent_update",
-                        "Could not initiate user onboarding because of a concurrency conflict, please retry"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "onboarding_state_unexpected",
-                        "Could not initiate user onboarding because of an unexpected state conflict, please retry")
-                ));
+            => commandResult switch
+            {
+                InitiateUserOnboardingOkResult ok => commandHttpResponseGenerator.Ok(
+                    new InitiateUserOnboardingResponse
+                    {
+                        UserId = ok.UserId.Value,
+                        UserOnboardingId = ok.UserOnboardingId.Value
+                    }),
+                InitiateUserOnboardingConcurrencyError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "concurrent_update",
+                    "Could not initiate user onboarding because of a concurrency conflict, please retry"),
+                InitiateUserOnboardingUnexpectedStateError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "onboarding_state_unexpected",
+                    "Could not initiate user onboarding because of an unexpected state conflict, please retry")
+            };
     }
 }

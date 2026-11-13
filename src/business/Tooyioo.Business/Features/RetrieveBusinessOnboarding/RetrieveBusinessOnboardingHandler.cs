@@ -1,4 +1,3 @@
-using Funzo;
 using Slicent.Application.Queries;
 using Tooyioo.Business.Features.Support;
 using Tooyioo.Common;
@@ -39,8 +38,9 @@ public sealed class RetrieveBusinessOnboardingHandler
 public sealed record RetrieveBusinessOnboardingQuery(BusinessOnboardingId BusinessOnboardingId, UserId UserId)
     : DocumentFilter<BusinessOnboardingDocument>, IQuery<RetrieveBusinessOnboardingQueryResult>;
 
-[Result<RetrieveBusinessOnboardingQueryOkResult, RetrieveBusinessOnboardingQueryNotFoundResult>]
-public partial class RetrieveBusinessOnboardingQueryResult;
+public union RetrieveBusinessOnboardingQueryResult(
+    RetrieveBusinessOnboardingQueryOkResult,
+    RetrieveBusinessOnboardingQueryNotFoundResult);
 
 public sealed record RetrieveBusinessOnboardingQueryOkResult(BusinessOnboardingDocument Document);
 public sealed record RetrieveBusinessOnboardingQueryNotFoundResult(BusinessOnboardingId Id);

@@ -24,25 +24,28 @@ public static class RetrieveUserMappers
             RetrieveUserQueryResult queryResult,
             HttpContext context,
             QueryHttpResponseGenerator<RetrieveUserResponse> queryHttpResponseGenerator)
-            => queryResult.Match<IResult>(
-                ok => queryHttpResponseGenerator.Ok(new RetrieveUserResponse
-                {
-                    Id = ok.Document.Id,
-                    Alias = ok.Document.Alias ?? string.Empty,
-                    Name = ok.Document.Name,
-                    LastName = ok.Document.LastName,
-                    Email = ok.Document.Email,
-                    IsEmailVerified = ok.Document.IsEmailVerified,
-                    PhoneNumber = ok.Document.PhoneNumber,
-                    Status = ok.Document.Status,
-                    CreatedAt = ok.Document.CreatedAt,
-                    LastModifiedAt = ok.Document.LastModifiedAt,
-                    TermsOfServiceVersion = ok.Document.TermsOfServiceVersion ?? string.Empty,
-                    PrivacyPolicyVersion = ok.Document.PrivacyPolicyVersion ?? string.Empty
-                }),
-                notFound => queryHttpResponseGenerator.NotFound(
+            => queryResult switch
+            {
+                RetrieveUserQueryOkResult ok => queryHttpResponseGenerator.Ok(
+                    new RetrieveUserResponse
+                    {
+                        Id = ok.Document.Id,
+                        Alias = ok.Document.Alias ?? string.Empty,
+                        Name = ok.Document.Name,
+                        LastName = ok.Document.LastName,
+                        Email = ok.Document.Email,
+                        IsEmailVerified = ok.Document.IsEmailVerified,
+                        PhoneNumber = ok.Document.PhoneNumber,
+                        Status = ok.Document.Status,
+                        CreatedAt = ok.Document.CreatedAt,
+                        LastModifiedAt = ok.Document.LastModifiedAt,
+                        TermsOfServiceVersion = ok.Document.TermsOfServiceVersion ?? string.Empty,
+                        PrivacyPolicyVersion = ok.Document.PrivacyPolicyVersion ?? string.Empty
+                    }),
+                RetrieveUserQueryNotFoundResult notFound => queryHttpResponseGenerator.NotFound(
                     context,
                     "profile_not_found",
-                    $"Could not find Profile with Id {notFound.Id}"));
+                    $"Could not find Profile with Id {notFound.Id}")
+            };
     }
 }

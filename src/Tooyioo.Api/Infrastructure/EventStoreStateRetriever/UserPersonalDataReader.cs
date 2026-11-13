@@ -1,7 +1,6 @@
 using Eventuous;
 using Slicent.EventStore;
 using Tooyioo.User.Features.Support;
-using Tooyioo.User.Contracts;
 
 namespace Tooyioo.Api.Infrastructure.EventStoreStateRetriever;
 

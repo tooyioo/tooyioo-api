@@ -1,5 +1,4 @@
 using Eventuous;
-using Funzo;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Common;
@@ -130,13 +129,13 @@ public sealed class CancelUserOnboardingHandler
 public sealed record CancelUserOnboardingCommand(UserOnboardingId UserOnboardingId, string ReasonCode)
     : ICommand<CancelUserOnboardingCommandResult>;
 
-[Result<CancelUserOnboardingCommandOkResult, CancelUserOnboardingCommandErrorResult>]
-public partial class CancelUserOnboardingCommandResult;
+public union CancelUserOnboardingCommandResult(
+    CancelUserOnboardingCommandOkResult,
+    CancelUserOnboardingAlreadyCompletedError,
+    CancelUserOnboardingConcurrencyConflictError,
+    CancelUserOnboardingUnexpectedStateError);
 
 public sealed record CancelUserOnboardingCommandOkResult(UserId UserId, UserOnboardingId UserOnboardingId);
-
-[Union<CancelUserOnboardingAlreadyCompletedError, CancelUserOnboardingConcurrencyConflictError, CancelUserOnboardingUnexpectedStateError>]
-public partial class CancelUserOnboardingCommandErrorResult;
 public sealed record CancelUserOnboardingAlreadyCompletedError;
 public sealed record CancelUserOnboardingConcurrencyConflictError;
 public sealed record CancelUserOnboardingUnexpectedStateError;

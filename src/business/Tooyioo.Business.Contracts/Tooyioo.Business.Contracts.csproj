@@ -1,12 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
+    
     <ItemGroup>
         <ProjectReference Include="..\..\Slicent\Slicent.csproj" />
     </ItemGroup>

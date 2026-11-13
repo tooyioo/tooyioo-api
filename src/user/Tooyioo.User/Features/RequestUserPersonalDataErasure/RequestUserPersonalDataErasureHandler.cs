@@ -1,5 +1,4 @@
 using Eventuous;
-using Funzo;
 using Microsoft.Extensions.Options;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
@@ -79,14 +78,13 @@ public sealed class RequestUserPersonalDataErasureHandler
 public sealed record RequestUserPersonalDataErasureCommand(UserId UserId, string ReasonCode)
     : ICommand<RequestUserPersonalDataErasureCommandResult>;
 
-[Result<RequestUserPersonalDataErasureCommandOkResult, RequestUserPersonalDataErasureCommandErrorResult>]
-public partial class RequestUserPersonalDataErasureCommandResult;
+public union RequestUserPersonalDataErasureCommandResult(
+    RequestUserPersonalDataErasureCommandOkResult,
+    RequestUserPersonalDataErasureNotFoundError,
+    RequestUserPersonalDataErasureAlreadyErasedError,
+    RequestUserPersonalDataErasureConcurrencyConflictError);
 
 public sealed record RequestUserPersonalDataErasureCommandOkResult(UserId UserId, DateTime EraseAfterUtc);
-
-[Union<RequestUserPersonalDataErasureNotFoundError, RequestUserPersonalDataErasureAlreadyErasedError, RequestUserPersonalDataErasureConcurrencyConflictError>]
-public partial class RequestUserPersonalDataErasureCommandErrorResult;
-
 public sealed record RequestUserPersonalDataErasureNotFoundError;
 public sealed record RequestUserPersonalDataErasureAlreadyErasedError;
 public sealed record RequestUserPersonalDataErasureConcurrencyConflictError;

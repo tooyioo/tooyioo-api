@@ -16,7 +16,7 @@ public abstract class UserOnboardingRouteAuthorizer<TRoute>(IEventReader eventRe
         HttpContext http,
         CancellationToken cancellationToken = default)
     {
-        if (!claimsPrincipal.GetClaim(Claims.UserId).IsSome(out var userId))
+        if (claimsPrincipal.GetClaim(Claims.UserId) is not { } userId)
         {
             return false;
         }

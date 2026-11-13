@@ -25,25 +25,26 @@ public static class CancelUserPersonalDataErasureMappers
             CancelUserPersonalDataErasureCommandResult commandResult,
             HttpContext context,
             CommandHttpResponseGenerator<CancelUserPersonalDataErasureResponse> commandHttpResponseGenerator)
-            => commandResult.Match<IResult>(
-                ok => commandHttpResponseGenerator.Ok(new CancelUserPersonalDataErasureResponse
-                {
-                    UserId = ok.UserId.Value,
-                    Status = "active"
-                }),
-                err => err.Match<IResult>(
-                    _ => commandHttpResponseGenerator.NotFound(
-                        context,
-                        "user_personal_data_not_found",
-                        "Could not find personal data for the given user"),
-                    _ => commandHttpResponseGenerator.UnprocessableEntity(
-                        context,
-                        "user_personal_data_already_erased",
-                        "The personal data has already been erased"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "concurrent_update",
-                        "Could not cancel personal data erasure because of a concurrency conflict, please retry")
-                ));
+            => commandResult switch
+            {
+                CancelUserPersonalDataErasureCommandOkResult ok => commandHttpResponseGenerator.Ok(
+                    new CancelUserPersonalDataErasureResponse
+                    {
+                        UserId = ok.UserId.Value,
+                        Status = "active"
+                    }),
+                CancelUserPersonalDataErasureNotFoundError => commandHttpResponseGenerator.NotFound(
+                    context,
+                    "user_personal_data_not_found",
+                    "Could not find personal data for the given user"),
+                CancelUserPersonalDataErasureAlreadyErasedError => commandHttpResponseGenerator.UnprocessableEntity(
+                    context,
+                    "user_personal_data_already_erased",
+                    "The personal data has already been erased"),
+                CancelUserPersonalDataErasureConcurrencyConflictError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "concurrent_update",
+                    "Could not cancel personal data erasure because of a concurrency conflict, please retry")
+            };
     }
 }

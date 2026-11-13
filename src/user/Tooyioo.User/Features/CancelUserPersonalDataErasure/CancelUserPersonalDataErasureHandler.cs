@@ -1,5 +1,4 @@
 using Eventuous;
-using Funzo;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.User.Contracts;
@@ -73,14 +72,13 @@ public sealed class CancelUserPersonalDataErasureHandler
 public sealed record CancelUserPersonalDataErasureCommand(UserId UserId)
     : ICommand<CancelUserPersonalDataErasureCommandResult>;
 
-[Result<CancelUserPersonalDataErasureCommandOkResult, CancelUserPersonalDataErasureCommandErrorResult>]
-public partial class CancelUserPersonalDataErasureCommandResult;
+public union CancelUserPersonalDataErasureCommandResult(
+    CancelUserPersonalDataErasureCommandOkResult,
+    CancelUserPersonalDataErasureNotFoundError,
+    CancelUserPersonalDataErasureAlreadyErasedError,
+    CancelUserPersonalDataErasureConcurrencyConflictError);
 
 public sealed record CancelUserPersonalDataErasureCommandOkResult(UserId UserId);
-
-[Union<CancelUserPersonalDataErasureNotFoundError, CancelUserPersonalDataErasureAlreadyErasedError, CancelUserPersonalDataErasureConcurrencyConflictError>]
-public partial class CancelUserPersonalDataErasureCommandErrorResult;
-
 public sealed record CancelUserPersonalDataErasureNotFoundError;
 public sealed record CancelUserPersonalDataErasureAlreadyErasedError;
 public sealed record CancelUserPersonalDataErasureConcurrencyConflictError;

@@ -23,7 +23,6 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
     private EventStreamSnapshot _externalIdentityClaimStreamBeforeWhen = null!;
     private EventStreamSnapshot _aliasClaimStreamBeforeWhen = null!;
     private EventStreamSnapshot _userLoginLinkingStreamBeforeWhen = null!;
-    private EventStreamSnapshot _personalDataStreamBeforeWhen = null!;
 
     protected override async Task Given()
     {
@@ -61,7 +60,7 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
             .Stream<UserLoginLinkingState, UserLoginLinkingId>(new UserLoginLinkingId(_userOnboardingId.Value))
             .CaptureSnapshot();
 
-        _personalDataStreamBeforeWhen = await Host.Events
+        await Host.Events
             .Stream<UserPersonalDataState, UserPersonalDataId>(new UserPersonalDataId(_userOnboardingId.Value))
             .CaptureSnapshot();
     }

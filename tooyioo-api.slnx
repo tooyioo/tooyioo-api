@@ -1,5 +1,4 @@
 <Solution>
-  <Folder Name="/doc/" />
   <Folder Name="/src/">
     <Project Path="src/Slicent/Slicent.csproj" />
     <Project Path="src/Tooyioo.Api/Tooyioo.Api.csproj" />

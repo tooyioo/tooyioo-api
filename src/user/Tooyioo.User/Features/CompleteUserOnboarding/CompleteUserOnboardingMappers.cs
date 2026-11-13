@@ -27,31 +27,30 @@ public static class CompleteUserOnboardingMappers
             CompleteUserOnboardingCommandResult commandResult,
             HttpContext context,
             CommandHttpResponseGenerator<CompleteUserOnboardingResponse> commandHttpResponseGenerator)
-            => commandResult.Match<IResult>(
-                ok => commandHttpResponseGenerator.Ok(
+            => commandResult switch
+            {
+                CompleteUserOnboardingCommandOkResult ok => commandHttpResponseGenerator.Ok(
                     new CompleteUserOnboardingResponse
                     {
                         UserId = ok.UserId.Value,
                         UserOnboardingId = ok.UserOnboardingId.Value
                     }),
-                err => err.Match<IResult>(
-                    _ => commandHttpResponseGenerator.UnprocessableEntity(
-                        context,
-                        "onboarding_already_canceled",
-                        "Could not complete user onboarding because it has been canceled"),
-                    _ => commandHttpResponseGenerator.UnprocessableEntity(
-                        context,
-                        "onboarding_alias_not_chosen",
-                        "Could not complete user onboarding because no alias has been chosen"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "concurrent_update",
-                        "Could not complete user onboarding because of a concurrency conflict, please retry"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "onboarding_state_unexpected",
-                        "Could not complete user onboarding because of an unexpected state conflict, please retry")
-
-                ));
+                CompleteUserOnboardingAlreadyCanceledError => commandHttpResponseGenerator.UnprocessableEntity(
+                    context,
+                    "onboarding_already_canceled",
+                    "Could not complete user onboarding because it has been canceled"),
+                CompleteUserOnboardingAliasNotChosenError => commandHttpResponseGenerator.UnprocessableEntity(
+                    context,
+                    "onboarding_alias_not_chosen",
+                    "Could not complete user onboarding because no alias has been chosen"),
+                CompleteUserOnboardingConcurrencyConflict => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "concurrent_update",
+                    "Could not complete user onboarding because of a concurrency conflict, please retry"),
+                CompleteUserOnboardingUnexpectedStateError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "onboarding_state_unexpected",
+                    "Could not complete user onboarding because of an unexpected state conflict, please retry")
+            };
     }
 }

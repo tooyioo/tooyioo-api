@@ -47,7 +47,7 @@ public sealed class WhenGoogleIdentityIsUnknown
         => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
     [Test]
-    public async Task? Then_response_contains_user_onboarding_id()
+    public async Task Then_response_contains_user_onboarding_id()
         => await Assert.That(Guid.TryParse(_body.UserOnboardingId, out _)).IsTrue();
     
     [Test]

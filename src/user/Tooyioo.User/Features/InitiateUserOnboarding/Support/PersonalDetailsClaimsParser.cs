@@ -13,21 +13,11 @@ internal static class PersonalDetailsClaimsParser
             GetRequiredBooleanClaim(principal, Claims.EmailVerified));
 
     private static string GetRequiredClaim(ClaimsPrincipal principal, string claim)
-    {
-        var claimOption = principal.GetClaim(claim);
-        return claimOption.IsSome(out var value) 
-            ? value 
-            : throw new InvalidOperationException($"JWT is missing the '{claim}' claim");
-    }
-    
-    private static string GetOptionalClaim(ClaimsPrincipal principal, string claim)
-    {
-        var claimOption = principal.GetClaim(claim);
+        => principal.GetClaim(claim)
+           ?? throw new InvalidOperationException($"JWT is missing the '{claim}' claim");
 
-        return claimOption.IsSome(out var value)
-            ? value
-            : string.Empty;
-    }
+    private static string GetOptionalClaim(ClaimsPrincipal principal, string claim)
+        => principal.GetClaim(claim) ?? string.Empty;
 
     private static bool GetRequiredBooleanClaim(ClaimsPrincipal principal, string claim)
     {

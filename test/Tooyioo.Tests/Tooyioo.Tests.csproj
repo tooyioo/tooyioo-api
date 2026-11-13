@@ -1,10 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
@@ -12,7 +9,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0" />
         <PackageReference Include="Testcontainers.MongoDb" Version="4.16.0" />
-        <PackageReference Include="TUnit" Version="1.83.8" />
+        <PackageReference Include="TUnit" Version="1.84.0" />
     </ItemGroup>
 
     <ItemGroup>

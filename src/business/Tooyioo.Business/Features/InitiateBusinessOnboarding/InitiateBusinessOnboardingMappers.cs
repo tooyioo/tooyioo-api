@@ -16,11 +16,8 @@ public static class InitiateBusinessOnboardingMappers
             InitiateBusinessOnboardingRequest request,
             HttpContext context)
         {
-            var userIdOption = context.User.GetClaim(Claims.UserId);
-            if (!userIdOption.IsSome(out var userId))
-            {
-                throw new InvalidOperationException($"JWT is missing the '{Claims.UserId}' claim");
-            }
+            var userId = context.User.GetClaim(Claims.UserId)
+                ?? throw new InvalidOperationException($"JWT is missing the '{Claims.UserId}' claim");
 
             return new InitiateBusinessOnboardingCommand(
                 BusinessOnboardingId.New(),
@@ -37,20 +34,21 @@ public static class InitiateBusinessOnboardingMappers
             InitiateBusinessOnboardingCommandResult commandResult,
             HttpContext context,
             CommandHttpResponseGenerator<InitiateBusinessOnboardingResponse> commandHttpResponseGenerator)
-            => commandResult.Match<IResult>(
-                ok => commandHttpResponseGenerator.Ok(new InitiateBusinessOnboardingResponse
-                {
-                    BusinessOnboardingId = ok.BusinessOnboardingId
-                }),
-                err => err.Match<IResult>(
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "concurrent_update",
-                        "Could not initiate business onboarding because of a concurrency conflict, please retry"),
-                    _ => commandHttpResponseGenerator.Conflict(
-                        context,
-                        "onboarding_state_unexpected",
-                        "Could not initiate business onboarding because of an unexpected state conflict, please retry")
-                ));
+            => commandResult switch
+            {
+                InitiateBusinessOnboardingOkResult ok => commandHttpResponseGenerator.Ok(
+                    new InitiateBusinessOnboardingResponse
+                    {
+                        BusinessOnboardingId = ok.BusinessOnboardingId
+                    }),
+                InitiateBusinessOnboardingConcurrencyError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "concurrent_update",
+                    "Could not initiate business onboarding because of a concurrency conflict, please retry"),
+                InitiateBusinessOnboardingUnexpectedStateError => commandHttpResponseGenerator.Conflict(
+                    context,
+                    "onboarding_state_unexpected",
+                    "Could not initiate business onboarding because of an unexpected state conflict, please retry")
+            };
     }
 }

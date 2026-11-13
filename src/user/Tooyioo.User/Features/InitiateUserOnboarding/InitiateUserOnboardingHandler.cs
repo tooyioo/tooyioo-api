@@ -1,5 +1,4 @@
 using Eventuous;
-using Funzo;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Common;
@@ -119,13 +118,11 @@ public sealed record InitiateUserOnboardingCommand(
     UserLoginKey UserLoginKey)
     : ICommand<InitiateUserOnboardingCommandResult>;
 
-[Result<InitiateUserOnboardingOkResult, InitiateUserOnboardingCommandErrorResult>]
-public partial class InitiateUserOnboardingCommandResult;
+public union InitiateUserOnboardingCommandResult(
+    InitiateUserOnboardingOkResult,
+    InitiateUserOnboardingConcurrencyError,
+    InitiateUserOnboardingUnexpectedStateError);
 
 public sealed record InitiateUserOnboardingOkResult(UserOnboardingId UserOnboardingId, UserId UserId);
-
-[Union<InitiateUserOnboardingConcurrencyError, InitiateUserOnboardingUnexpectedStateError>]
-public partial class InitiateUserOnboardingCommandErrorResult;
-
 public sealed record InitiateUserOnboardingConcurrencyError;
 public sealed record InitiateUserOnboardingUnexpectedStateError;

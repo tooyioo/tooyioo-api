@@ -1,5 +1,3 @@
-using System.Net.Http.Json;
-
 namespace Tooyioo.Tests.Support.Http;
 
 internal static class HttpResponseMessageExtensions

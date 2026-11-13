@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using System.Reflection;
-using Funzo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -139,7 +138,7 @@ public static class AuthExtensions
 
         var userLoginResolver = context.HttpContext.RequestServices.GetRequiredService<IUserLoginResolver>();
 
-        Option<UserId> resolution;
+        UserId? resolution;
         try
         {
             resolution = await userLoginResolver.Resolve(externalIdentity, context.HttpContext.RequestAborted);
@@ -150,7 +149,7 @@ public static class AuthExtensions
             return;
         }
 
-        if (resolution.IsSome(out var userId))
+        if (resolution is { } userId)
         {
             claimsIdentity.AddClaim(new Claim(Claims.UserId, userId.Value));
         }
