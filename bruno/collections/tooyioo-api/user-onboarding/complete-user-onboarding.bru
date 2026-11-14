@@ -4,8 +4,8 @@ meta {
   seq: 4
 }
 
-post {
-  url: {{baseUrl}}/user-onboarding/{{dynamicUserOnboardingId}}/complete
+put {
+  url: {{baseUrl}}/users/{{dynamicUserId}}/onboarding/completion
   body: json
   auth: inherit
 }

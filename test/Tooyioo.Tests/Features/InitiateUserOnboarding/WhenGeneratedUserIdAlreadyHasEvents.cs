@@ -4,16 +4,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Slicent.Application;
 using Slicent.Application.Commands;
-using Tooyioo.Common;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.InitiateUserOnboarding;
 using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
+using Tooyioo.User.Identity;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 
@@ -23,7 +23,6 @@ public sealed class WhenGeneratedUserIdAlreadyHasEvents
 {
     private FixedIdCommandMapper _mapper = null!;
     private UserId _userId = null!;
-    private UserOnboardingId _userOnboardingId = null!;
     private HttpResponseMessage _response = null!;
     private HttpProblemDetails _body = null!;
 
@@ -43,13 +42,11 @@ public sealed class WhenGeneratedUserIdAlreadyHasEvents
     protected override async Task Given()
     {
         _userId = new UserId(1.ToGuid().ToString());
-        _userOnboardingId = new UserOnboardingId(2.ToGuid().ToString());
 
         _mapper.UserId = _userId;
-        _mapper.UserOnboardingId = _userOnboardingId;
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userId.Value),
+        await Host.Given<UserPersonalDataState, UserId>(
+            _userId,
             DomainEvent.UserPersonalDataRecorded().Build());
     }
 
@@ -60,7 +57,7 @@ public sealed class WhenGeneratedUserIdAlreadyHasEvents
             .Build();
 
         _response = await Host.HttpClient.PostJson(
-            "/user-onboarding/initiate",
+            "/users",
             new InitiateUserOnboardingRequest(),
             token);
 
@@ -79,7 +76,6 @@ public sealed class WhenGeneratedUserIdAlreadyHasEvents
         : ICommandMapper<InitiateUserOnboardingRequest, HttpContext, InitiateUserOnboardingCommand>
     {
         public UserId UserId { get; set; } = null!;
-        public UserOnboardingId UserOnboardingId { get; set; } = null!;
 
         public InitiateUserOnboardingCommand Map(
             InitiateUserOnboardingRequest request,
@@ -91,11 +87,7 @@ public sealed class WhenGeneratedUserIdAlreadyHasEvents
 
             var command = productionMapper.Map(request, context);
 
-            return command with
-            {
-                UserId = UserId,
-                UserOnboardingId = UserOnboardingId
-            };
+            return command with { UserId = UserId };
         }
     }
 }

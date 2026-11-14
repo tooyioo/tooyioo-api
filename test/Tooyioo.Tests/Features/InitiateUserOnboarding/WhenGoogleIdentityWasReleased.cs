@@ -1,12 +1,11 @@
 using System.Net;
-using Tooyioo.Common;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 
@@ -16,32 +15,30 @@ public sealed class WhenGoogleIdentityWasReleased
 {
     private HttpResponseMessage _response = null!;
     private InitiateUserOnboardingResponse _body = null!;
-    private UserOnboardingId _canceledUserOnboardingId = null!;
+    private UserId _canceledUserId = null!;
     private string _subject = null!;
     private string _name = null!;
     private string _lastName = null!;
     private string _email = null!;
     private EventStreamSnapshot _externalIdentityClaimStreamBeforeWhen = null!;
-    private UserId _canceledUserId = null!;
 
     protected override async Task Given()
     {
-        _canceledUserOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
-        _canceledUserId = new UserId(2.ToGuid().ToString());
+        _canceledUserId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
-            _canceledUserOnboardingId,
+        await Host.Given<UserOnboardingState, UserId>(
+            _canceledUserId,
             DomainEvent.UserOnboardingInitiated()
                 .WithExternalIdentityId(_subject)
-                .WithUserId(_canceledUserId)
+                
                 .Build(),
             DomainEvent.UserOnboardingCanceled().Build());
 
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
-            DomainEvent.UserLoginClaimed().WithUserOnboardingId(_canceledUserOnboardingId).Build(),
-            DomainEvent.UserLoginReleased().WithUserOnboardingId(_canceledUserOnboardingId).Build());
+            DomainEvent.UserLoginClaimed().WithUserId(_canceledUserId).Build(),
+            DomainEvent.UserLoginReleased().WithUserId(_canceledUserId).Build());
 
         _externalIdentityClaimStreamBeforeWhen = await Host.Events
             .Stream<UserLoginClaimingState, UserLoginClaimingId>(new UserLoginClaimingId(_subject))
@@ -60,7 +57,7 @@ public sealed class WhenGoogleIdentityWasReleased
             .Build();
 
         _response = await Host.HttpClient.PostJson(
-            "/user-onboarding/initiate",
+            "/users",
             new InitiateUserOnboardingRequest(),
             token);
 
@@ -69,11 +66,11 @@ public sealed class WhenGoogleIdentityWasReleased
 
     [Test]
     public async Task Then_response_is_ok()
-        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.Created);
 
     [Test]
     public async Task Then_response_returns_a_new_user_onboarding_id()
-        => await Assert.That(_body.UserOnboardingId).IsNotEqualTo(_canceledUserOnboardingId.Value);
+        => await Assert.That(_body.UserId).IsNotEqualTo(_canceledUserId.Value);
     
     [Test]
     public async Task Then_response_returns_a_new_user_id()
@@ -87,13 +84,13 @@ public sealed class WhenGoogleIdentityWasReleased
                 _externalIdentityClaimStreamBeforeWhen,
                 DomainEvent.UserLoginClaimed()
                     .WithUserId(_body.UserId)
-                    .WithUserOnboardingId(_body.UserOnboardingId)
+                    .WithUserId(_body.UserId)
                     .Build());
 
     [Test]
     public async Task Then_personal_data_is_recorded_for_the_new_user()
         => await Host.Events
-            .Stream<UserPersonalDataState, UserPersonalDataId>(new UserPersonalDataId(_body.UserId))
+            .Stream<UserPersonalDataState, UserId>(new UserId(_body.UserId))
             .ShouldContainExactly(
                 DomainEvent.UserPersonalDataRecorded()
                     .WithName(_name)
@@ -105,7 +102,7 @@ public sealed class WhenGoogleIdentityWasReleased
     [Test]
     public async Task Then_user_login_is_linked_to_the_new_user()
         => await Host.Events
-            .Stream<UserLoginLinkingState, UserLoginLinkingId>(new UserLoginLinkingId(_body.UserId))
+            .Stream<UserLoginLinkingState, UserId>(new UserId(_body.UserId))
             .ShouldContainExactly(
                 DomainEvent.UserLoginLinked()
                     .WithUserLoginKey(_subject)
@@ -114,9 +111,9 @@ public sealed class WhenGoogleIdentityWasReleased
     [Test]
     public async Task Then_user_onboarding_is_initiated_for_the_new_user()
         => await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(new UserOnboardingId(_body.UserOnboardingId))
+            .Stream<UserOnboardingState, UserId>(new UserId(_body.UserId))
             .ShouldContainExactly(
                 DomainEvent.UserOnboardingInitiated()
-                    .WithUserId(_body.UserId)
+                    
                     .Build());
 }

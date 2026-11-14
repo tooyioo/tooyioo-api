@@ -21,11 +21,11 @@ public sealed class WhenUserSummariesAreFilteredByIdContainsIgnoringCase(MongoTe
 
     protected override async Task Given()
     {
-        var janeUserOnboardingId = new UserOnboardingId("00000000-0000-0000-0000-000000000101");
-        var johnUserOnboardingId = new UserOnboardingId("00000000-0000-0000-0000-000000000102");
-        var caseyUserOnboardingId = new UserOnboardingId("00000000-0000-0000-0000-000000000103");
+        var janeUserId = new UserId("00000000-0000-0000-0000-000000000101");
+        var johnUserId = new UserId("00000000-0000-0000-0000-000000000102");
+        var caseyUserId = new UserId("00000000-0000-0000-0000-000000000103");
 
-        _janeUserId = janeUserOnboardingId.Value;
+        _janeUserId = janeUserId.Value;
         _janeSubject = "google-sub-jane";
         _janeAlias = "jane-bloggs";
         var johnSubject = "google-sub-john";
@@ -34,23 +34,23 @@ public sealed class WhenUserSummariesAreFilteredByIdContainsIgnoringCase(MongoTe
         await GivenUserLoginClaimingEvents(
             _janeSubject,
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(janeUserOnboardingId)
+                .WithUserId(janeUserId)
                 .Build());
 
         await GivenUserLoginClaimingEvents(
             johnSubject,
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(johnUserOnboardingId)
+                .WithUserId(johnUserId)
                 .Build());
 
         await GivenUserLoginClaimingEvents(
             caseySubject,
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(caseyUserOnboardingId)
+                .WithUserId(caseyUserId)
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
-            janeUserOnboardingId,
+            janeUserId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("Jane")
                 .WithLastName("Bloggs")
@@ -65,7 +65,7 @@ public sealed class WhenUserSummariesAreFilteredByIdContainsIgnoringCase(MongoTe
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
-            johnUserOnboardingId,
+            johnUserId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("John")
                 .WithLastName("Smith")
@@ -80,7 +80,7 @@ public sealed class WhenUserSummariesAreFilteredByIdContainsIgnoringCase(MongoTe
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
-            caseyUserOnboardingId,
+            caseyUserId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("Casey")
                 .WithLastName("Bloggins")

@@ -19,11 +19,10 @@ public sealed class RetrieveBusinessOnboardingEndpoint
                 RetrieveBusinessOnboardingQuery,
                 RetrieveBusinessOnboardingQueryResult,
                 RetrieveBusinessOnboardingResponse>(
-                "/business-onboarding/{id:guid}",
+                "/businesses/{id:guid}/onboarding",
                 cfg => cfg
                     .WithName("retrieve-business-onboarding")
-                    .WithSummary("Get a business onboarding")
-                    .WithTags("business-onboarding"))
-            .RequireAuthorization(AuthorizationPolicies.UserRequired)
-            .WithQueryConventions<RetrieveBusinessOnboardingResponse, HttpProblemDetails>();
+                    .WithSummary("Get the business onboarding")
+                    .WithTags("business"))
+            .RequireAuthorization(AuthorizationPolicies.UserRequired);
 }

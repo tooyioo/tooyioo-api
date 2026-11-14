@@ -2,7 +2,7 @@
 
 state_change "initiate_business_onboarding" {
   title       = "Initiate Business Onboarding"
-  description = "POST /business-onboarding/initiate starts a business onboarding process for an authenticated, fully onboarded user. The mapper generates the business onboarding id, trims the legal name, and takes InitiatedBy from the app-owned user_id claim. The handler appends BusinessOnboardingInitiated to a single process stream. Repeating the request creates another business onboarding."
+  description = "POST /businesses creates the business for the authenticated, fully onboarded user and starts its onboarding. The server mints the business_id and returns it in the Location header. The mapper trims the legal name and takes InitiatedBy from the app-owned user_id claim. The handler appends BusinessOnboardingInitiated to a single process stream. Repeating the request creates another business."
   status      = "done"
 
   screen "initiate_business_onboarding_ui" {
@@ -24,7 +24,7 @@ state_change "initiate_business_onboarding" {
       event.business.business_onboarding_initiated
     ]
 
-    field "business_onboarding_id" {
+    field "business_id" {
       type         = "String"
       id_attribute = true
       example      = "00000000-0000-0000-0000-000000000100"
@@ -55,11 +55,11 @@ state_change "initiate_business_onboarding" {
     }
 
     comment {
-      description = "The mapper generates the business onboarding id, trims the legal name, and takes InitiatedBy from the app-owned user_id claim. The handler appends one event to the new process stream."
+      description = "The mapper mints the business_id, trims the legal name, and takes InitiatedBy from the app-owned user_id claim. The handler appends one event to the new process stream."
     }
   }
 
-  scenario "scenario_02_business_onboarding_id_already_has_events" {
+  scenario "scenario_02_business_id_already_has_events" {
     title = "The generated business onboarding ID already has events"
 
     when {
@@ -94,19 +94,19 @@ state_change "initiate_business_onboarding" {
 
 state_view "retrieve_business_onboarding" {
   title       = "Retrieve Business Onboarding"
-  description = "GET /business-onboarding/{id} returns the persisted Business Onboarding projection. The read model's id and the screen's business_onboarding_id identify the same business onboarding."
+  description = "GET /businesses/{business_id}/onboarding returns the persisted Business Onboarding projection. The read model's id and the screen's business_id identify the same business."
   status      = "done"
 
   readmodel "business_onboarding" {
     title       = "Business Onboarding"
-    description = "Persistent Business Onboarding read model assembled from business onboarding events. It is exposed by GET /business-onboarding/{id} and returns one business onboarding; it is not paginated."
+    description = "Persistent Business Onboarding read model assembled from business onboarding events. It is exposed by GET /businesses/{business_id}/onboarding and returns one business; it is not paginated."
     question    = "What is the current state of this business onboarding?"
     from = [
       event.business.business_onboarding_initiated
     ]
     to = [screen.retrieve_business_onboarding_ui]
 
-    field "id" {
+    field "business_id" {
       type         = "String"
       id_attribute = true
       example      = "00000000-0000-0000-0000-000000000100"
@@ -147,7 +147,7 @@ state_view "retrieve_business_onboarding" {
     title = "Business Onboarding"
     actor = actor.authenticated_user
 
-    field "business_onboarding_id" {
+    field "business_id" {
       type         = "String"
       id_attribute = true
       example      = "00000000-0000-0000-0000-000000000100"

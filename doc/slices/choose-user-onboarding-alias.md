@@ -14,5 +14,5 @@
 
 ## Constraints
 
-- Auth: the route carries the `user_onboarding_id`; the authorizer loads the onboarding state and checks its `user_id` against the app-owned `user_id` claim.
+- Auth: the route carries the `user_id`, which is also the onboarding stream id; the authorizer compares it with the app-owned `user_id` claim.
 - Multi-stream consistency: `UserOnboardingAliasChosen` and `AliasClaimed` are appended with expected versions. A concurrent claim conflict returns a conflict result.

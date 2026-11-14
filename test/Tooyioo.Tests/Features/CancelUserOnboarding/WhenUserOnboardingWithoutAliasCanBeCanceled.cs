@@ -3,10 +3,10 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.CancelUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.CancelUserOnboarding;
 
@@ -15,7 +15,7 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
     : CommandVerticalSliceTest
 {
     private HttpResponseMessage _response = null!;
-    private UserOnboardingId _userOnboardingId = null!;
+    private UserId _userOnboardingId = null!;
     private string _subject = null!;
     private string _alias = null!;
     private string _reason = null!;
@@ -26,12 +26,12 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
 
     protected override async Task Given()
     {
-        _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        _userOnboardingId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
         _alias = "jane-bloggs";
         _reason = "Changed mind";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
+        await Host.Given<UserOnboardingState, UserId>(
             _userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithExternalIdentityId(_subject)
@@ -39,13 +39,13 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
 
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
-            DomainEvent.UserLoginClaimed().WithUserOnboardingId(_userOnboardingId).Build());
+            DomainEvent.UserLoginClaimed().WithUserId(_userOnboardingId).Build());
 
         await Host.GivenUserPersonalData(_userOnboardingId);
         await Host.GivenLinkedLogin(_userOnboardingId, _subject);
 
         _userOnboardingStreamBeforeWhen = await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .CaptureSnapshot();
 
         _externalIdentityClaimStreamBeforeWhen = await Host.Events
@@ -57,11 +57,11 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
             .CaptureSnapshot();
 
         _userLoginLinkingStreamBeforeWhen = await Host.Events
-            .Stream<UserLoginLinkingState, UserLoginLinkingId>(new UserLoginLinkingId(_userOnboardingId.Value))
+            .Stream<UserLoginLinkingState, UserId>(new UserId(_userOnboardingId.Value))
             .CaptureSnapshot();
 
         await Host.Events
-            .Stream<UserPersonalDataState, UserPersonalDataId>(new UserPersonalDataId(_userOnboardingId.Value))
+            .Stream<UserPersonalDataState, UserId>(new UserId(_userOnboardingId.Value))
             .CaptureSnapshot();
     }
 
@@ -71,8 +71,8 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
             .WithSubject(_subject)
             .Build();
 
-        _response = await Host.HttpClient.PostJson(
-            $"/user-onboarding/{_userOnboardingId.Value}/cancel",
+        _response = await Host.HttpClient.PutJson(
+            $"/users/{_userOnboardingId.Value}/onboarding/cancellation",
             new CancelUserOnboardingRequest { ReasonCode = _reason },
             token);
     }
@@ -84,7 +84,7 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
     [Test]
     public async Task Then_user_onboarding_is_canceled()
         => await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .ShouldAppendExactly(
                 _userOnboardingStreamBeforeWhen,
                 DomainEvent.UserOnboardingCanceled().WithReason(_reason).Build());
@@ -95,7 +95,7 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
             .Stream<UserLoginClaimingState, UserLoginClaimingId>(new UserLoginClaimingId(_subject))
             .ShouldAppendExactly(
                 _externalIdentityClaimStreamBeforeWhen,
-                DomainEvent.UserLoginReleased().WithUserOnboardingId(_userOnboardingId).Build());
+                DomainEvent.UserLoginReleased().WithUserId(_userOnboardingId).Build());
 
     [Test]
     public async Task Then_no_alias_claim_stream_is_written()
@@ -106,7 +106,7 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
     [Test]
     public async Task Then_user_login_is_unlinked()
         => await Host.Events
-            .Stream<UserLoginLinkingState, UserLoginLinkingId>(new UserLoginLinkingId(_userOnboardingId.Value))
+            .Stream<UserLoginLinkingState, UserId>(new UserId(_userOnboardingId.Value))
             .ShouldAppendExactly(
                 _userLoginLinkingStreamBeforeWhen,
                 DomainEvent.UserLoginUnlinked().WithUserLoginKey(_subject).Build());
@@ -114,6 +114,6 @@ public sealed class WhenUserOnboardingWithoutAliasCanBeCanceled
     [Test]
     public async Task Then_personal_data_erasure_is_requested()
         => await Host.Events
-            .Stream<UserPersonalDataState, UserPersonalDataId>(new UserPersonalDataId(_userOnboardingId.Value))
+            .Stream<UserPersonalDataState, UserId>(new UserId(_userOnboardingId.Value))
             .ShouldContain<UserPersonalDataDomainEvents.V1.UserPersonalDataErasureRequested>();
 }

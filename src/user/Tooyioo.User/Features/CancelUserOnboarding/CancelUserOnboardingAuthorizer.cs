@@ -1,4 +1,3 @@
-using Eventuous;
 using Tooyioo.User.Features.CancelUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
 
@@ -6,9 +5,9 @@ using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.User.Features.CancelUserOnboarding;
 
-public sealed class CancelUserOnboardingAuthorizer(IEventReader eventReader)
-    : UserOnboardingRouteAuthorizer<CancelUserOnboardingRoute>(eventReader)
+public sealed class CancelUserOnboardingAuthorizer
+    : UserOnboardingRouteAuthorizer<CancelUserOnboardingRoute>
 {
-    protected override Guid GetUserOnboardingId(CancelUserOnboardingRoute route)
-        => route.UserOnboardingId;
+    protected override Guid GetUserId(CancelUserOnboardingRoute route)
+        => route.UserId;
 }

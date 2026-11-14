@@ -2,7 +2,6 @@ using Eventuous;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Business.Contracts;
-using Tooyioo.Common;
 // ReSharper disable ClassNeverInstantiated.Global
 // ReSharper disable ConvertToPrimaryConstructor
 
@@ -26,10 +25,10 @@ public sealed class InitiateBusinessOnboardingHandler
         InitiateBusinessOnboardingCommand command,
         CancellationToken cancellationToken = default)
     {
-        var businessOnboardingId = command.BusinessOnboardingId;
+        var businessId = command.BusinessId;
         var businessOnboarding =
-            await _eventReader.LoadStateOrNew<BusinessOnboardingState, BusinessOnboardingId>(
-                businessOnboardingId,
+            await _eventReader.LoadStateOrNew<BusinessOnboardingState, BusinessId>(
+                businessId,
                 cancellationToken);
 
         if (businessOnboarding.Events.Length != 0)
@@ -50,7 +49,7 @@ public sealed class InitiateBusinessOnboardingHandler
                 ],
                 cancellationToken);
 
-            return new InitiateBusinessOnboardingOkResult(businessOnboardingId);
+            return new InitiateBusinessOnboardingOkResult(businessId);
         }
         catch (OptimisticConcurrencyException)
         {
@@ -60,9 +59,9 @@ public sealed class InitiateBusinessOnboardingHandler
 }
 
 public sealed record InitiateBusinessOnboardingCommand(
-    BusinessOnboardingId BusinessOnboardingId,
+    BusinessId BusinessId,
     string LegalName,
-    UserId InitiatedBy)
+    BusinessUserId InitiatedBy)
     : ICommand<InitiateBusinessOnboardingCommandResult>;
 
 public union InitiateBusinessOnboardingCommandResult(
@@ -70,6 +69,6 @@ public union InitiateBusinessOnboardingCommandResult(
     InitiateBusinessOnboardingConcurrencyError,
     InitiateBusinessOnboardingUnexpectedStateError);
 
-public sealed record InitiateBusinessOnboardingOkResult(BusinessOnboardingId BusinessOnboardingId);
+public sealed record InitiateBusinessOnboardingOkResult(BusinessId BusinessId);
 public sealed record InitiateBusinessOnboardingConcurrencyError;
 public sealed record InitiateBusinessOnboardingUnexpectedStateError;

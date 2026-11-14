@@ -6,11 +6,12 @@
 
 ## Decisions
 
-- The command mapper mints two ids at initiation: `user_onboarding_id` for the onboarding process/stream and `user_id` for the person. They may share a value, but they are separate concepts.
-- `UserOnboardingInitiated` records the `user_id` once. The onboarding stream is keyed by `user_onboarding_id`. PII is written only to the `user_personal_data` stream.
+- The command mapper mints one id at initiation: `user_id`. The onboarding process is keyed by the same id, so there is no separate onboarding id.
+- `UserOnboardingInitiated` carries no fields: the stream id is the `user_id`. PII is written only to the `user_personal_data` stream.
 - The user login is identified by `HMAC(pepper, kind|issuer|subject)`, not by the raw provider `sub`. The issuer comes from the validated token and is matched exactly by the JWT middleware; changing it re-keys existing user logins.
 - The user login claim is the idempotency key: a retry for an already claimed user login returns the existing `user_id` and appends nothing. A released user login can be claimed again and mints a new `user_id`.
 - Initiation is one atomic multi-stream write: `user_personal_data`, `user_login_linking`, `user_login_claiming`, and `user_onboarding`.
+- A user login claimed by an erased user is released and re-claimed for a new `user_id` in the same command. It is the safety net for a purge release that was missed: a stale claim never locks a person out.
 
 ## Constraints
 

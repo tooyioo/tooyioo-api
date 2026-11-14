@@ -4,7 +4,6 @@ using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.Support;
-using Tooyioo.Common;
 
 // ReSharper disable ClassNeverInstantiated.Global
 // ReSharper disable ConvertToPrimaryConstructor
@@ -35,8 +34,8 @@ public sealed class RequestUserPersonalDataErasureHandler
         var userId = command.UserId;
 
         var personalData =
-            await _eventReader.LoadStateOrNew<UserPersonalDataState, UserPersonalDataId>(
-                new UserPersonalDataId(userId.Value),
+            await _eventReader.LoadStateOrNew<UserPersonalDataState, UserId>(
+                new UserId(userId.Value),
                 cancellationToken);
 
         if (personalData.Events.Length == 0)

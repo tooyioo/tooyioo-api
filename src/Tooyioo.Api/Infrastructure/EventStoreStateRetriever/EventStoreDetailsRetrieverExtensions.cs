@@ -8,7 +8,6 @@ public static class EventStoreDetailsRetrieverExtensions
         : IHostApplicationBuilder
     {
         builder.Services.AddTransient<IUserPersonalDataDetailsRetriever, UserPersonalDataDetailsRetriever>();
-        builder.Services.AddTransient<IUserPersonalDataReader, UserPersonalDataReader>();
         return builder;
     }
 }

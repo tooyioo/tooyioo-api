@@ -5,8 +5,8 @@ using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.User;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.InitiateBusinessOnboarding;
 
@@ -25,17 +25,17 @@ public sealed class InitiateBusinessOnboardingValidationTests
         await using var host = await VerticalSliceTestHost.Start();
 
         const string subject = "google-sub-123";
-        var userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        var userOnboardingId = new UserId(1.ToGuid().ToString());
         var userId = 2.ToGuid().ToString();
 
-        await host.Given<UserOnboardingState, UserOnboardingId>(
+        await host.Given<UserOnboardingState, UserId>(
             userOnboardingId,
             DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(subject).Build(),
             DomainEvent.UserOnboardingCompleted().WithUserId(userId).Build());
 
         await host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(subject),
-            DomainEvent.UserLoginClaimed().WithUserOnboardingId(userOnboardingId).Build());
+            DomainEvent.UserLoginClaimed().WithUserId(userOnboardingId).Build());
 
         var token = host.GoogleIdentityToken()
             .WithSubject(subject)
@@ -53,7 +53,7 @@ public sealed class InitiateBusinessOnboardingValidationTests
             : new InitiateBusinessOnboardingRequest { LegalName = legalName };
 
         using var response = await host.HttpClient.PostJson(
-            "/business-onboarding/initiate",
+            "/businesses",
             request,
             token);
 

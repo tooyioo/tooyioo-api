@@ -6,13 +6,13 @@ namespace Tooyioo.Tests.Support.Events;
 public sealed class EventAssertions(IEventReader eventReader)
 {
     public EventStreamAssertions<TState, TId> Stream<TState, TId>(TId id)
-        where TState : State<TState, TId>, new()
+        where TState : State<TState>, IStreamState<TId>, new()
         where TId : Id
         => new(eventReader, id);
 }
 
 public sealed class EventStreamAssertions<TState, TId>(IEventReader eventReader, TId id)
-    where TState : State<TState, TId>, new()
+    where TState : State<TState>, IStreamState<TId>, new()
     where TId : Id
 {
     public Task<EventStreamSnapshot> Capture()

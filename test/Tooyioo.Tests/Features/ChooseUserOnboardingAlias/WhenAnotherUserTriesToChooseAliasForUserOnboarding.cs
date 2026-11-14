@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -16,22 +16,22 @@ public sealed class WhenAnotherUserTriesToChooseAliasForUserOnboarding
 {
     private HttpResponseMessage _response = null!;
     private HttpProblemDetails _body = null!;
-    private UserOnboardingId _ownerUserOnboardingId = null!;
-    private UserOnboardingId _anotherUserOnboardingId = null!;
+    private UserId _ownerUserId = null!;
+    private UserId _anotherUserId = null!;
     private string _ownerSubject = null!;
     private string _anotherSubject = null!;
     private string _alias = null!;
 
     protected override async Task Given()
     {
-        _ownerUserOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
-        _anotherUserOnboardingId = new UserOnboardingId(2.ToGuid().ToString());
+        _ownerUserId = new UserId(1.ToGuid().ToString());
+        _anotherUserId = new UserId(2.ToGuid().ToString());
         _ownerSubject = "owner-google-sub-123";
         _anotherSubject = "another-google-sub-456";
         _alias = "jane-bloggs";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
-            _ownerUserOnboardingId,
+        await Host.Given<UserOnboardingState, UserId>(
+            _ownerUserId,
             DomainEvent.UserOnboardingInitiated()
                 .WithName("Jane")
                 .WithLastName("Bloggs")
@@ -42,11 +42,11 @@ public sealed class WhenAnotherUserTriesToChooseAliasForUserOnboarding
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_ownerSubject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_ownerUserOnboardingId)
+                .WithUserId(_ownerUserId)
                 .Build());
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
-            _anotherUserOnboardingId,
+        await Host.Given<UserOnboardingState, UserId>(
+            _anotherUserId,
             DomainEvent.UserOnboardingInitiated()
                 .WithName("Other")
                 .WithLastName("User")
@@ -57,7 +57,7 @@ public sealed class WhenAnotherUserTriesToChooseAliasForUserOnboarding
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_anotherSubject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_anotherUserOnboardingId)
+                .WithUserId(_anotherUserId)
                 .Build());
     }
 
@@ -68,8 +68,8 @@ public sealed class WhenAnotherUserTriesToChooseAliasForUserOnboarding
             .WithPersonalDetails("Other", "User", "other.user@test.com", true)
             .Build();
 
-        _response = await Host.HttpClient.PostJson(
-            $"/user-onboarding/{_ownerUserOnboardingId.Value}/choose-alias",
+        _response = await Host.HttpClient.PutJson(
+            $"/users/{_ownerUserId.Value}/onboarding/alias",
             new ChooseUserOnboardingAliasRequest { Alias = _alias },
             anotherUserToken);
 

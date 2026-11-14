@@ -2,9 +2,9 @@ using System.Net;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 
@@ -35,7 +35,7 @@ public sealed class WhenGoogleIdentityIsUnknown
             .Build();
 
         _response = await Host.HttpClient.PostJson(
-            "/user-onboarding/initiate",
+            "/users",
             new { },
             token);
 
@@ -44,11 +44,15 @@ public sealed class WhenGoogleIdentityIsUnknown
 
     [Test]
     public async Task Then_response_is_ok()
-        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.Created);
+
+    [Test]
+    public async Task Then_response_returns_the_location_of_the_new_user()
+        => await Assert.That(_response.Headers.Location?.ToString()).IsEqualTo($"/users/{_body.UserId}");
 
     [Test]
     public async Task Then_response_contains_user_onboarding_id()
-        => await Assert.That(Guid.TryParse(_body.UserOnboardingId, out _)).IsTrue();
+        => await Assert.That(Guid.TryParse(_body.UserId, out _)).IsTrue();
     
     [Test]
     public async Task Then_response_contains_user_id()
@@ -57,10 +61,10 @@ public sealed class WhenGoogleIdentityIsUnknown
     [Test]
     public async Task Then_user_onboarding_events_are_saved()
         => await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(new UserOnboardingId(_body.UserOnboardingId))
+            .Stream<UserOnboardingState, UserId>(new UserId(_body.UserId))
             .ShouldContainExactly(
                 DomainEvent.UserOnboardingInitiated()
-                    .WithUserId(_body.UserId)
+                    
                     .WithName(_name)
                     .WithLastName(_lastName)
                     .WithEmail(_email)
@@ -75,13 +79,13 @@ public sealed class WhenGoogleIdentityIsUnknown
             .ShouldContainExactly(
                 DomainEvent.UserLoginClaimed()
                     .WithUserId(_body.UserId)
-                    .WithUserOnboardingId(_body.UserOnboardingId)
+                    .WithUserId(_body.UserId)
                     .Build());
 
     [Test]
     public async Task Then_personal_data_is_recorded()
         => await Host.Events
-            .Stream<UserPersonalDataState, UserPersonalDataId>(new UserPersonalDataId(_body.UserId))
+            .Stream<UserPersonalDataState, UserId>(new UserId(_body.UserId))
             .ShouldContainExactly(
                 DomainEvent.UserPersonalDataRecorded()
                     .WithName(_name)
@@ -93,7 +97,7 @@ public sealed class WhenGoogleIdentityIsUnknown
     [Test]
     public async Task Then_user_login_is_linked()
         => await Host.Events
-            .Stream<UserLoginLinkingState, UserLoginLinkingId>(new UserLoginLinkingId(_body.UserId))
+            .Stream<UserLoginLinkingState, UserId>(new UserId(_body.UserId))
             .ShouldContainExactly(
                 DomainEvent.UserLoginLinked()
                     .WithUserLoginKey(_subject)

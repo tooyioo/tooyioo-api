@@ -1,10 +1,10 @@
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.ApplyUserPersonalDataErasure;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.UserPersonalData;
 
@@ -13,12 +13,12 @@ namespace Tooyioo.Tests.Features.UserPersonalData;
 public sealed class WhenDueUserPersonalDataErasureIsApplied
     : CommandVerticalSliceTest
 {
-    private UserOnboardingId _userId = null!;
+    private UserId _userId = null!;
     private string _subject = null!;
 
     protected override async Task Given()
     {
-        _userId = new UserOnboardingId(1.ToGuid().ToString());
+        _userId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
 
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
@@ -27,8 +27,8 @@ public sealed class WhenDueUserPersonalDataErasureIsApplied
 
         await Host.GivenLinkedLogin(_userId, _subject);
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userId.Value),
+        await Host.Given<UserPersonalDataState, UserId>(
+            new UserId(_userId.Value),
             DomainEvent.UserPersonalDataRecorded().Build(),
             DomainEvent.UserPersonalDataErasureRequested()
                 .WithEraseAfterUtc(DateTime.UtcNow.AddMinutes(-1))
@@ -37,12 +37,12 @@ public sealed class WhenDueUserPersonalDataErasureIsApplied
 
     protected override async Task When()
         => _ = await Host.SendCommand(
-            new ApplyUserPersonalDataErasureCommand(new UserPersonalDataId(_userId.Value)));
+            new ApplyUserPersonalDataErasureCommand(new UserId(_userId.Value)));
 
     [Test]
     public async Task Then_the_erasure_is_applied()
         => await Host.Events
-            .Stream<UserPersonalDataState, UserPersonalDataId>(new UserPersonalDataId(_userId.Value))
+            .Stream<UserPersonalDataState, UserId>(new UserId(_userId.Value))
             .ShouldContain<UserPersonalDataDomainEvents.V1.UserPersonalDataErasureApplied>();
 
     [Test]
@@ -55,7 +55,7 @@ public sealed class WhenDueUserPersonalDataErasureIsApplied
     [Test]
     public async Task Then_the_user_login_is_unlinked()
         => await Host.Events
-            .Stream<UserLoginLinkingState, UserLoginLinkingId>(
-                new UserLoginLinkingId(_userId.Value))
+            .Stream<UserLoginLinkingState, UserId>(
+                new UserId(_userId.Value))
             .ShouldContain<UserLoginLinkingDomainEvents.V1.UserLoginUnlinked>();
 }

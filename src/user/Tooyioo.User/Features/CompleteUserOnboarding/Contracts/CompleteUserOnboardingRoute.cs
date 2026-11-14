@@ -6,5 +6,5 @@ namespace Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
 public record CompleteUserOnboardingRoute
 {
     [FromRoute(Name = "id")] 
-    public required Guid UserOnboardingId { get; init; }
+    public required Guid UserId { get; init; }
 }

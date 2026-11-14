@@ -28,29 +28,27 @@ public sealed class RetrieveUserOnboardingHandler
         CancellationToken cancellationToken = default)
     {
         var userOnboarding =
-            await _eventReader.LoadStateOrNew<UserOnboardingState, UserOnboardingId>(
-                query.UserOnboardingId,
+            await _eventReader.LoadStateOrNew<UserOnboardingState, UserId>(
+                query.UserId,
                 cancellationToken);
 
-        if (userOnboarding.Events.Length == 0
-            || !userOnboarding.State.IsInitiated
-            || string.IsNullOrWhiteSpace(userOnboarding.State.UserId))
+        if (userOnboarding.Events.Length == 0 || !userOnboarding.State.IsInitiated)
         {
-            return new RetrieveUserOnboardingQueryNotFoundResult(query.UserOnboardingId);
+            return new RetrieveUserOnboardingQueryNotFoundResult(query.UserId);
         }
 
         var personalData = await _personalDataDetailsRetriever.Retrieve(
-            userOnboarding.State.UserId,
+            query.UserId.Value,
             cancellationToken);
 
         return new RetrieveUserOnboardingQueryOkResult(
-            query.UserOnboardingId,
+            query.UserId,
             userOnboarding.State,
             personalData);
     }
 }
 
-public sealed record RetrieveUserOnboardingQuery(UserOnboardingId UserOnboardingId)
+public sealed record RetrieveUserOnboardingQuery(UserId UserId)
     : IQuery<RetrieveUserOnboardingQueryResult>;
 
 public union RetrieveUserOnboardingQueryResult(
@@ -58,8 +56,8 @@ public union RetrieveUserOnboardingQueryResult(
     RetrieveUserOnboardingQueryNotFoundResult);
 
 public sealed record RetrieveUserOnboardingQueryOkResult(
-    UserOnboardingId UserOnboardingId,
+    UserId UserId,
     UserOnboardingState State,
     UserPersonalDataDetails? UserPersonalData);
 
-public sealed record RetrieveUserOnboardingQueryNotFoundResult(UserOnboardingId UserOnboardingId);
+public sealed record RetrieveUserOnboardingQueryNotFoundResult(UserId UserId);

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Slicent.Application.Commands;
 using Tooyioo.User.Features.RequestUserPersonalDataErasure.Contracts;
-using Tooyioo.Common;
 
 namespace Tooyioo.User.Features.RequestUserPersonalDataErasure;
 

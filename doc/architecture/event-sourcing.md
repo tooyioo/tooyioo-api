@@ -30,7 +30,7 @@ Avoid entity-history streams such as:
 - `organization`
 - `campaign`
 
-The event model names each aggregate in snake_case, and the aggregate name is the stream name. The implementation has no aggregate classes: each aggregate is a stream, named in PascalCase (`user_onboarding` is `UserOnboarding-{id}`). The id in the stream name is the aggregate id: the `user_onboarding_id` for user onboarding, the `user_id` for user personal data and user logins, and the alias for user alias claiming. The onboarding stream carries the `user_id` of the person in `UserOnboardingInitiated`; the two ids are separate and may differ.
+The event model names each aggregate in snake_case, and the aggregate name is the stream name. The implementation has no aggregate classes: each aggregate is a stream, named in snake_case (`user_onboarding` is `user_onboarding-{id}`). The name comes from the `[StreamName]` attribute on the state, so renaming a class never renames storage. The id in the stream name is either the `user_id` (onboarding, personal data and user logins) or the alias (user alias claiming). The onboarding process is keyed by the same `user_id` it creates: there is no separate onboarding id.
 
 ## User personal data record
 
@@ -39,11 +39,10 @@ The event model names each aggregate in snake_case, and the aggregate name is th
 The exception exists so that erasure is possible in one place. The record:
 
 - is created at user onboarding initiation, in the same atomic multi-stream append as the user login claim and the onboarding process
-- holds only identifying data (`name`, `last_name`, `email`, `is_email_verified`)
-- appends `UserPersonalDataErasureRequested`, `UserPersonalDataErasureCanceled` and `UserPersonalDataErasureApplied` to model the right to be forgotten
-- is truncated before `UserPersonalDataErasureRequested` when the erasure is applied, so the erasure events survive and the PII disappears
+- holds only identifying data (`name`, `last_name`, `email`, `is_email_verified`); it is the only stream with PII
+- is truncated at its end when the erasure is applied, so no event survives and the PII disappears
 
-The erasure events are the only events that remain in the stream. Every read model that consumes `UserPersonalDataRecorded` must also consume `UserPersonalDataErasureApplied`; otherwise a projection rebuild would re-materialize PII.
+The erasure process lives in its own `user_personal_data_erasure/{user_id}` stream (`Requested`, `Canceled`, `Applying`, `Applied`). It holds no PII, is never truncated and is the source of truth for the erasure status. Every read model that consumes `UserPersonalDataRecorded` must also consume `UserPersonalDataErasureApplied`; otherwise a projection rebuild would re-materialize PII.
 
 User logins are pseudonymous and are not PII: the user login key is an HMAC and the claim stream is retained so the same provider account can sign up again. Erasure releases the user logins; it does not delete the claim history.
 

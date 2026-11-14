@@ -3,10 +3,10 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.CancelUserPersonalDataErasure.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.UserPersonalData;
 
@@ -17,20 +17,20 @@ public sealed class WhenUserPersonalDataErasureIsCanceled
 {
     private HttpResponseMessage _response = null!;
     private CancelUserPersonalDataErasureResponse _body = null!;
-    private UserOnboardingId _userId = null!;
+    private UserId _userId = null!;
     private string _subject = null!;
 
     protected override async Task Given()
     {
-        _userId = new UserOnboardingId(1.ToGuid().ToString());
+        _userId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
 
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed().WithUserId(_userId.Value).Build());
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userId.Value),
+        await Host.Given<UserPersonalDataState, UserId>(
+            new UserId(_userId.Value),
             DomainEvent.UserPersonalDataRecorded().Build(),
             DomainEvent.UserPersonalDataErasureRequested().Build());
     }
@@ -41,9 +41,8 @@ public sealed class WhenUserPersonalDataErasureIsCanceled
             .WithSubject(_subject)
             .Build();
 
-        _response = await Host.HttpClient.PostJson(
-            $"/users/{_userId.Value}/personal-data/cancel-erasure",
-            new CancelUserPersonalDataErasureRequest(),
+        _response = await Host.HttpClient.Delete(
+            $"/users/{_userId.Value}/personal-data/erasure",
             token);
 
         _body = await _response.ReadJson<CancelUserPersonalDataErasureResponse>();
@@ -63,6 +62,6 @@ public sealed class WhenUserPersonalDataErasureIsCanceled
     [Test]
     public async Task Then_the_erasure_request_is_canceled()
         => await Host.Events
-            .Stream<UserPersonalDataState, UserPersonalDataId>(new UserPersonalDataId(_userId.Value))
+            .Stream<UserPersonalDataState, UserId>(new UserId(_userId.Value))
             .ShouldContain<UserPersonalDataDomainEvents.V1.UserPersonalDataErasureCanceled>();
 }

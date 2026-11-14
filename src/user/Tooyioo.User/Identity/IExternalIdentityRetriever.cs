@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Tooyioo.Common;
+namespace Tooyioo.User.Identity;
 
 public interface IExternalIdentityRetriever
 {

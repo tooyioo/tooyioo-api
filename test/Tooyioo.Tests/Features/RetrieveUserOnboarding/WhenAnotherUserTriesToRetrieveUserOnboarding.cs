@@ -1,12 +1,11 @@
 using System.Net;
 using Slicent.Application;
-using Tooyioo.Common;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.RetrieveUserOnboarding;
 
@@ -16,19 +15,19 @@ public sealed class WhenAnotherUserTriesToRetrieveUserOnboarding
 {
     private HttpResponseMessage _response = null!;
     private HttpProblemDetails _body = null!;
-    private UserOnboardingId _ownerUserOnboardingId = null!;
+    private UserId _ownerUserId = null!;
     private string _anotherSubject = null!;
 
     protected override async Task Given()
     {
-        _ownerUserOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        _ownerUserId = new UserId(1.ToGuid().ToString());
         var ownerUserId = new UserId(2.ToGuid().ToString());
         _anotherSubject = "another-google-sub-456";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
-            _ownerUserOnboardingId,
+        await Host.Given<UserOnboardingState, UserId>(
+            _ownerUserId,
             DomainEvent.UserOnboardingInitiated()
-                .WithUserId(ownerUserId)
+                
                 .Build());
 
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
@@ -51,7 +50,7 @@ public sealed class WhenAnotherUserTriesToRetrieveUserOnboarding
             .Build();
 
         _response = await Host.HttpClient.Get(
-            $"/user-onboarding/{_ownerUserOnboardingId.Value}",
+            $"/users/{_ownerUserId.Value}/onboarding",
             token);
 
         _body = await _response.ReadJson<HttpProblemDetails>();

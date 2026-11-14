@@ -6,7 +6,7 @@ namespace Tooyioo.Business.Features.RetrieveBusinessOnboarding.Contracts;
 /// Response returned after a successful retrieve business onboarding request.
 /// </summary>
 /// <example>
-/// {"businessOnboardingId": "00000000-0000-0000-0000-000000000100", "legalName": "Acme Ltd",
+/// {"businessId": "00000000-0000-0000-0000-000000000100", "legalName": "Acme Ltd",
 /// "initiatedBy": "00000000-0000-0000-0000-000000000010", "status": "in_progress",
 /// "createdAt": "2026-01-01T00:00:00.000Z", "lastModifiedAt": "2026-01-01T00:00:00.000Z"}
 /// </example>
@@ -17,7 +17,7 @@ public sealed record RetrieveBusinessOnboardingResponse
     /// <summary>
     /// The unique identifier of the business onboarding.
     /// </summary>
-    public required string BusinessOnboardingId { get; init; }
+    public required string BusinessId { get; init; }
 
     /// <summary>
     /// The legal name of the business being onboarded.

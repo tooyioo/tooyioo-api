@@ -1,30 +1,31 @@
 # User personal data erasure
 
 - **Event model:** [05-user_personal_data.em.hcl](../event-model/05-user_personal_data.em.hcl)
-- **Workflows:** `retrieve_user_personal_data`, `request_user_personal_data_erasure`, `cancel_user_personal_data_erasure`, `apply_due_user_personal_data_erasures`
+- **Workflows:** `retrieve_user_personal_data`, `request_user_personal_data_erasure`, `cancel_user_personal_data_erasure`, `retrieve_pending_user_personal_data_erasures`, `purge_user_personal_data_erasures`, `apply_user_personal_data_erasures`
 - **Tests:** [UserPersonalData tests](../../test/Tooyioo.Tests/Features/UserPersonalData)
 
 ## Decisions
 
-- The `user_personal_data` stream is the only place that stores PII. It is a data-protection record, not a business process, and it is the deliberate exception to the process-stream rule.
-- The PII slices live in `Tooyioo.User`, together with onboarding, authentication and the directory. The events live in `Tooyioo.User.Contracts`; the state and slices live in the implementation. The initiation, cancellation and erasure handlers write the streams directly in the same module.
-- Erasure is modeled on the record: `UserPersonalDataErasureRequested`, `UserPersonalDataErasureCanceled` and `UserPersonalDataErasureApplied`. The request carries a due date so a policy change does not alter existing requests.
-- Canceling onboarding requests an immediate erasure. A user-initiated erasure uses the configured grace period (14 days by default) and can be canceled during it.
-- Applying the erasure appends `UserPersonalDataErasureApplied`, releases every user login from the `user_login_linking` index, and then truncates the stream before the `UserPersonalDataErasureRequested` event. The request and applied events survive; the PII disappears.
-- The stream is truncated instead of deleted. A tombstone would make the stream name permanently unusable and would prevent a later re-registration; truncation keeps the erasure facts and the identity reusable.
-- The scheduled erasure is not an event handler. It polls a due-erasure read model (`due_user_personal_data_erasures` in the HCL; `UserPersonalDataDocument` filtered by request/due state in code) and is idempotent. The automation is modeled with the read model between the request event and the external-triggered command, not as a processor directly subscribed to `UserPersonalDataErasureRequested`. If the truncate fails after the append, the state is already erased and the retry truncates again.
+- **PII and process are separate streams.** `user_personal_data/{user_id}` holds only `UserPersonalDataRecorded`; `user_personal_data_erasure/{user_id}` holds the request, the cancellation, the applying marker and the applied fact. The erasure process holds no PII and is never truncated, so it survives the erasure and is the source of truth for the status.
+- **No grace period.** A request only marks the person for deletion. Nothing is erased until an operator starts a purge, and the request can be canceled until the purge starts applying it. The deletion is a manual, auditable operation, not a timer.
+- **The purge snapshots what it promises.** The run event stores the same `user_ids` the endpoint returns, so the promise and the work cannot drift. A user who requests erasure after the snapshot is left for the next run; a user who cancels before the snapshot is excluded; a user who cancels after it is skipped when applied.
+- **The run stream is the audit and the progress.** `PersonalDataErasureRunStarted` records who started the purge and the snapshot; `PersonalDataErasureRunUserErased` is appended atomically with `UserPersonalDataErasureApplied`, so progress cannot drift from the erasure. There is no separate completion event.
+- **Release before truncate, applied last.** The apply releases every linked user login, truncates the personal data stream at its end and only then appends `UserPersonalDataErasureApplied`. If a step fails, the user stays pending and the next run retries it; releasing first means the login is free even if the truncate failed, so a failed erasure never blocks a re-registration.
+- **`UserPersonalDataErasureApplying` is the cancellation barrier.** It is the point of no return: a cancel after it is rejected, so a canceled request can never have a truncated stream.
+- **`InitiateUserOnboarding` is the safety net.** A user login claimed by an erased user is released and re-claimed for a new `user_id`. A missed release therefore never locks a person out, which is what allows the release list to come from the login index instead of a stricter mechanism.
+- **Truncate, not delete.** The stream name stays valid and the erasure facts live in the erasure stream. A re-registration mints a new `user_id`, so the truncated stream is never reused.
 - Read models may copy PII for search, but every projection that consumes `UserPersonalDataRecorded` must also consume `UserPersonalDataErasureApplied` and anonymize the copy. Otherwise a projection rebuild would re-materialize PII.
 - User login claims are retained as pseudonymous anti-abuse records. Erasure releases them; a re-registration mints a new `user_id`.
 
 ## Constraints
 
-- Auth: every endpoint requires the matching app-owned `user_id` claim.
-- The apply write is a multi-stream append (personal data, user login index and each claimed user login) followed by a stream truncation. The truncate is not part of the atomic append.
+- Auth: the self-service endpoints require the matching app-owned `user_id` claim. The purge endpoint is modeled with an `administrator` actor; the authorization mechanism is not implemented yet.
+- The apply is two atomic appends (applying plus releases, then applied plus run progress) separated by a stream truncation. The truncate is not part of either append, which is why `Applied` is written last.
 - Scavenging is an operational step, not application code. Backups retain the truncated events until they rotate.
 - Every PII-consuming projection must consume `UserPersonalDataErasureApplied`.
 
 ## Open questions
 
-- Whether the grace period should be shorter than the current 14 days.
-- Whether an operator-initiated erasure endpoint is required in addition to the authenticated self-service one.
-- Whether the erased user document should be hidden from the directory entirely instead of returned masked.
+- How the administrator actor is authenticated and authorized.
+- Whether the run status is exposed over HTTP or read from the run stream by an operator tool.
+- Whether a run can be resumed from its own stream instead of from the pending read model.

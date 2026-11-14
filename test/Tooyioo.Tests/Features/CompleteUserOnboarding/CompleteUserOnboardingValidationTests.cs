@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.User;
 using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 
@@ -30,12 +30,12 @@ public sealed class CompleteUserOnboardingValidationTests
         await using var host = await VerticalSliceTestHost.Start();
 
         const string subject = "google-sub-123";
-        var userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        var userOnboardingId = new UserId(1.ToGuid().ToString());
 
         await GivenUserOnboarding(host, userOnboardingId, subject);
 
         var userOnboardingStreamBeforeWhen = await host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(userOnboardingId)
             .CaptureSnapshot();
 
         var token = host.GoogleIdentityToken()
@@ -62,8 +62,8 @@ public sealed class CompleteUserOnboardingValidationTests
             };
         }
 
-        using var response = await host.HttpClient.PostJson(
-            $"/user-onboarding/{userOnboardingId.Value}/complete",
+        using var response = await host.HttpClient.PutJson(
+            $"/users/{userOnboardingId.Value}/onboarding/completion",
             payload,
             token);
 
@@ -82,16 +82,16 @@ public sealed class CompleteUserOnboardingValidationTests
         }
 
         await host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(userOnboardingId)
             .ShouldHaveNoChangesSince(userOnboardingStreamBeforeWhen);
     }
 
     private static async Task GivenUserOnboarding(
         VerticalSliceTestHost host,
-        UserOnboardingId userOnboardingId,
+        UserId userOnboardingId,
         string subject)
     {
-        await host.Given<UserOnboardingState, UserOnboardingId>(
+        await host.Given<UserOnboardingState, UserId>(
             userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithName("Jane")
@@ -106,7 +106,7 @@ public sealed class CompleteUserOnboardingValidationTests
         await host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(userOnboardingId)
+                .WithUserId(userOnboardingId)
                 .Build());
     }
 }

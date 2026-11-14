@@ -1,4 +1,3 @@
-using Tooyioo.User.Contracts;
 using Eventuous;
 using Eventuous.Subscriptions;
 using Eventuous.Subscriptions.Context;
@@ -9,8 +8,8 @@ using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.ReadModels;
-using Tooyioo.User;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -77,17 +76,16 @@ public sealed class VerticalSliceTestHost
         => new(_signingKey);
 
     public async Task Given<TState, TId>(TId id, params object[] events)
-        where TState : State<TState, TId>, new()
+        where TState : State<TState>, IStreamState<TId>, new()
         where TId : Id
     {
-        events = NormalizeEvents(id, events);
         var stream = await EventStore.LoadStateOrNew<TState, TId>(id, CancellationToken.None);
         await EventStore.StoreStateChanges([stream.ToStateStreamChanges(events)], CancellationToken.None);
     }
 
     public Task GivenAndProject<TProjector, TState, TId>(TId id, params object[] events)
         where TProjector : IEventHandler
-        where TState : State<TState, TId>, new()
+        where TState : State<TState>, IStreamState<TId>, new()
         where TId : Id
         => GivenAndProject<TProjector, TState, TId>(id, DateTime.UtcNow, events);
 
@@ -96,10 +94,9 @@ public sealed class VerticalSliceTestHost
         DateTime createdUtc,
         params object[] events)
         where TProjector : IEventHandler
-        where TState : State<TState, TId>, new()
+        where TState : State<TState>, IStreamState<TId>, new()
         where TId : Id
     {
-        events = NormalizeEvents(id, events);
         var stream = await EventStore.LoadStateOrNew<TState, TId>(id, CancellationToken.None);
         var changes = stream.ToStateStreamChanges(events);
         await EventStore.StoreStateChanges([changes], CancellationToken.None);
@@ -131,32 +128,14 @@ public sealed class VerticalSliceTestHost
         }
     }
 
-    private static object[] NormalizeEvents<TId>(TId id, object[] events)
-        where TId : Id
-    {
-        if (id is not UserOnboardingId onboardingId)
-        {
-            return events;
-        }
-
-        return
-        [
-            .. events
-                .Select(evt => evt is UserOnboardingDomainEvents.V1.UserOnboardingInitiated initiated
-                               && string.IsNullOrWhiteSpace(initiated.UserId)
-                    ? new UserOnboardingDomainEvents.V1.UserOnboardingInitiated(onboardingId.Value)
-                    : evt)
-        ];
-    }
-
     public Task GivenUserPersonalData(
-        UserOnboardingId userId,
+        UserId userId,
         string name = "Jane",
         string lastName = "Bloggs",
         string email = "jane.bloggs@test.com",
         bool isEmailVerified = false)
-        => Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(userId.Value),
+        => Given<UserPersonalDataState, UserId>(
+            new UserId(userId.Value),
             DomainEvent.UserPersonalDataRecorded()
                 .WithName(name)
                 .WithLastName(lastName)
@@ -171,9 +150,9 @@ public sealed class VerticalSliceTestHost
         return await dispatcher.Send(command, CancellationToken.None);
     }
 
-    public Task GivenLinkedLogin(UserOnboardingId userId, string subject)
-        => Given<UserLoginLinkingState, UserLoginLinkingId>(
-            new UserLoginLinkingId(userId.Value),
+    public Task GivenLinkedLogin(UserId userId, string subject)
+        => Given<UserLoginLinkingState, UserId>(
+            new UserId(userId.Value),
             DomainEvent.UserLoginLinked()
                 .WithUserLoginKey(subject)
                 .Build());

@@ -28,7 +28,7 @@ The token filter does not trust the raw `sub` as an identity. It resolves a pseu
 user_login_key = HMAC-SHA256(pepper, "oidc|" + issuer + "|" + subject)
 ```
 
-- The stream `user_login_claiming/{user_login_key}` holds `UserLoginClaimed(user_id, user_onboarding_id)` and `UserLoginReleased(user_id)`.
+- The stream `user_login_claiming/{user_login_key}` holds `UserLoginClaimed(user_id)` and `UserLoginReleased(user_id)`.
 - A claimed user login resolves to its `user_id`; a released or unknown user login resolves to no user.
 - The raw `sub` is never stored. Stream names end up in `$all`, backups, and logs, so the key is a keyed hash, not plaintext.
 - The issuer comes from the validated token and is matched exactly by the JWT middleware (`Google.Issuer`). Changing an issuer re-keys existing user logins, so it is a one-time user-login migration, not a re-architecture.
@@ -71,7 +71,7 @@ The application enriches the authenticated principal with one app-owned claim af
 
 - `user_id`: the user resolved from the claimed user login.
 
-There is no `user_onboarding_id` claim. The user onboarding process has its own `user_onboarding_id` in the route; the authorizer loads the onboarding state and compares its `user_id` with the claim. Onboarding state (in progress, completed, canceled) is a domain fact, not a separate identity.
+There is no onboarding claim. The onboarding process is keyed by the same `user_id`, so the onboarding routes carry a `user_id` and the authorizer compares it with the app-owned claim. Onboarding state (in progress, completed, canceled) is a domain fact, not a separate identity.
 
 Business slices receive an authenticated principal with `user_id` and do not know which provider produced the token.
 

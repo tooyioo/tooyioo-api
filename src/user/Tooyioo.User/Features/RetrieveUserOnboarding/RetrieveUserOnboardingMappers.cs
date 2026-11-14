@@ -17,7 +17,7 @@ public static class RetrieveUserOnboardingMappers
         : IQueryMapper<RetrieveUserOnboardingRoute, HttpContext, RetrieveUserOnboardingQuery>
     {
         public RetrieveUserOnboardingQuery Map(RetrieveUserOnboardingRoute urlParams, HttpContext context)
-            => new(new UserOnboardingId(urlParams.UserOnboardingId.ToString()));
+            => new(new UserId(urlParams.UserId.ToString()));
     }
 
     public sealed class QueryHttpResponseMapper
@@ -32,8 +32,7 @@ public static class RetrieveUserOnboardingMappers
                 RetrieveUserOnboardingQueryOkResult ok => queryHttpResponseGenerator.Ok(
                     new RetrieveUserOnboardingResponse
                     {
-                        UserId = ok.State.UserId!,
-                        UserOnboardingId = ok.UserOnboardingId.Value,
+                        UserId = ok.UserId.Value,
                         Alias = ok.State.Alias,
                         Name = ok.UserPersonalData?.Name ?? ErasedValue,
                         LastName = ok.UserPersonalData?.LastName ?? ErasedValue,
@@ -45,7 +44,7 @@ public static class RetrieveUserOnboardingMappers
                 RetrieveUserOnboardingQueryNotFoundResult notFound => queryHttpResponseGenerator.NotFound(
                     context,
                     "user_onboarding_not_found",
-                    $"Could not find user onboarding with Id {notFound.UserOnboardingId}")
+                    $"Could not find user onboarding with Id {notFound.UserId}")
             };
 
         private static string ToStatus(UserOnboardingState state) =>

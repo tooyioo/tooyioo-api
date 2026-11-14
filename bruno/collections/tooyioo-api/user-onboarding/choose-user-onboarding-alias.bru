@@ -4,8 +4,8 @@ meta {
   seq: 2
 }
 
-post {
-  url: {{baseUrl}}/user-onboarding/{{dynamicUserOnboardingId}}/choose-alias
+put {
+  url: {{baseUrl}}/users/{{dynamicUserId}}/onboarding/alias
   body: json
   auth: inherit
 }

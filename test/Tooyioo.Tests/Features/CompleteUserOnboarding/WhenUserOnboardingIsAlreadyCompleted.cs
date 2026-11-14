@@ -3,9 +3,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 
@@ -15,16 +15,16 @@ public sealed class WhenUserOnboardingIsAlreadyCompleted
 {
     private HttpResponseMessage _response = null!;
     private CompleteUserOnboardingResponse _body = null!;
-    private UserOnboardingId _userOnboardingId = null!;
+    private UserId _userOnboardingId = null!;
     private string _subject = null!;
     private EventStreamSnapshot _userOnboardingStreamBeforeWhen = null!;
 
     protected override async Task Given()
     {
-        _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        _userOnboardingId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
+        await Host.Given<UserOnboardingState, UserId>(
             _userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithName("Jane")
@@ -44,11 +44,11 @@ public sealed class WhenUserOnboardingIsAlreadyCompleted
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_userOnboardingId)
+                .WithUserId(_userOnboardingId)
                 .Build());
 
         _userOnboardingStreamBeforeWhen = await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .CaptureSnapshot();
     }
 
@@ -58,8 +58,8 @@ public sealed class WhenUserOnboardingIsAlreadyCompleted
             .WithSubject(_subject)
             .Build();
 
-        _response = await Host.HttpClient.PostJson(
-            $"/user-onboarding/{_userOnboardingId.Value}/complete",
+        _response = await Host.HttpClient.PutJson(
+            $"/users/{_userOnboardingId.Value}/onboarding/completion",
             new CompleteUserOnboardingRequest
             {
                 TermsOfServiceVersion = "v1",
@@ -76,11 +76,11 @@ public sealed class WhenUserOnboardingIsAlreadyCompleted
 
     [Test]
     public async Task Then_response_returns_user_onboarding_id()
-        => await Assert.That(_body.UserOnboardingId).IsEqualTo(_userOnboardingId.Value);
+        => await Assert.That(_body.UserId).IsEqualTo(_userOnboardingId.Value);
 
     [Test]
     public async Task Then_user_onboarding_stream_has_no_new_events()
         => await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .ShouldHaveNoChangesSince(_userOnboardingStreamBeforeWhen);
 }

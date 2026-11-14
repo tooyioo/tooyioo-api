@@ -18,7 +18,7 @@ public sealed class WhenUserExists(MongoTestContainer mongoDb)
     private readonly DateTime _createdAtUtc = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
     private HttpResponseMessage _response = null!;
     private RetrieveUserResponse _body = null!;
-    private UserOnboardingId _userOnboardingId = null!;
+    private UserId _userOnboardingId = null!;
     private string _userId = null!;
     private string _subject = null!;
     private string _termsOfServiceVersion = null!;
@@ -26,7 +26,7 @@ public sealed class WhenUserExists(MongoTestContainer mongoDb)
 
     protected override async Task Given()
     {
-        _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        _userOnboardingId = new UserId(1.ToGuid().ToString());
         _userId = _userOnboardingId.Value;
         _subject = "google-sub-123";
         _termsOfServiceVersion = "v1";
@@ -35,11 +35,12 @@ public sealed class WhenUserExists(MongoTestContainer mongoDb)
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_userOnboardingId)
+                .WithUserId(_userOnboardingId)
                 .Build());
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userOnboardingId.Value),
+        await Host.GivenAndProject<UserProjector, UserPersonalDataState, UserId>(
+            _userOnboardingId,
+            _createdAtUtc,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("Jane")
                 .WithLastName("Bloggs")
@@ -47,7 +48,7 @@ public sealed class WhenUserExists(MongoTestContainer mongoDb)
                 .WithIsEmailVerified(true)
                 .Build());
 
-        await Host.GivenAndProject<UserProjector, UserOnboardingState, UserOnboardingId>(
+        await Host.GivenAndProject<UserProjector, UserOnboardingState, UserId>(
             _userOnboardingId,
             _createdAtUtc,
             DomainEvent.UserOnboardingInitiated()

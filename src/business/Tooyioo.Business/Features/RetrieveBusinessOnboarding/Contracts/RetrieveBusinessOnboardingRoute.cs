@@ -6,5 +6,5 @@ namespace Tooyioo.Business.Features.RetrieveBusinessOnboarding.Contracts;
 public record RetrieveBusinessOnboardingRoute
 {
     [FromRoute(Name = "id")]
-    public required Guid BusinessOnboardingId { get; init; }
+    public required Guid BusinessId { get; init; }
 }

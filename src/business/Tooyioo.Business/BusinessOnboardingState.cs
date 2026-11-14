@@ -1,14 +1,15 @@
 using Eventuous;
+using Slicent.EventStore;
 using Tooyioo.Business.Contracts;
-using Tooyioo.Common;
 
 namespace Tooyioo.Business;
 
+[StreamName("business_onboarding")]
 public record BusinessOnboardingState
-    : State<BusinessOnboardingState, BusinessOnboardingId>
+    : State<BusinessOnboardingState>, IStreamState<BusinessId>
 {
     public string LegalName { get; private init; } = null!;
-    public UserId InitiatedBy { get; private init; } = null!;
+    public BusinessUserId InitiatedBy { get; private init; } = null!;
 
     public BusinessOnboardingState()
     {

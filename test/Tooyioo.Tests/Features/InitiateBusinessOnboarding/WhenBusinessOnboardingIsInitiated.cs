@@ -5,8 +5,8 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.InitiateBusinessOnboarding;
 
@@ -16,19 +16,19 @@ public sealed class WhenBusinessOnboardingIsInitiated
 {
     private HttpResponseMessage _response = null!;
     private InitiateBusinessOnboardingResponse _body = null!;
-    private UserOnboardingId _userOnboardingId = null!;
+    private UserId _userOnboardingId = null!;
     private string _userId = null!;
     private string _subject = null!;
     private string _legalName = null!;
 
     protected override async Task Given()
     {
-        _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        _userOnboardingId = new UserId(1.ToGuid().ToString());
         _userId = _userOnboardingId.Value;
         _subject = "google-sub-123";
         _legalName = "Acme Ltd";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
+        await Host.Given<UserOnboardingState, UserId>(
             _userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithExternalIdentityId(_subject)
@@ -42,7 +42,7 @@ public sealed class WhenBusinessOnboardingIsInitiated
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_userOnboardingId)
+                .WithUserId(_userOnboardingId)
                 .Build());
     }
 
@@ -53,7 +53,7 @@ public sealed class WhenBusinessOnboardingIsInitiated
             .Build();
 
         _response = await Host.HttpClient.PostJson(
-            "/business-onboarding/initiate",
+            "/businesses",
             new InitiateBusinessOnboardingRequest { LegalName = _legalName },
             token);
 
@@ -62,17 +62,21 @@ public sealed class WhenBusinessOnboardingIsInitiated
 
     [Test]
     public async Task Then_response_is_ok()
-        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.Created);
+
+    [Test]
+    public async Task Then_response_returns_the_location_of_the_new_business()
+        => await Assert.That(_response.Headers.Location?.ToString()).IsEqualTo($"/businesses/{_body.BusinessId}");
 
     [Test]
     public async Task Then_response_contains_business_onboarding_id()
-        => await Assert.That(Guid.TryParse(_body.BusinessOnboardingId, out _)).IsTrue();
+        => await Assert.That(Guid.TryParse(_body.BusinessId, out _)).IsTrue();
 
     [Test]
     public async Task Then_business_onboarding_events_are_saved()
         => await Host.Events
-            .Stream<BusinessOnboardingState, BusinessOnboardingId>(
-                new BusinessOnboardingId(_body.BusinessOnboardingId))
+            .Stream<BusinessOnboardingState, BusinessId>(
+                new BusinessId(_body.BusinessId))
             .ShouldContainExactly(
                 DomainEvent.BusinessOnboardingInitiated()
                     .WithLegalName(_legalName)

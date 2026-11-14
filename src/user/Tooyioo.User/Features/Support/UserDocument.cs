@@ -17,7 +17,6 @@ public sealed record UserDocument
     {
     }
 
-    public required string UserOnboardingId { get; init; }
     public string? Alias { get; init; }
     public required string Name { get; init; }
     public required string LastName { get; init; }

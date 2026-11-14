@@ -1,7 +1,6 @@
 using Eventuous;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
-using Tooyioo.Common;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.Support;
 // ReSharper disable ConvertToPrimaryConstructor
@@ -28,15 +27,15 @@ public sealed class ChooseUserOnboardingAliasHandler
         ChooseUserOnboardingAliasCommand command,
         CancellationToken cancellationToken = default)
     {
-        var userOnboardingId = command.UserOnboardingId;
+        var userId = command.UserId;
         var alias = command.Alias;
 
         var userOnboarding =
-            await _eventReader.LoadStateOrNew<UserOnboardingState, UserOnboardingId>(userOnboardingId, cancellationToken);
+            await _eventReader.LoadStateOrNew<UserOnboardingState, UserId>(userId, cancellationToken);
 
-        if (userOnboarding.Events.Length == 0 || string.IsNullOrWhiteSpace(userOnboarding.State.UserId))
+        if (userOnboarding.Events.Length == 0)
         {
-            return new ChooseUserOnboardingAliasUnexpectedStateError();
+            return new ChooseUserOnboardingAliasNotFoundError();
         }
 
         if (userOnboarding.State.IsCanceled || userOnboarding.State.IsComplete)
@@ -48,7 +47,7 @@ public sealed class ChooseUserOnboardingAliasHandler
         {
             if (userOnboarding.State.Alias == alias)
             {
-                return new ChooseUserOnboardingAliasCommandOkResult(new UserId(userOnboarding.State.UserId), userOnboardingId);
+                return new ChooseUserOnboardingAliasCommandOkResult(userId);
             }
 
             return new ChooseUserOnboardingAliasAlreadyChosenError(userOnboarding.State.Alias);
@@ -58,7 +57,7 @@ public sealed class ChooseUserOnboardingAliasHandler
             await _eventReader.LoadStateOrNew<UserAliasClaimingState, UserAliasClaimingId>(alias, cancellationToken);
 
         if (claimingAlias.State.UserId is { } claimingUserId
-            && claimingUserId != userOnboarding.State.UserId)
+            && claimingUserId != userId.Value)
         {
             return new ChooseUserOnboardingAliasAlreadyClaimedError(new UserId(claimingUserId));
         }
@@ -67,7 +66,7 @@ public sealed class ChooseUserOnboardingAliasHandler
             new object[] { new UserOnboardingDomainEvents.V1.UserOnboardingAliasChosen(alias) };
 
         var claimingAliasEvents =
-            new object[] { new UserAliasClaimingDomainEvents.V1.UserAliasClaimed(userOnboarding.State.UserId) };
+            new object[] { new UserAliasClaimingDomainEvents.V1.UserAliasClaimed(userId.Value) };
 
         try
         {
@@ -78,7 +77,7 @@ public sealed class ChooseUserOnboardingAliasHandler
                 ],
                 cancellationToken);
 
-            return new ChooseUserOnboardingAliasCommandOkResult(new UserId(userOnboarding.State.UserId), userOnboardingId);
+            return new ChooseUserOnboardingAliasCommandOkResult(userId);
         }
         catch (OptimisticConcurrencyException)
         {
@@ -87,7 +86,7 @@ public sealed class ChooseUserOnboardingAliasHandler
     }
 }
 
-public sealed record ChooseUserOnboardingAliasCommand(UserOnboardingId UserOnboardingId, string Alias)
+public sealed record ChooseUserOnboardingAliasCommand(UserId UserId, string Alias)
     : ICommand<ChooseUserOnboardingAliasCommandResult>;
 
 public union ChooseUserOnboardingAliasCommandResult(
@@ -96,11 +95,11 @@ public union ChooseUserOnboardingAliasCommandResult(
     ChooseUserOnboardingAliasAlreadyChosenError,
     ChooseUserOnboardingAliasNotInProgressError,
     ChooseUserOnboardingAliasConcurrencyConflictError,
-    ChooseUserOnboardingAliasUnexpectedStateError);
+    ChooseUserOnboardingAliasNotFoundError);
 
-public sealed record ChooseUserOnboardingAliasCommandOkResult(UserId UserId, UserOnboardingId UserOnboardingId);
+public sealed record ChooseUserOnboardingAliasCommandOkResult(UserId UserId);
 public sealed record ChooseUserOnboardingAliasAlreadyClaimedError(UserId UserId);
 public sealed record ChooseUserOnboardingAliasAlreadyChosenError(string ExistingAlias);
 public sealed record ChooseUserOnboardingAliasNotInProgressError;
 public sealed record ChooseUserOnboardingAliasConcurrencyConflictError;
-public sealed record ChooseUserOnboardingAliasUnexpectedStateError;
+public sealed record ChooseUserOnboardingAliasNotFoundError;

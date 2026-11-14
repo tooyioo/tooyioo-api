@@ -1,8 +1,7 @@
 using Tooyioo.Business.Contracts;
-using Tooyioo.Common;
 using Tooyioo.Tests.Support.Extensions;
-using Tooyioo.User;
 using Tooyioo.User.Contracts;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Support.Events;
 
@@ -56,23 +55,10 @@ public static class DomainEvent
 
 public sealed class UserOnboardingInitiatedBuilder
 {
-    private string _userId = string.Empty;
     private string _name = "Jane";
     private string _lastName = "Bloggs";
     private string _email = "jane.bloggs@test.com";
     private bool _isEmailVerified;
-
-    public UserOnboardingInitiatedBuilder WithUserId(string userId)
-    {
-        _userId = userId;
-        return this;
-    }
-
-    public UserOnboardingInitiatedBuilder WithUserId(UserId userId)
-    {
-        _userId = userId.Value;
-        return this;
-    }
 
     public UserOnboardingInitiatedBuilder WithName(string name)
     {
@@ -105,7 +91,7 @@ public sealed class UserOnboardingInitiatedBuilder
         => this;
 
     public UserOnboardingDomainEvents.V1.UserOnboardingInitiated Build()
-        => new(_userId);
+        => new();
 
     public UserPersonalDataDomainEvents.V1.UserPersonalDataRecorded BuildUserPersonalData()
         => new(_name, _lastName, _email, _isEmailVerified);
@@ -170,20 +156,7 @@ public sealed class UserOnboardingCanceledBuilder
 
 public sealed class UserLoginClaimedBuilder
 {
-    private string? _userId;
-    private string _userOnboardingId = 1.ToGuid().ToString();
-
-    public UserLoginClaimedBuilder WithUserOnboardingId(string userOnboardingId)
-    {
-        _userOnboardingId = userOnboardingId;
-        return this;
-    }
-
-    public UserLoginClaimedBuilder WithUserOnboardingId(UserOnboardingId userOnboardingId)
-    {
-        _userOnboardingId = userOnboardingId.Value;
-        return this;
-    }
+    private string _userId = 1.ToGuid().ToString();
 
     public UserLoginClaimedBuilder WithUserId(string userId)
     {
@@ -198,28 +171,22 @@ public sealed class UserLoginClaimedBuilder
     }
 
     public UserLoginClaimingDomainEvents.V1.UserLoginClaimed Build()
-        => new(_userId ?? _userOnboardingId, _userOnboardingId);
+        => new(_userId);
 }
 
 public sealed class UserLoginReleasedBuilder
 {
     private string _userId = 1.ToGuid().ToString();
 
-    public UserLoginReleasedBuilder WithUserOnboardingId(string userOnboardingId)
-    {
-        _userId = userOnboardingId;
-        return this;
-    }
-
-    public UserLoginReleasedBuilder WithUserOnboardingId(UserOnboardingId userOnboardingId)
-    {
-        _userId = userOnboardingId.Value;
-        return this;
-    }
-
     public UserLoginReleasedBuilder WithUserId(string userId)
     {
         _userId = userId;
+        return this;
+    }
+
+    public UserLoginReleasedBuilder WithUserId(UserId userId)
+    {
+        _userId = userId.Value;
         return this;
     }
 
@@ -230,8 +197,6 @@ public sealed class UserLoginReleasedBuilder
 public sealed class UserLoginLinkedBuilder
 {
     private string _userLoginKey = "google-sub-123";
-    private string _kind = "oidc";
-    private string _issuer = "https://accounts.google.com";
 
     public UserLoginLinkedBuilder WithUserLoginKey(string userLoginKey)
     {
@@ -239,20 +204,8 @@ public sealed class UserLoginLinkedBuilder
         return this;
     }
 
-    public UserLoginLinkedBuilder WithKind(string kind)
-    {
-        _kind = kind;
-        return this;
-    }
-
-    public UserLoginLinkedBuilder WithIssuer(string issuer)
-    {
-        _issuer = issuer;
-        return this;
-    }
-
     public UserLoginLinkingDomainEvents.V1.UserLoginLinked Build()
-        => new(_userLoginKey, _kind, _issuer);
+        => new(_userLoginKey);
 }
 
 public sealed class UserLoginUnlinkedBuilder
@@ -344,21 +297,15 @@ public sealed class UserAliasClaimedBuilder
 {
     private string _userId = 1.ToGuid().ToString();
 
-    public UserAliasClaimedBuilder WithUserOnboardingId(string userOnboardingId)
-    {
-        _userId = userOnboardingId;
-        return this;
-    }
-
-    public UserAliasClaimedBuilder WithUserOnboardingId(UserOnboardingId userOnboardingId)
-    {
-        _userId = userOnboardingId.Value;
-        return this;
-    }
-
     public UserAliasClaimedBuilder WithUserId(string userId)
     {
         _userId = userId;
+        return this;
+    }
+
+    public UserAliasClaimedBuilder WithUserId(UserId userId)
+    {
+        _userId = userId.Value;
         return this;
     }
 
@@ -370,21 +317,15 @@ public sealed class UserAliasReleasedBuilder
 {
     private string _userId = 1.ToGuid().ToString();
 
-    public UserAliasReleasedBuilder WithUserOnboardingId(string userOnboardingId)
-    {
-        _userId = userOnboardingId;
-        return this;
-    }
-
-    public UserAliasReleasedBuilder WithUserOnboardingId(UserOnboardingId userOnboardingId)
-    {
-        _userId = userOnboardingId.Value;
-        return this;
-    }
-
     public UserAliasReleasedBuilder WithUserId(string userId)
     {
         _userId = userId;
+        return this;
+    }
+
+    public UserAliasReleasedBuilder WithUserId(UserId userId)
+    {
+        _userId = userId.Value;
         return this;
     }
 

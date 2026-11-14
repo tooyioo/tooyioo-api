@@ -2,7 +2,7 @@
 
 state_change "initiate_user_onboarding" {
   title       = "Initiate User Onboarding"
-  description = "POST /user-onboarding/initiate. Resolves the user login, mints a user_onboarding_id and a user_id, records the person's PII, links and claims the user login, and starts the onboarding process in one atomic multi-stream append. A retry with an already claimed user login returns the existing ids and appends nothing."
+  description = "POST /users creates the user for the authenticated user login, records the person's PII, links and claims the user login, and starts the onboarding process in one atomic multi-stream append. The server mints the user_id and returns it in the Location header. A retry with an already claimed user login returns the existing user_id and appends nothing."
   status      = "done"
 
   screen "initiate_user_onboarding_ui" {
@@ -13,9 +13,9 @@ state_change "initiate_user_onboarding" {
 
   command "initiate_user_onboarding" {
     title       = "Initiate User Onboarding"
-    description = "Generates the user_onboarding_id and user_id in the mapper, derives user_login_key = HMAC(pepper, kind|issuer|subject) and writes personal data, the user login link, the user login claim and the onboarding initiation atomically."
+    description = "Generates the user_id in the mapper, derives user_login_key = HMAC(pepper, kind|issuer|subject) and writes personal data, the user login link, the user login claim and the onboarding initiation atomically."
     aggregate   = aggregate.user.user_onboarding
-    api_endpoint = "POST /user-onboarding/initiate"
+    api_endpoint = "POST /users"
 
     aggregate_dependencies = [
       aggregate.user.user_personal_data,
@@ -30,15 +30,10 @@ state_change "initiate_user_onboarding" {
       event.user.user_onboarding_initiated,
     ]
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "user_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000010"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "name" {
@@ -153,7 +148,50 @@ state_change "initiate_user_onboarding" {
     }
   }
 
-  scenario "scenario_04_user_login_is_claimed_concurrently" {
+  scenario "scenario_04_login_claimed_by_an_erased_user_starts_a_new_user" {
+    title = "A user login claimed by an erased user starts a new user"
+
+    given {
+      title = "The user login was claimed by a previous user"
+      event = event.user.user_login_claimed
+    }
+
+    given {
+      title = "The previous user's erasure was applied"
+      event = event.user.user_personal_data_erasure_applied
+    }
+
+    when {
+      title   = "Initiate user onboarding with the same user login"
+      command = command.initiate_user_onboarding
+    }
+
+    then {
+      title = "The stale user login is released"
+      event = event.user.user_login_released
+    }
+
+    then {
+      title = "The user login is claimed by the new user"
+      event = event.user.user_login_claimed
+    }
+
+    then {
+      title = "The personal data is recorded for the new user"
+      event = event.user.user_personal_data_recorded
+    }
+
+    then {
+      title = "The user onboarding is initiated"
+      event = event.user.user_onboarding_initiated
+    }
+
+    comment {
+      description = "The purge releases the user logins before truncating, so this path is the safety net for a release that was missed. A login claimed by an erased user is never a lockout."
+    }
+  }
+
+  scenario "scenario_05_user_login_is_claimed_concurrently" {
     title = "Another request claims the user login first"
 
     when {
@@ -171,7 +209,7 @@ state_change "initiate_user_onboarding" {
     }
   }
 
-  scenario "scenario_05_generated_user_id_already_has_events" {
+  scenario "scenario_06_generated_user_id_already_has_events" {
     title = "The generated user_id already has events"
 
     when {
@@ -213,12 +251,6 @@ state_view "retrieve_claimed_user_login" {
       example  = "00000000-0000-0000-0000-000000000010"
     }
 
-    field "user_onboarding_id" {
-      type     = "String"
-      optional = true
-      example  = "00000000-0000-0000-0000-000000000001"
-    }
-
     field "is_claimed" {
       type    = "Boolean"
       example = true
@@ -249,19 +281,15 @@ state_view "retrieve_linked_user_logins" {
 
     field "logins" {
       cardinality = "List"
-      type        = field_type.user.linked_user_login
-      example = [{
-        user_login_key = "5f0c2e..."
-        kind           = "oidc"
-        issuer         = "https://accounts.google.com"
-      }]
+      type        = "String"
+      example     = ["5f0c2e..."]
     }
   }
 }
 
 state_view "retrieve_user_onboarding" {
   title       = "Retrieve User Onboarding"
-  description = "GET /user-onboarding/{user_onboarding_id} reads the user onboarding state directly from the stream and joins the User Personal Data state. It is not a Mongo projection."
+  description = "GET /users/{user_id}/onboarding reads the user onboarding state directly from the stream and joins the User Personal Data state. It is not a Mongo projection."
   status      = "done"
 
   readmodel "user_onboarding" {
@@ -276,15 +304,10 @@ state_view "retrieve_user_onboarding" {
     ]
     to = [screen.retrieve_user_onboarding_ui]
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "user_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000010"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "alias" {
@@ -309,15 +332,10 @@ state_view "retrieve_user_onboarding" {
     title = "User Onboarding"
     actor = actor.authenticated_user
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "user_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000010"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "alias" {
@@ -410,7 +428,7 @@ state_view "retrieve_user_onboarding" {
 
 state_change "choose_user_onboarding_alias" {
   title       = "Choose User Onboarding Alias"
-  description = "POST /user-onboarding/{user_onboarding_id}/choose-alias. Claims an alias for the user. The alias is 3-30 lowercase letters, numbers, dashes or underscores. Choosing the same alias again is idempotent; choosing an alias owned by another user is rejected."
+  description = "PUT /users/{user_id}/onboarding/alias sets the alias of the user. The alias is 3-30 lowercase letters, numbers, dashes or underscores. Setting the same alias again is idempotent; an alias owned by another user is rejected."
   status      = "done"
 
   screen "choose_user_onboarding_alias_ui" {
@@ -418,10 +436,10 @@ state_change "choose_user_onboarding_alias" {
     actor = actor.authenticated_user
     to    = [command.choose_user_onboarding_alias]
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "alias" {
@@ -434,7 +452,7 @@ state_change "choose_user_onboarding_alias" {
     title       = "Choose User Onboarding Alias"
     description = "Writes a 3-30 character lowercase alias on the onboarding process and claims it for the user in one atomic append."
     aggregate   = aggregate.user.user_onboarding
-    api_endpoint = "POST /user-onboarding/{user_onboarding_id}/choose-alias"
+    api_endpoint = "PUT /users/{user_id}/onboarding/alias"
 
     aggregate_dependencies = [
       aggregate.user.user_alias_claiming,
@@ -445,10 +463,10 @@ state_change "choose_user_onboarding_alias" {
       event.user.alias_claimed,
     ]
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "alias" {
@@ -557,7 +575,7 @@ state_change "choose_user_onboarding_alias" {
 
     then {
       title = "No user onboarding process exists to choose an alias for"
-      error = "onboarding_state_unexpected"
+      error = "user_onboarding_not_found"
     }
   }
 
@@ -612,7 +630,7 @@ state_view "retrieve_claimed_alias" {
 
 state_change "complete_user_onboarding" {
   title       = "Complete User Onboarding"
-  description = "POST /user-onboarding/{user_onboarding_id}/complete. Completes an onboarding that already has an alias and records the accepted terms of service and privacy policy versions. No id is minted here: both ids already exist."
+  description = "PUT /users/{user_id}/onboarding/completion completes an onboarding that already has an alias and records the accepted terms of service and privacy policy versions. The user_id already exists and is the onboarding process identity."
   status      = "done"
 
   screen "complete_user_onboarding_ui" {
@@ -620,10 +638,10 @@ state_change "complete_user_onboarding" {
     actor = actor.authenticated_user
     to    = [command.complete_user_onboarding]
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "terms_of_service_version" {
@@ -641,16 +659,16 @@ state_change "complete_user_onboarding" {
     title       = "Complete User Onboarding"
     description = "Appends UserOnboardingCompleted to the process stream with the accepted terms of service and privacy policy versions. Consent evidence must survive an erasure."
     aggregate   = aggregate.user.user_onboarding
-    api_endpoint = "POST /user-onboarding/{user_onboarding_id}/complete"
+    api_endpoint = "PUT /users/{user_id}/onboarding/completion"
 
     to = [
       event.user.user_onboarding_completed,
     ]
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "terms_of_service_version" {
@@ -736,7 +754,7 @@ state_change "complete_user_onboarding" {
 
     then {
       title = "No user onboarding process exists to complete"
-      error = "onboarding_state_unexpected"
+      error = "user_onboarding_not_found"
     }
   }
 
@@ -778,15 +796,10 @@ state_view "project_users" {
       event.user.user_personal_data_erasure_applied,
     ]
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
-    }
-
-    field "user_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000010"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "alias" {

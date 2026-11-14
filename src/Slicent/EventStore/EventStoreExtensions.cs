@@ -1,4 +1,4 @@
-﻿using Eventuous;
+using Eventuous;
 
 // ReSharper disable ConvertToExtensionBlock
 // ReSharper disable InvertIf
@@ -7,13 +7,16 @@ namespace Slicent.EventStore;
 
 public static class EventStoreExtensions
 {
-    public static async Task<FoldedEventStream<TState>> LoadStateOrNew<TState, TId>(
+    public static Task<FoldedEventStream<TState>> LoadStateOrNew<TState, TId>(
         this IEventReader eventReader,
         TId id,
         CancellationToken ct)
-        where TState : State<TState, TId>, new()
+        where TState : State<TState>, IStreamState<TId>, new()
         where TId : Id =>
-        await eventReader.LoadState<TState, TId>(new StreamNameMap(), id, failIfNotFound: false, cancellationToken: ct);
+        eventReader.LoadState<TState>(
+            StreamNames.For<TState>(TState.StreamIdentity(id)),
+            failIfNotFound: false,
+            cancellationToken: ct);
     
     public static StateStreamChanges ToStateStreamChanges<TState>(
         this FoldedEventStream<TState> stream,

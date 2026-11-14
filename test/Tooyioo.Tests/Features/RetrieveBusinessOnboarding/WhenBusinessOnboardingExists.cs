@@ -2,14 +2,13 @@ using System.Net;
 using Tooyioo.Business;
 using Tooyioo.Business.Features.RetrieveBusinessOnboarding.Contracts;
 using Tooyioo.Business.Features.Support;
-using Tooyioo.Common;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.RetrieveBusinessOnboarding;
 
@@ -21,16 +20,16 @@ public sealed class WhenBusinessOnboardingExists(MongoTestContainer mongoDb)
     private readonly DateTime _createdAtUtc = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
     private HttpResponseMessage _response = null!;
     private RetrieveBusinessOnboardingResponse _body = null!;
-    private BusinessOnboardingId _businessOnboardingId = null!;
-    private UserOnboardingId _userOnboardingId = null!;
+    private BusinessId _businessOnboardingId = null!;
+    private UserId _userOnboardingId = null!;
     private string _userId = null!;
     private string _subject = null!;
     private string _legalName = null!;
 
     protected override async Task Given()
     {
-        _businessOnboardingId = new BusinessOnboardingId(1.ToGuid().ToString());
-        _userOnboardingId = new UserOnboardingId(2.ToGuid().ToString());
+        _businessOnboardingId = new BusinessId(1.ToGuid().ToString());
+        _userOnboardingId = new UserId(2.ToGuid().ToString());
         _userId = _userOnboardingId.Value;
         _subject = "google-sub-123";
         _legalName = "Acme Ltd";
@@ -38,10 +37,10 @@ public sealed class WhenBusinessOnboardingExists(MongoTestContainer mongoDb)
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_userOnboardingId)
+                .WithUserId(_userOnboardingId)
                 .Build());
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
+        await Host.Given<UserOnboardingState, UserId>(
             _userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithExternalIdentityId(_subject)
@@ -50,7 +49,7 @@ public sealed class WhenBusinessOnboardingExists(MongoTestContainer mongoDb)
                 .WithUserId(_userId)
                 .Build());
 
-        await Host.GivenAndProject<BusinessOnboardingProjector, BusinessOnboardingState, BusinessOnboardingId>(
+        await Host.GivenAndProject<BusinessOnboardingProjector, BusinessOnboardingState, BusinessId>(
             _businessOnboardingId,
             _createdAtUtc,
             DomainEvent.BusinessOnboardingInitiated()
@@ -66,7 +65,7 @@ public sealed class WhenBusinessOnboardingExists(MongoTestContainer mongoDb)
             .Build();
 
         _response = await Host.HttpClient.Get(
-            $"/business-onboarding/{_businessOnboardingId.Value}",
+            $"/businesses/{_businessOnboardingId.Value}/onboarding",
             token);
 
         _body = await _response.ReadJson<RetrieveBusinessOnboardingResponse>();
@@ -78,7 +77,7 @@ public sealed class WhenBusinessOnboardingExists(MongoTestContainer mongoDb)
 
     [Test]
     public async Task Then_response_returns_business_onboarding_id()
-        => await Assert.That(_body.BusinessOnboardingId).IsEqualTo(_businessOnboardingId.Value);
+        => await Assert.That(_body.BusinessId).IsEqualTo(_businessOnboardingId.Value);
 
     [Test]
     public async Task Then_response_returns_legal_name_and_owner()

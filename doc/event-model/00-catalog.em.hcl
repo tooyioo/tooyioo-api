@@ -17,7 +17,9 @@ board {
     workflow.retrieve_user_personal_data,
     workflow.request_user_personal_data_erasure,
     workflow.cancel_user_personal_data_erasure,
-    workflow.apply_due_user_personal_data_erasures,
+    workflow.retrieve_pending_user_personal_data_erasures,
+    workflow.purge_user_personal_data_erasures,
+    workflow.apply_user_personal_data_erasures,
     workflow.initiate_business_onboarding,
     workflow.retrieve_business_onboarding,
   ]
@@ -31,6 +33,10 @@ actor "system" {
   auth_required = false
 }
 
+actor "administrator" {
+  auth_required = true
+}
+
 bounded_context "user" {
   title       = "User"
   description = "User onboarding, authentication and personal data. One module, several aggregates and streams."
@@ -38,6 +44,7 @@ bounded_context "user" {
 
   aggregate "user_personal_data" {
     title       = "User Personal Data"
+    description = "Stream user_personal_data/{user_id}. The only stream that stores PII. It is truncated at its end when the erasure is applied."
   }
 
   event "user_personal_data_recorded" {
@@ -69,38 +76,73 @@ bounded_context "user" {
     }
   }
 
+  aggregate "user_personal_data_erasure" {
+    title       = "User Personal Data Erasure"
+    description = "Stream user_personal_data_erasure/{user_id}. The erasure process. It holds no PII and is never truncated, so it survives the erasure."
+  }
+
   event "user_personal_data_erasure_requested" {
     title       = "User Personal Data Erasure Requested"
-    description = "The person asked to be forgotten. The data is still readable until the request is applied, so the request can be canceled during the grace period."
-    aggregate   = aggregate.user_personal_data
+    description = "The person asked to be forgotten. Nothing is erased until an operator runs the purge, and the request can be canceled until the purge starts applying it."
+    aggregate   = aggregate.user_personal_data_erasure
 
     field "reason_code" {
       type    = "String"
       example = "user_request"
     }
-
-    field "erase_after_utc" {
-      type    = "DateTime"
-      example = "2026-11-16T00:00:00.000Z"
-    }
   }
 
   event "user_personal_data_erasure_canceled" {
     title       = "User Personal Data Erasure Canceled"
-    description = "The person changed their mind before the erasure was applied. The personal data was never truncated."
-    aggregate   = aggregate.user_personal_data
+    description = "The person changed their mind before the purge applied the erasure. The personal data was never truncated."
+    aggregate   = aggregate.user_personal_data_erasure
+  }
+
+  event "user_personal_data_erasure_applying" {
+    title       = "User Personal Data Erasure Applying"
+    description = "The purge started applying this erasure. It is the point of no return: the request can no longer be canceled."
+    aggregate   = aggregate.user_personal_data_erasure
   }
 
   event "user_personal_data_erasure_applied" {
     title       = "User Personal Data Erasure Applied"
-    description = "The erasure was executed: user logins were released and the stream was truncated before UserPersonalDataErasureRequested. This event survives the truncation and is what read models use to anonymize."
-    aggregate   = aggregate.user_personal_data
+    description = "The erasure was executed: every linked user login was released and the personal data stream was truncated at its end. This event survives and is what read models use to anonymize."
+    aggregate   = aggregate.user_personal_data_erasure
   }
 
-
-  field_type "linked_user_login" {
-    type = "Custom"
+  aggregate "personal_data_erasure_run" {
+    title       = "Personal Data Erasure Run"
+    description = "Stream personal_data_erasure_run/{run_id}. A manual purge started by an operator. It records the snapshot of users it promised to erase and the ones already erased."
   }
+
+  event "personal_data_erasure_run_started" {
+    title       = "Personal Data Erasure Run Started"
+    description = "An operator started a purge. The event records who started it and the snapshot of user_ids it promised to erase."
+    aggregate   = aggregate.personal_data_erasure_run
+
+    field "requested_by" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-0000000000aa"
+    }
+
+    field "user_ids" {
+      cardinality = "List"
+      type        = "String"
+      example     = ["00000000-0000-0000-0000-000000000010"]
+    }
+  }
+
+  event "personal_data_erasure_run_user_erased" {
+    title       = "Personal Data Erasure Run User Erased"
+    description = "A user from the run snapshot was erased. It is appended atomically with the applied event, so the run progress cannot drift from the erasure."
+    aggregate   = aggregate.personal_data_erasure_run
+
+    field "user_id" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-000000000010"
+    }
+  }
+
 
   aggregate "user_login_claiming" {
     title       = "User Login Claiming"
@@ -119,11 +161,6 @@ bounded_context "user" {
     field "user_id" {
       type    = "String"
       example = "00000000-0000-0000-0000-000000000010"
-    }
-
-    field "user_onboarding_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000001"
     }
   }
 
@@ -146,16 +183,6 @@ bounded_context "user" {
     field "user_login_key" {
       type    = "String"
       example = "5f0c2e..."
-    }
-
-    field "kind" {
-      type    = "String"
-      example = "oidc"
-    }
-
-    field "issuer" {
-      type    = "String"
-      example = "https://accounts.google.com"
     }
   }
 
@@ -190,13 +217,8 @@ bounded_context "user" {
 
   event "user_onboarding_initiated" {
     title       = "User Onboarding Initiated"
-    description = "A person started user onboarding. The user_onboarding_id is the stream id; the user_id identifies the person and is recorded once here."
+    description = "A person started user onboarding. The user_id is the stream id."
     aggregate   = aggregate.user_onboarding
-
-    field "user_id" {
-      type    = "String"
-      example = "00000000-0000-0000-0000-000000000010"
-    }
   }
 
   event "user_onboarding_alias_chosen" {

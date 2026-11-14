@@ -1,12 +1,13 @@
 using Eventuous;
+using Slicent.EventStore;
 using Tooyioo.User.Contracts;
 
 namespace Tooyioo.User.Features.Support;
 
+[StreamName("user_onboarding")]
 public sealed record UserOnboardingState
-    : State<UserOnboardingState, UserOnboardingId>
+    : State<UserOnboardingState>, IStreamState<UserId>
 {
-    public string? UserId { get; private init; }
     public string? Alias { get; private init; }
     public bool IsInitiated { get; private init; }
     public bool IsComplete { get; private init; }
@@ -24,7 +25,7 @@ public sealed record UserOnboardingState
     private static UserOnboardingState Initiated(
         UserOnboardingState state,
         UserOnboardingDomainEvents.V1.UserOnboardingInitiated domainEvent)
-        => state with { IsInitiated = true, UserId = domainEvent.UserId };
+        => state with { IsInitiated = true };
 
     private static UserOnboardingState AliasChosen(
         UserOnboardingState state,

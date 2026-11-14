@@ -1,4 +1,3 @@
-using Eventuous;
 using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 using Tooyioo.User.Features.Support;
 
@@ -6,9 +5,9 @@ using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.User.Features.ChooseUserOnboardingAlias;
 
-public sealed class ChooseUserOnboardingAliasAuthorizer(IEventReader eventReader)
-    : UserOnboardingRouteAuthorizer<ChooseUserOnboardingAliasRoute>(eventReader)
+public sealed class ChooseUserOnboardingAliasAuthorizer
+    : UserOnboardingRouteAuthorizer<ChooseUserOnboardingAliasRoute>
 {
-    protected override Guid GetUserOnboardingId(ChooseUserOnboardingAliasRoute route)
-        => route.UserOnboardingId;
+    protected override Guid GetUserId(ChooseUserOnboardingAliasRoute route)
+        => route.UserId;
 }

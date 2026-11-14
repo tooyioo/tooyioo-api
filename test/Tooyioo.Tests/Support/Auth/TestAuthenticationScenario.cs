@@ -56,6 +56,14 @@ public static class TestAuthenticationScenarioExtensions
         VerticalSliceTestHost host)
         => client.PostJson(uri, request, scenario.CreateBearerToken(host));
 
+    public static Task<HttpResponseMessage> PutJson(
+        this HttpClient client,
+        string uri,
+        object request,
+        TestAuthenticationScenario scenario,
+        VerticalSliceTestHost host)
+        => client.PutJson(uri, request, scenario.CreateBearerToken(host));
+
     public static Task<HttpResponseMessage> Get(
         this HttpClient client,
         string uri,

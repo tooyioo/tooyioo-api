@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.RequestUserPersonalDataErasure.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.UserPersonalData;
 
@@ -16,20 +16,20 @@ public sealed class WhenErasedUserPersonalDataErasureIsRequested
 {
     private HttpResponseMessage _response = null!;
     private HttpProblemDetails _body = null!;
-    private UserOnboardingId _userId = null!;
+    private UserId _userId = null!;
     private string _subject = null!;
 
     protected override async Task Given()
     {
-        _userId = new UserOnboardingId(1.ToGuid().ToString());
+        _userId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
 
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed().WithUserId(_userId.Value).Build());
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userId.Value),
+        await Host.Given<UserPersonalDataState, UserId>(
+            new UserId(_userId.Value),
             DomainEvent.UserPersonalDataRecorded().Build(),
             DomainEvent.UserPersonalDataErasureRequested().Build(),
             DomainEvent.UserPersonalDataErasureApplied().Build());
@@ -41,8 +41,8 @@ public sealed class WhenErasedUserPersonalDataErasureIsRequested
             .WithSubject(_subject)
             .Build();
 
-        _response = await Host.HttpClient.PostJson(
-            $"/users/{_userId.Value}/personal-data/erase",
+        _response = await Host.HttpClient.PutJson(
+            $"/users/{_userId.Value}/personal-data/erasure",
             new RequestUserPersonalDataErasureRequest { ReasonCode = "user_request" },
             token);
 

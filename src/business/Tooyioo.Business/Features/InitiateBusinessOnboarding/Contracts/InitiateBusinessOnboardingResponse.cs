@@ -4,13 +4,13 @@ namespace Tooyioo.Business.Features.InitiateBusinessOnboarding.Contracts;
 /// Response returned after a successful initiate business onboarding request
 /// </summary>
 /// <remarks>
-/// It contains the unique identifier of the business onboarding
+/// It contains the unique identifier of the business
 /// </remarks>
-/// <example>{"businessOnboardingId": "00000000-0000-0000-0000-000000000001"}</example>
+/// <example>{"businessId": "00000000-0000-0000-0000-000000000001"}</example>
 public sealed record InitiateBusinessOnboardingResponse
 {
     /// <summary>
-    /// The unique identifier of the business onboarding
+    /// The unique identifier of the business
     /// </summary>
-    public required string BusinessOnboardingId { get; init; }
+    public required string BusinessId { get; init; }
 }

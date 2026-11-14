@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Routing;
 using Slicent.Application;
 using Slicent.Application.Authorization;
 using Slicent.Application.Commands;
-using Tooyioo.Common;
 using Tooyioo.User.Features.RequestUserPersonalDataErasure.Contracts;
 
 namespace Tooyioo.User.Features.RequestUserPersonalDataErasure;
@@ -20,13 +19,13 @@ public sealed class RequestUserPersonalDataErasureEndpoint
                 RequestUserPersonalDataErasureCommand,
                 RequestUserPersonalDataErasureCommandResult,
                 RequestUserPersonalDataErasureResponse>(
-                "/users/{id:guid}/personal-data/erase",
+                "/users/{id:guid}/personal-data/erasure",
                 cfg => cfg
                     .WithName("request-user-personal-data-erasure")
-                    .WithSummary("Request personal data erasure")
+                    .WithSummary("Set the personal data erasure request")
                     .WithDescription(
-                        "Starts the right-to-be-forgotten grace period for the authenticated user. The data remains readable until the grace period ends, and the request can be canceled meanwhile.")
-                    .WithTags("user-personal-data"))
-            .RequireRouteAuthorization<RequestUserPersonalDataErasureRoute, RequestUserPersonalDataErasureAuthorizer>()
-            .WithCommandConventions<RequestUserPersonalDataErasureResponse, HttpProblemDetails>();
+                        "Sets the erasure request of the authenticated user. Nothing is erased until an operator runs the purge; the request can be removed until then.")
+                    .WithTags("user-personal-data"),
+                CommandHttpMethod.Put)
+            .RequireRouteAuthorization<RequestUserPersonalDataErasureRoute, RequestUserPersonalDataErasureAuthorizer>();
 }

@@ -22,11 +22,6 @@ public sealed record RetrieveUserOnboardingResponse
     public required string UserId { get; init; }
 
     /// <summary>
-    /// The onboarding process identifier
-    /// </summary>
-    public required string UserOnboardingId { get; init; }
-
-    /// <summary>
     /// The unique alias (if any)
     /// </summary>
     public required string? Alias { get; init; }

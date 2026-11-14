@@ -1,7 +1,7 @@
 using Eventuous;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
-using Tooyioo.Common;
+using Tooyioo.User.Identity;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.Support;
 // ReSharper disable ConvertToPrimaryConstructor
@@ -34,18 +34,13 @@ public sealed class InitiateUserOnboardingHandler
 
         if (userLoginClaiming.State.UserId is { } existingUserId)
         {
-            var existingOnboardingId = userLoginClaiming.State.UserOnboardingId ?? existingUserId;
-            return new InitiateUserOnboardingOkResult(
-                new UserOnboardingId(existingOnboardingId),
-                new UserId(existingUserId));
+            return new InitiateUserOnboardingOkResult(new UserId(existingUserId));
         }
 
-        var userOnboardingId = command.UserOnboardingId;
         var userId = command.UserId;
 
         var personalData =
-            await _eventReader.LoadStateOrNew<UserPersonalDataState, UserPersonalDataId>(
-                new UserPersonalDataId(userId.Value), cancellationToken);
+            await _eventReader.LoadStateOrNew<UserPersonalDataState, UserId>(userId, cancellationToken);
 
         if (personalData.Events.Length != 0)
         {
@@ -53,8 +48,7 @@ public sealed class InitiateUserOnboardingHandler
         }
 
         var userLoginLinking =
-            await _eventReader.LoadStateOrNew<UserLoginLinkingState, UserLoginLinkingId>(
-                new UserLoginLinkingId(userId.Value), cancellationToken);
+            await _eventReader.LoadStateOrNew<UserLoginLinkingState, UserId>(userId, cancellationToken);
 
         if (userLoginLinking.Events.Length != 0)
         {
@@ -62,8 +56,7 @@ public sealed class InitiateUserOnboardingHandler
         }
 
         var userOnboarding =
-            await _eventReader.LoadStateOrNew<UserOnboardingState, UserOnboardingId>(
-                userOnboardingId, cancellationToken);
+            await _eventReader.LoadStateOrNew<UserOnboardingState, UserId>(userId, cancellationToken);
 
         if (userOnboarding.Events.Length != 0)
         {
@@ -76,20 +69,15 @@ public sealed class InitiateUserOnboardingHandler
             command.Email,
             command.IsEmailVerified);
 
-        var userLoginLinked = new UserLoginLinkingDomainEvents.V1.UserLoginLinked(
-            userLoginKey.Key,
-            userLoginKey.Kind,
-            userLoginKey.Issuer);
+        var userLoginLinked = new UserLoginLinkingDomainEvents.V1.UserLoginLinked(userLoginKey.Key);
 
-        var userLoginClaimed = new UserLoginClaimingDomainEvents.V1.UserLoginClaimed(
-            userId.Value,
-            userOnboardingId.Value);
+        var userLoginClaimed = new UserLoginClaimingDomainEvents.V1.UserLoginClaimed(userId.Value);
 
-        var userOnboardingInitiated = new UserOnboardingDomainEvents.V1.UserOnboardingInitiated(userId.Value);
+        var userOnboardingInitiated = new UserOnboardingDomainEvents.V1.UserOnboardingInitiated();
 
         try
         {
-            // One append for all streams: the process, the login index/claim and the PII record.
+            // One append for all streams: the user, the login index/claim and the PII record.
             _ = await _eventWriter.StoreStateChanges(
                 [
                     personalData.ToStateStreamChanges([personalDataRecorded]),
@@ -99,7 +87,7 @@ public sealed class InitiateUserOnboardingHandler
                 ],
                 cancellationToken);
 
-            return new InitiateUserOnboardingOkResult(userOnboardingId, userId);
+            return new InitiateUserOnboardingOkResult(userId);
         }
         catch (OptimisticConcurrencyException)
         {
@@ -109,7 +97,6 @@ public sealed class InitiateUserOnboardingHandler
 }
 
 public sealed record InitiateUserOnboardingCommand(
-    UserOnboardingId UserOnboardingId,
     UserId UserId,
     string Name,
     string LastName,
@@ -123,6 +110,6 @@ public union InitiateUserOnboardingCommandResult(
     InitiateUserOnboardingConcurrencyError,
     InitiateUserOnboardingUnexpectedStateError);
 
-public sealed record InitiateUserOnboardingOkResult(UserOnboardingId UserOnboardingId, UserId UserId);
+public sealed record InitiateUserOnboardingOkResult(UserId UserId);
 public sealed record InitiateUserOnboardingConcurrencyError;
 public sealed record InitiateUserOnboardingUnexpectedStateError;

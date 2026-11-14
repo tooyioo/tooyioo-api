@@ -1,17 +1,14 @@
 using Eventuous;
+using Slicent.EventStore;
 using Tooyioo.User.Contracts;
 
 namespace Tooyioo.User.Features.Support;
 
-public sealed record LinkedUserLogin(
-    string UserLoginKey,
-    string Kind,
-    string Issuer);
-
+[StreamName("user_login_linking")]
 public sealed record UserLoginLinkingState
-    : State<UserLoginLinkingState, UserLoginLinkingId>
+    : State<UserLoginLinkingState>, IStreamState<UserId>
 {
-    public IReadOnlyList<LinkedUserLogin> Logins { get; private init; } = [];
+    public IReadOnlyList<string> Logins { get; private init; } = [];
 
     public UserLoginLinkingState()
     {
@@ -26,11 +23,8 @@ public sealed record UserLoginLinkingState
         {
             Logins =
             [
-                .. state.Logins.Where(x => x.UserLoginKey != domainEvent.UserLoginKey),
-                new LinkedUserLogin(
-                    domainEvent.UserLoginKey,
-                    domainEvent.Kind,
-                    domainEvent.Issuer)
+                .. state.Logins.Where(x => x != domainEvent.UserLoginKey),
+                domainEvent.UserLoginKey
             ]
         };
 
@@ -40,7 +34,7 @@ public sealed record UserLoginLinkingState
         => state with
         {
             Logins = state.Logins
-                .Where(x => x.UserLoginKey != domainEvent.UserLoginKey)
+                .Where(x => x != domainEvent.UserLoginKey)
                 .ToArray()
         };
 }

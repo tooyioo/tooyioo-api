@@ -20,7 +20,7 @@ public sealed class InitiateUserOnboardingAuthenticationTests
         await using var host = await VerticalSliceTestHost.Start();
 
         using var response = await host.HttpClient.PostJson(
-            $"/user-onboarding/initiate",
+            $"/users",
             new InitiateUserOnboardingRequest(),
             authenticationScenario,
             host);

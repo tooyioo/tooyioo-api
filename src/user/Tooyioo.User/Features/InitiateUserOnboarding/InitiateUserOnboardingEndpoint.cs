@@ -15,17 +15,16 @@ public sealed class InitiateUserOnboardingEndpoint
 {
     public void Map(IEndpointRouteBuilder app)
         => app
-            .MapCommand<InitiateUserOnboardingRequest, InitiateUserOnboardingCommand,
+            .MapCreateCommand<InitiateUserOnboardingRequest, InitiateUserOnboardingCommand,
                 InitiateUserOnboardingCommandResult,
                 InitiateUserOnboardingResponse>(
-                "user-onboarding/initiate",
+                "/users",
                 cfg
                     => cfg
                         .WithName("initiate-user-onboarding")
-                        .WithSummary("Initiate user onboarding")
+                        .WithSummary("Create a user and start its onboarding")
                         .WithDescription(
-                            "Resolves the authenticated user login, records the personal data, and starts onboarding. Repeated requests for an already claimed credential return its existing user_id.")
-                        .WithTags("user-onboarding"))
-            .RequireAuthorization(AuthorizationPolicies.SubRequired)
-            .WithCommandConventions<InitiateUserOnboardingResponse, HttpProblemDetails>();
+                            "Creates the user from the authenticated user login, records the personal data and starts onboarding. The server mints the user_id and returns it in the Location header. Repeated requests for an already claimed credential return its existing user_id.")
+                        .WithTags("users"))
+            .RequireAuthorization(AuthorizationPolicies.SubRequired);
 }

@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.User;
 using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -31,9 +31,9 @@ public sealed class ChooseUserOnboardingAliasValidationTests
         const string name = "Jane";
         const string lastName = "Bloggs";
         const string email = "jane.bloggs@test.com";
-        var userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        var userOnboardingId = new UserId(1.ToGuid().ToString());
 
-        await host.Given<UserOnboardingState, UserOnboardingId>(
+        await host.Given<UserOnboardingState, UserId>(
             userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithName(name)
@@ -45,11 +45,11 @@ public sealed class ChooseUserOnboardingAliasValidationTests
         await host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(userOnboardingId)
+                .WithUserId(userOnboardingId)
                 .Build());
 
         var userOnboardingStreamBeforeWhen = await host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(userOnboardingId)
             .CaptureSnapshot();
 
         var token = host.GoogleIdentityToken()
@@ -61,8 +61,8 @@ public sealed class ChooseUserOnboardingAliasValidationTests
             ? new { }
             : new ChooseUserOnboardingAliasRequest { Alias = alias };
 
-        using var response = await host.HttpClient.PostJson(
-            $"/user-onboarding/{userOnboardingId.Value}/choose-alias",
+        using var response = await host.HttpClient.PutJson(
+            $"/users/{userOnboardingId.Value}/onboarding/alias",
             request,
             token);
 
@@ -80,7 +80,7 @@ public sealed class ChooseUserOnboardingAliasValidationTests
         }
 
         await host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(userOnboardingId)
             .ShouldHaveNoChangesSince(userOnboardingStreamBeforeWhen);
     }
 }

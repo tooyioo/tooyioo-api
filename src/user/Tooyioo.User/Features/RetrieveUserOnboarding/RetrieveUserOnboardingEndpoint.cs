@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Routing;
 using Slicent.Application;
 using Slicent.Application.Authorization;
 using Slicent.Application.Queries;
-using Tooyioo.Common;
 using Tooyioo.User.Features.RetrieveUserOnboarding.Contracts;
+
 // ReSharper disable UnusedType.Global
 
 namespace Tooyioo.User.Features.RetrieveUserOnboarding;
@@ -20,11 +20,10 @@ public sealed class RetrieveUserOnboardingEndpoint
                 RetrieveUserOnboardingQuery,
                 RetrieveUserOnboardingQueryResult,
                 RetrieveUserOnboardingResponse>(
-                "/user-onboarding/{id:guid}",
+                "/users/{id:guid}/onboarding",
                 cfg => cfg
                     .WithName("retrieve-user-onboarding")
                     .WithSummary("Get a user onboarding")
-                    .WithTags("user-onboarding"))
-            .RequireRouteAuthorization<RetrieveUserOnboardingRoute, RetrieveUserOnboardingAuthorizer>()
-            .WithQueryConventions<RetrieveUserOnboardingResponse, HttpProblemDetails>();
+                    .WithTags("users"))
+            .RequireRouteAuthorization<RetrieveUserOnboardingRoute, RetrieveUserOnboardingAuthorizer>();
 }

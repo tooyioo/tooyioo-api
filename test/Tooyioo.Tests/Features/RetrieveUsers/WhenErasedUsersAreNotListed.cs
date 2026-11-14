@@ -17,24 +17,24 @@ public sealed class WhenErasedUsersAreNotListed(MongoTestContainer mongoDb)
 {
     private HttpResponseMessage _response = null!;
     private RetrieveUsersResponse _body = null!;
-    private UserOnboardingId _activeUserId = null!;
-    private UserOnboardingId _erasedUserId = null!;
+    private UserId _activeUserId = null!;
+    private UserId _erasedUserId = null!;
 
     protected override async Task Given()
     {
-        _activeUserId = new UserOnboardingId(1.ToGuid().ToString());
-        _erasedUserId = new UserOnboardingId(2.ToGuid().ToString());
+        _activeUserId = new UserId(1.ToGuid().ToString());
+        _erasedUserId = new UserId(2.ToGuid().ToString());
 
         await GivenUserLoginClaimingEvents(
             "google-sub-active",
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_activeUserId)
+                .WithUserId(_activeUserId)
                 .Build());
 
         await GivenUserLoginClaimingEvents(
             "google-sub-erased",
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_erasedUserId)
+                .WithUserId(_erasedUserId)
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
@@ -69,8 +69,8 @@ public sealed class WhenErasedUsersAreNotListed(MongoTestContainer mongoDb)
                 .WithPrivacyPolicyVersion("1.0.0")
                 .Build());
 
-        await Host.GivenAndProject<UserProjector, UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_erasedUserId.Value),
+        await Host.GivenAndProject<UserProjector, UserPersonalDataState, UserId>(
+            new UserId(_erasedUserId.Value),
             DomainEvent.UserPersonalDataErasureApplied().Build());
     }
 

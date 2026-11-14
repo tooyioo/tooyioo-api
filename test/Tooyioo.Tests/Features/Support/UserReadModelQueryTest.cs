@@ -2,8 +2,8 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
 using Tooyioo.User.Features.Support;
-using Tooyioo.User;
 using Tooyioo.User.Contracts;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.Support;
 
@@ -20,7 +20,7 @@ public abstract class UserReadModelQueryTest(MongoTestContainer mongoDb)
             domainEvents);
 
     protected async Task GivenUserOnboardingEventsWereProjected(
-        UserOnboardingId userId,
+        UserId userId,
         params object[] domainEvents)
     {
         var personalData =
@@ -35,12 +35,15 @@ public abstract class UserReadModelQueryTest(MongoTestContainer mongoDb)
         if (onboardingEvents.All(x => x is not UserOnboardingDomainEvents.V1.UserOnboardingInitiated))
         {
             onboardingEvents.Insert(0,
-                DomainEvent.UserOnboardingInitiated().WithUserId(userId.Value).Build());
+                DomainEvent.UserOnboardingInitiated().Build());
         }
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(new UserPersonalDataId(userId.Value), personalData);
+        await Host.GivenAndProject<UserProjector, UserPersonalDataState, UserId>(
+            userId,
+            ProjectedAtUtc,
+            personalData);
 
-        await Host.GivenAndProject<UserProjector, UserOnboardingState, UserOnboardingId>(
+        await Host.GivenAndProject<UserProjector, UserOnboardingState, UserId>(
             userId,
             ProjectedAtUtc,
             onboardingEvents.ToArray());

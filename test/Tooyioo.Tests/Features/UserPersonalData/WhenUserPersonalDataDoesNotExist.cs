@@ -5,8 +5,8 @@ using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.UserPersonalData;
 
@@ -17,20 +17,20 @@ public sealed class WhenUserPersonalDataDoesNotExist(MongoTestContainer mongoDb)
 {
     private HttpResponseMessage _response = null!;
     private HttpProblemDetails _body = null!;
-    private UserOnboardingId _userId = null!;
+    private UserId _userId = null!;
     private string _subject = null!;
 
     protected override async Task Given()
     {
-        _userId = new UserOnboardingId(1.ToGuid().ToString());
+        _userId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
 
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed().WithUserId(_userId.Value).Build());
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userId.Value),
+        await Host.Given<UserPersonalDataState, UserId>(
+            new UserId(_userId.Value),
             DomainEvent.UserPersonalDataRecorded().Build());
     }
 

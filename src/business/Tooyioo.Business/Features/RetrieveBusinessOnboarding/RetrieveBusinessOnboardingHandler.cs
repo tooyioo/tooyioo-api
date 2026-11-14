@@ -1,6 +1,5 @@
 using Slicent.Application.Queries;
 using Tooyioo.Business.Features.Support;
-using Tooyioo.Common;
 // ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable UnusedType.Global
 // ReSharper disable ClassNeverInstantiated.Global
@@ -23,19 +22,19 @@ public sealed class RetrieveBusinessOnboardingHandler
         CancellationToken cancellationToken = default)
     {
         var document = await _queryService.GetSingleOrDefault(
-            x => x.Id == query.BusinessOnboardingId.Value && x.InitiatedBy == query.UserId.Value,
+            x => x.Id == query.BusinessId.Value && x.InitiatedBy == query.UserId.Value,
             cancellationToken);
 
         if (document is null)
         {
-            return new RetrieveBusinessOnboardingQueryNotFoundResult(query.BusinessOnboardingId);
+            return new RetrieveBusinessOnboardingQueryNotFoundResult(query.BusinessId);
         }
 
         return new RetrieveBusinessOnboardingQueryOkResult(document);
     }
 }
 
-public sealed record RetrieveBusinessOnboardingQuery(BusinessOnboardingId BusinessOnboardingId, UserId UserId)
+public sealed record RetrieveBusinessOnboardingQuery(BusinessId BusinessId, BusinessUserId UserId)
     : DocumentFilter<BusinessOnboardingDocument>, IQuery<RetrieveBusinessOnboardingQueryResult>;
 
 public union RetrieveBusinessOnboardingQueryResult(
@@ -43,4 +42,4 @@ public union RetrieveBusinessOnboardingQueryResult(
     RetrieveBusinessOnboardingQueryNotFoundResult);
 
 public sealed record RetrieveBusinessOnboardingQueryOkResult(BusinessOnboardingDocument Document);
-public sealed record RetrieveBusinessOnboardingQueryNotFoundResult(BusinessOnboardingId Id);
+public sealed record RetrieveBusinessOnboardingQueryNotFoundResult(BusinessId Id);

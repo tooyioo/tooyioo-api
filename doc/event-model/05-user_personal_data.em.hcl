@@ -7,12 +7,13 @@ state_view "retrieve_user_personal_data" {
 
   readmodel "user_personal_data" {
     title       = "User Personal Data"
-    description = "Persisted User Personal Data read model. The only read model whose purpose is to expose PII to its owner. Anonymized on UserPersonalDataErasureApplied."
+    description = "Persisted User Personal Data read model. The only read model whose purpose is to expose PII to its owner. It joins the personal data stream with the erasure process stream and anonymizes on UserPersonalDataErasureApplied."
     question    = "Which personal data and erasure status does this user have?"
     from = [
       event.user.user_personal_data_recorded,
       event.user.user_personal_data_erasure_requested,
       event.user.user_personal_data_erasure_canceled,
+      event.user.user_personal_data_erasure_applying,
       event.user.user_personal_data_erasure_applied,
     ]
     to = [screen.retrieve_user_personal_data_ui]
@@ -52,12 +53,6 @@ state_view "retrieve_user_personal_data" {
     field "status" {
       type    = "String"
       example = "active"
-    }
-
-    field "erase_after_utc" {
-      type     = "DateTime"
-      optional = true
-      example  = "2026-11-16T00:00:00.000Z"
     }
 
     field "created_at" {
@@ -113,12 +108,6 @@ state_view "retrieve_user_personal_data" {
       type    = "String"
       example = "active"
     }
-
-    field "erase_after_utc" {
-      type     = "DateTime"
-      optional = true
-      example  = null
-    }
   }
 
   scenario "scenario_01_active_user_personal_data_is_retrieved" {
@@ -135,7 +124,7 @@ state_view "retrieve_user_personal_data" {
     }
   }
 
-  scenario "scenario_02_pending_erasure_is_retrieved" {
+  scenario "scenario_02_erasure_requested_personal_data_is_retrieved" {
     title = "Pending erasure view"
 
     given {
@@ -149,7 +138,7 @@ state_view "retrieve_user_personal_data" {
     }
 
     then {
-      title     = "The view shows the pending erasure and its due date"
+      title     = "The view shows the pending erasure status"
       readmodel = readmodel.user_personal_data
     }
   }
@@ -171,9 +160,8 @@ state_view "retrieve_user_personal_data" {
       title     = "The view shows a masked identity and the erased status"
       readmodel = readmodel.user_personal_data
     }
-
-
   }
+
   scenario "scenario_04_unknown_user_personal_data_is_not_found" {
     title = "No personal data exists for the requested user"
 
@@ -187,12 +175,11 @@ state_view "retrieve_user_personal_data" {
       error = "user_personal_data_not_found"
     }
   }
-
 }
 
 state_change "request_user_personal_data_erasure" {
   title       = "Request User Personal Data Erasure"
-  description = "POST /users/{user_id}/personal-data/erase starts the right-to-be-forgotten grace period for the authenticated user. The data remains readable and the request can be canceled until the grace period ends."
+  description = "PUT /users/{user_id}/personal-data/erasure marks the authenticated user's personal data for deletion. Nothing is erased until an operator runs the purge, and the request can be removed until the purge starts applying it."
   status      = "done"
 
   screen "request_user_personal_data_erasure_ui" {
@@ -214,9 +201,13 @@ state_change "request_user_personal_data_erasure" {
 
   command "request_user_personal_data_erasure" {
     title       = "Request User Personal Data Erasure"
-    description = "Appends UserPersonalDataErasureRequested with the due date computed from the configured grace period."
-    aggregate   = aggregate.user.user_personal_data
-    api_endpoint = "POST /users/{user_id}/personal-data/erase"
+    description = "Appends UserPersonalDataErasureRequested to the erasure process stream. The personal data stream is untouched; the request holds no PII."
+    aggregate   = aggregate.user.user_personal_data_erasure
+    api_endpoint = "PUT /users/{user_id}/personal-data/erasure"
+
+    aggregate_dependencies = [
+      aggregate.user.user_personal_data,
+    ]
 
     to = [
       event.user.user_personal_data_erasure_requested,
@@ -248,12 +239,12 @@ state_change "request_user_personal_data_erasure" {
     }
 
     then {
-      title = "The erasure is requested with a due date"
+      title = "The erasure is requested"
       event = event.user.user_personal_data_erasure_requested
     }
 
     comment {
-      description = "A repeated request returns the existing due date without appending another event."
+      description = "A repeated request while the erasure is pending returns the current status and appends nothing."
     }
   }
 
@@ -296,7 +287,7 @@ state_change "request_user_personal_data_erasure" {
   }
 
   scenario "scenario_04_user_personal_data_erasure_is_requested_concurrently" {
-    title = "Another request changes the personal data first"
+    title = "Another request changes the erasure first"
 
     given {
       title = "The personal data was recorded"
@@ -304,12 +295,12 @@ state_change "request_user_personal_data_erasure" {
     }
 
     when {
-      title   = "Request the erasure while another request changes the personal data"
+      title   = "Request the erasure while another request changes the erasure process"
       command = command.request_user_personal_data_erasure
     }
 
     then {
-      title = "This attempt conflicts because the personal data changed before the request was saved"
+      title = "This attempt conflicts because the erasure process changed before the request was saved"
       error = "concurrent_update"
     }
   }
@@ -317,7 +308,7 @@ state_change "request_user_personal_data_erasure" {
 
 state_change "cancel_user_personal_data_erasure" {
   title       = "Cancel User Personal Data Erasure"
-  description = "POST /users/{user_id}/personal-data/cancel-erasure cancels a pending erasure during the grace period. It is rejected once the erasure has been applied."
+  description = "DELETE /users/{user_id}/personal-data/erasure removes a pending erasure. It is rejected once the purge has started applying it."
   status      = "done"
 
   screen "cancel_user_personal_data_erasure_ui" {
@@ -334,9 +325,9 @@ state_change "cancel_user_personal_data_erasure" {
 
   command "cancel_user_personal_data_erasure" {
     title       = "Cancel User Personal Data Erasure"
-    description = "Appends UserPersonalDataErasureCanceled. The personal data was never truncated."
-    aggregate   = aggregate.user.user_personal_data
-    api_endpoint = "POST /users/{user_id}/personal-data/cancel-erasure"
+    description = "Appends UserPersonalDataErasureCanceled to the erasure process stream. The personal data was never truncated."
+    aggregate   = aggregate.user.user_personal_data_erasure
+    api_endpoint = "DELETE /users/{user_id}/personal-data/erasure"
 
     to = [
       event.user.user_personal_data_erasure_canceled,
@@ -350,7 +341,7 @@ state_change "cancel_user_personal_data_erasure" {
   }
 
   scenario "scenario_01_pending_erasure_is_canceled" {
-    title = "Cancel a pending erasure during the grace period"
+    title = "Cancel a pending erasure"
 
     given {
       title = "An erasure was requested"
@@ -368,7 +359,26 @@ state_change "cancel_user_personal_data_erasure" {
     }
   }
 
-  scenario "scenario_02_erased_user_personal_data_cannot_be_restored" {
+  scenario "scenario_02_erasure_being_applied_cannot_be_canceled" {
+    title = "Cancel an erasure that the purge is applying"
+
+    given {
+      title = "The erasure request is being applied"
+      event = event.user.user_personal_data_erasure_applying
+    }
+
+    when {
+      title   = "Cancel the erasure"
+      command = command.cancel_user_personal_data_erasure
+    }
+
+    then {
+      title = "The erasure can no longer be canceled"
+      error = "erasure_already_applying"
+    }
+  }
+
+  scenario "scenario_03_erased_user_personal_data_cannot_be_restored" {
     title = "Cancel the erasure of already erased personal data"
 
     given {
@@ -387,34 +397,35 @@ state_change "cancel_user_personal_data_erasure" {
     }
   }
 
-  scenario "scenario_03_unknown_user_personal_data_cannot_cancel_an_erasure" {
-    title = "Cancel the erasure of unknown personal data"
+  scenario "scenario_04_erasure_that_was_never_requested_cannot_be_canceled" {
+    title = "Cancel an erasure that was never requested"
 
     when {
-      title   = "Cancel the erasure for an unknown user_id"
+      title   = "Cancel an erasure for an unknown or active user_id"
       command = command.cancel_user_personal_data_erasure
     }
 
     then {
-      title = "No personal data exists for the given user"
-      error = "user_personal_data_not_found"
+      title = "There is no pending erasure to cancel"
+      error = "erasure_not_requested"
     }
   }
 }
 
-automation "apply_due_user_personal_data_erasures" {
-  title       = "Apply Due User Personal Data Erasures"
-  description = "Scheduled job; not an HTTP endpoint. Every few seconds it queries the due erasures read model for requests whose erase_after_utc has passed and applies them idempotently."
+state_view "retrieve_pending_user_personal_data_erasures" {
+  title       = "Retrieve Pending User Personal Data Erasures"
+  description = "Internal lookup; not an HTTP endpoint. The purge command reads it to snapshot the erasures it promises to apply."
   status      = "done"
 
-  readmodel "due_user_personal_data_erasures" {
-    title       = "Due User Personal Data Erasures"
-    description = "View read by the scheduled erasure processor. It contains erasure requests whose grace period has ended."
-    question    = "Which personal data erasure requests are due?"
+  readmodel "pending_user_personal_data_erasures" {
+    title       = "Pending User Personal Data Erasures"
+    description = "View read by the purge command. It contains the erasure requests that have not been applied yet."
+    question    = "Which personal data erasure requests are pending?"
 
     from = [
       event.user.user_personal_data_erasure_requested,
       event.user.user_personal_data_erasure_canceled,
+      event.user.user_personal_data_erasure_applying,
       event.user.user_personal_data_erasure_applied,
     ]
 
@@ -426,30 +437,157 @@ automation "apply_due_user_personal_data_erasures" {
 
     field "status" {
       type    = "String"
-      example = "erasure_requested"
+      example = "requested"
+    }
+  }
+}
+
+state_change "purge_user_personal_data_erasures" {
+  title       = "Purge User Personal Data Erasures"
+  description = "POST /admin/personal-data/erasure-runs starts a manual purge. It snapshots the pending erasures, records the run and returns the users it promised to erase. The erasures are applied asynchronously."
+  status      = "done"
+
+  screen "purge_user_personal_data_erasures_ui" {
+    title = "Purge User Personal Data Erasures"
+    actor = actor.administrator
+    to    = [command.purge_user_personal_data_erasures]
+
+    field "run_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-0000000000aa"
+    }
+  }
+
+  command "purge_user_personal_data_erasures" {
+    title       = "Purge User Personal Data Erasures"
+    description = "Reads the pending erasures, mints a run_id, appends PersonalDataErasureRunStarted with the snapshot and returns the run id and the user_ids. It starts no work by itself. When nothing is pending it returns an empty snapshot and appends nothing."
+    aggregate   = aggregate.user.personal_data_erasure_run
+    api_endpoint = "POST /admin/personal-data/erasure-runs"
+
+    to = [
+      event.user.personal_data_erasure_run_started,
+    ]
+
+    field "run_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-0000000000aa"
     }
 
-    field "erase_after_utc" {
-      type    = "DateTime"
-      example = "2026-11-16T00:00:00.000Z"
+    field "requested_by" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-0000000000aa"
+    }
+
+    field "user_ids" {
+      cardinality = "List"
+      type        = "String"
+      example     = ["00000000-0000-0000-0000-000000000010"]
+    }
+  }
+
+  scenario "scenario_01_pending_erasures_are_purged" {
+    title = "A purge snapshots the pending erasures"
+
+    given {
+      title = "An erasure was requested"
+      event = event.user.user_personal_data_erasure_requested
+    }
+
+    when {
+      title   = "Start a purge"
+      command = command.purge_user_personal_data_erasures
+    }
+
+    then {
+      title = "The run records the snapshot of users to erase"
+      event = event.user.personal_data_erasure_run_started
+    }
+
+    comment {
+      description = "The response returns the same user_ids that the run event records, so the promise and the work cannot drift."
+    }
+  }
+
+  scenario "scenario_02_canceled_erasures_are_not_purged" {
+    title = "A canceled erasure is not part of the snapshot"
+
+    given {
+      title = "An erasure was requested"
+      event = event.user.user_personal_data_erasure_requested
+    }
+
+    given {
+      title = "The erasure was canceled"
+      event = event.user.user_personal_data_erasure_canceled
+    }
+
+    when {
+      title   = "Start a purge"
+      command = command.purge_user_personal_data_erasures
+    }
+
+    then {
+      title = "The canceled erasure is not in the run snapshot"
+      event = event.user.personal_data_erasure_run_started
+    }
+  }
+}
+
+automation "apply_user_personal_data_erasures" {
+  title       = "Apply User Personal Data Erasures"
+  description = "Internal; not an HTTP endpoint. Started by PersonalDataErasureRunStarted. For each user in the run it sends ApplyUserPersonalDataErasure, which releases the user logins, truncates the personal data and marks the erasure as applied."
+  status      = "done"
+
+  readmodel "personal_data_erasure_run_progress" {
+    title       = "Personal Data Erasure Run Progress"
+    description = "Progress of a purge, reconstructed from its run stream. It is what tells the operator which users of the snapshot are already erased."
+    question    = "Which users of this run are still pending?"
+
+    from = [
+      event.user.personal_data_erasure_run_started,
+      event.user.personal_data_erasure_run_user_erased,
+    ]
+
+    field "run_id" {
+      type         = "String"
+      id_attribute = true
+      example      = "00000000-0000-0000-0000-0000000000aa"
+    }
+
+    field "user_ids" {
+      cardinality = "List"
+      type        = "String"
+      example     = ["00000000-0000-0000-0000-000000000010"]
+    }
+
+    field "erased_user_ids" {
+      cardinality = "List"
+      type        = "String"
+      example     = ["00000000-0000-0000-0000-000000000010"]
     }
   }
 
   command "apply_user_personal_data_erasure" {
     title       = "Apply User Personal Data Erasure"
-    description = "Appends UserPersonalDataErasureApplied and releases every user login of the user, then truncates the user personal data stream before the erasure request. The erasure events survive and the PII disappears."
-    aggregate   = aggregate.user.user_personal_data
+    description = "Appends UserPersonalDataErasureApplying, appends every user login release in one atomic multi-stream append, truncates the personal data stream at its end and finally appends UserPersonalDataErasureApplied together with the run record. Applied is written last, so it means the releases and the truncate are both done. A failed step leaves the user pending and the next run retries it."
+    aggregate   = aggregate.user.user_personal_data_erasure
     external_trigger = true
 
     aggregate_dependencies = [
+      aggregate.user.user_personal_data,
       aggregate.user.user_login_claiming,
       aggregate.user.user_login_linking,
+      aggregate.user.personal_data_erasure_run,
     ]
 
     to = [
-      event.user.user_personal_data_erasure_applied,
+      event.user.user_personal_data_erasure_applying,
       event.user.user_login_released,
       event.user.user_login_unlinked,
+      event.user.user_personal_data_erasure_applied,
+      event.user.personal_data_erasure_run_user_erased,
     ]
 
     field "user_id" {
@@ -457,12 +595,20 @@ automation "apply_due_user_personal_data_erasures" {
       id_attribute = true
       example      = "00000000-0000-0000-0000-000000000010"
     }
+
+    field "run_id" {
+      type    = "String"
+      example = "00000000-0000-0000-0000-0000000000aa"
+    }
   }
 
+  scenario "scenario_01_pending_erasure_is_applied" {
+    title = "Apply a pending erasure"
 
-
-  scenario "scenario_01_due_erasure_is_applied" {
-    title = "Apply an erasure whose grace period ended"
+    given {
+      title = "An erasure was requested"
+      event = event.user.user_personal_data_erasure_requested
+    }
 
     given {
       title = "The user login is linked to the user"
@@ -470,18 +616,18 @@ automation "apply_due_user_personal_data_erasures" {
     }
 
     given {
-      title     = "The due erasures view contains the request"
-      readmodel = readmodel.due_user_personal_data_erasures
+      title = "The run contains the user"
+      event = event.user.personal_data_erasure_run_started
     }
 
     when {
-      title   = "Apply the due erasure"
+      title   = "Apply the erasure"
       command = command.apply_user_personal_data_erasure
     }
 
     then {
-      title = "The erasure is applied"
-      event = event.user.user_personal_data_erasure_applied
+      title = "The erasure starts applying"
+      event = event.user.user_personal_data_erasure_applying
     }
 
     then {
@@ -490,17 +636,60 @@ automation "apply_due_user_personal_data_erasures" {
     }
 
     then {
-      title = "The user login is unlinked"
+      title = "The user login is unlinked from the user"
       event = event.user.user_login_unlinked
     }
 
+    then {
+      title = "The erasure is applied"
+      event = event.user.user_personal_data_erasure_applied
+    }
+
+    then {
+      title = "The run records the user as erased"
+      event = event.user.personal_data_erasure_run_user_erased
+    }
+
     comment {
-      description = "After the atomic append, the user personal data stream is truncated before UserPersonalDataErasureRequested, so the request and applied events remain and the PII disappears. A later scavenge removes the truncated events from disk."
+      description = "The releases are atomic and Applied is written only after the truncate, so a failed step leaves the user pending and the next run retries it. A later scavenge removes the truncated events from disk. The erasure stream is the source of truth for the status."
     }
   }
 
-  scenario "scenario_02_erasure_before_its_due_date_is_not_applied" {
-    title = "Apply an erasure whose grace period has not ended"
+  scenario "scenario_02_canceled_erasure_is_not_applied" {
+    title = "Apply an erasure that was canceled"
+
+    given {
+      title = "The erasure was canceled"
+      event = event.user.user_personal_data_erasure_canceled
+    }
+
+    when {
+      title   = "Apply the canceled erasure"
+      command = command.apply_user_personal_data_erasure
+    }
+
+    then {
+      title = "There is no pending erasure to apply"
+      error = "erasure_not_requested"
+    }
+  }
+
+  scenario "scenario_03_unknown_user_personal_data_is_not_applied" {
+    title = "Apply an erasure for an unknown user"
+
+    when {
+      title   = "Apply the erasure for an unknown user_id"
+      command = command.apply_user_personal_data_erasure
+    }
+
+    then {
+      title = "No personal data exists for the given user"
+      error = "user_personal_data_not_found"
+    }
+  }
+
+  scenario "scenario_04_erasure_is_applied_concurrently" {
+    title = "Another request changes the erasure first"
 
     given {
       title = "An erasure was requested"
@@ -508,27 +697,17 @@ automation "apply_due_user_personal_data_erasures" {
     }
 
     when {
-      title   = "Apply the erasure before its due date"
+      title   = "Apply the erasure while another request changes the erasure process"
       command = command.apply_user_personal_data_erasure
     }
 
     then {
-      title = "The erasure is not due"
-      error = "erasure_not_due"
-    }
-  }
-
-  scenario "scenario_03_erasure_without_a_request_is_not_applied" {
-    title = "Apply an erasure that was never requested"
-
-    when {
-      title   = "Apply an erasure with no request"
-      command = command.apply_user_personal_data_erasure
+      title = "This attempt conflicts because the erasure process changed before the apply was saved"
+      error = "concurrent_update"
     }
 
-    then {
-      title = "No erasure request exists"
-      error = "erasure_not_requested"
+    comment {
+      description = "The next run retries the user. Releasing an already released login and truncating an already truncated stream are no-ops."
     }
   }
 }

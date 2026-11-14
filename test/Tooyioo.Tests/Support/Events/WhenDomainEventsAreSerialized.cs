@@ -26,15 +26,15 @@ public sealed class WhenDomainEventsAreSerialized
 
         (object Event, string Name)[] cases =
         [
-            (new UserOnboardingInitiated("user-1"), "V1.UserOnboardingInitiated"),
+            (new UserOnboardingInitiated(), "V1.UserOnboardingInitiated"),
             (new UserOnboardingAliasChosen("ada"), "V1.UserOnboardingAliasChosen"),
             (new UserOnboardingCompleted("v1", "v1"), "V1.UserOnboardingCompleted"),
             (new UserOnboardingCanceled("requested"), "V1.UserOnboardingCanceled"),
             (new UserAliasClaimed("user-1"), "V1.UserAliasClaimed"),
             (new UserAliasReleased("user-1"), "V1.UserAliasReleased"),
-            (new UserLoginClaimed("user-1", "onboarding-1"), "V1.UserLoginClaimed"),
+            (new UserLoginClaimed("user-1"), "V1.UserLoginClaimed"),
             (new UserLoginReleased("user-1"), "V1.UserLoginReleased"),
-            (new UserLoginLinked("credential-key", "oidc", "https://accounts.google.com"), "V1.UserLoginLinked"),
+            (new UserLoginLinked("credential-key"), "V1.UserLoginLinked"),
             (new UserLoginUnlinked("credential-key"), "V1.UserLoginUnlinked"),
             (new UserPersonalDataRecorded("Ada", "Lovelace", "ada@example.com", true), "V1.UserPersonalDataRecorded"),
             (new UserPersonalDataErasureRequested("user_request", DateTime.UtcNow), "V1.UserPersonalDataErasureRequested"),

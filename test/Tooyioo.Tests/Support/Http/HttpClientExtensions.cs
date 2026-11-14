@@ -26,6 +26,26 @@ internal static class HttpClientExtensions
         return await HttpResponseMessage(client, bearerToken, message);
     }
 
+    public static async Task<HttpResponseMessage> PutJson(
+        this HttpClient client,
+        string uri,
+        object request,
+        string? bearerToken)
+    {
+        using var message = new HttpRequestMessage(HttpMethod.Put, uri);
+        message.Content = JsonContent.Create(request);
+        return await HttpResponseMessage(client, bearerToken, message);
+    }
+
+    public static async Task<HttpResponseMessage> Delete(
+        this HttpClient client,
+        string uri,
+        string? bearerToken)
+    {
+        using var message = new HttpRequestMessage(HttpMethod.Delete, uri);
+        return await HttpResponseMessage(client, bearerToken, message);
+    }
+
     private static async Task<HttpResponseMessage> HttpResponseMessage(
         HttpClient client, 
         string? bearerToken, 

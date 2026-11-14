@@ -1,9 +1,9 @@
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.ApplyUserPersonalDataErasure;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.UserPersonalData;
 
@@ -11,21 +11,21 @@ namespace Tooyioo.Tests.Features.UserPersonalData;
 public sealed class WhenErasureWasNeverRequested
     : CommandVerticalSliceTest
 {
-    private UserOnboardingId _userId = null!;
+    private UserId _userId = null!;
     private ApplyUserPersonalDataErasureCommandResult _result;
 
     protected override async Task Given()
     {
-        _userId = new UserOnboardingId(1.ToGuid().ToString());
+        _userId = new UserId(1.ToGuid().ToString());
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userId.Value),
+        await Host.Given<UserPersonalDataState, UserId>(
+            new UserId(_userId.Value),
             DomainEvent.UserPersonalDataRecorded().Build());
     }
 
     protected override async Task When()
         => _result = await Host.SendCommand(
-            new ApplyUserPersonalDataErasureCommand(new UserPersonalDataId(_userId.Value)));
+            new ApplyUserPersonalDataErasureCommand(new UserId(_userId.Value)));
 
     [Test]
     public async Task Then_the_erasure_is_not_applied()

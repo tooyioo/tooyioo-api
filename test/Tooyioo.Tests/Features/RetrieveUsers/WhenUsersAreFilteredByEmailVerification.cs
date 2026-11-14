@@ -20,35 +20,35 @@ public sealed class WhenUsersAreFilteredByEmailVerification(MongoTestContainer m
 
     protected override async Task Given()
     {
-        var janeUserOnboardingId = new UserOnboardingId("00000000-0000-0000-0000-000000000101");
-        var johnUserOnboardingId = new UserOnboardingId("00000000-0000-0000-0000-000000000102");
-        var caseyUserOnboardingId = new UserOnboardingId("00000000-0000-0000-0000-000000000103");
+        var janeUserId = new UserId("00000000-0000-0000-0000-000000000101");
+        var johnUserId = new UserId("00000000-0000-0000-0000-000000000102");
+        var caseyUserId = new UserId("00000000-0000-0000-0000-000000000103");
 
         _janeSubject = "google-sub-jane";
         var johnSubject = "google-sub-john";
         var caseySubject = "google-sub-casey";
-        _johnUserId = johnUserOnboardingId.Value;
+        _johnUserId = johnUserId.Value;
 
         await GivenUserLoginClaimingEvents(
             _janeSubject,
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(janeUserOnboardingId)
+                .WithUserId(janeUserId)
                 .Build());
 
         await GivenUserLoginClaimingEvents(
             johnSubject,
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(johnUserOnboardingId)
+                .WithUserId(johnUserId)
                 .Build());
 
         await GivenUserLoginClaimingEvents(
             caseySubject,
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(caseyUserOnboardingId)
+                .WithUserId(caseyUserId)
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
-            janeUserOnboardingId,
+            janeUserId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("Jane")
                 .WithLastName("Bloggs")
@@ -64,7 +64,7 @@ public sealed class WhenUsersAreFilteredByEmailVerification(MongoTestContainer m
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
-            johnUserOnboardingId,
+            johnUserId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("John")
                 .WithLastName("Smith")
@@ -79,7 +79,7 @@ public sealed class WhenUsersAreFilteredByEmailVerification(MongoTestContainer m
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
-            caseyUserOnboardingId,
+            caseyUserId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("Casey")
                 .WithLastName("Bloggins")

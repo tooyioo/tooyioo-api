@@ -55,6 +55,21 @@ In production, configure `UserLogin__Pepper` through the platform secret store. 
 
 `Google.Issuer` is the Google issuer used by the JWT middleware. The user login key uses the validated token issuer; there is no separate allowlist or display name. Changing the issuer re-keys existing user logins, so treat it as a migration.
 
+#### Check configured secrets
+
+List the secrets that are currently configured for the API:
+
+```bash
+dotnet user-secrets list --project src/Tooyioo.Api
+```
+
+The values are stored outside the repository, in the per-user secrets file referenced by `UserSecretsId` in `src/Tooyioo.Api/Tooyioo.Api.csproj`:
+
+- Windows: `%APPDATA%\Microsoft\UserSecrets\<UserSecretsId>\secrets.json`
+- macOS and Linux: `~/.microsoft/usersecrets/<UserSecretsId>/secrets.json`
+
+Never commit that file. Clear a secret with `dotnet user-secrets remove "<key>" --project src/Tooyioo.Api`.
+
 ### 2. Start Podman
 
 On macOS and Windows, start the Podman machine:

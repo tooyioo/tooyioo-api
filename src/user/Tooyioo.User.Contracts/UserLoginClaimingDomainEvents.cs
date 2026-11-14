@@ -9,9 +9,7 @@ public static class UserLoginClaimingDomainEvents
         private const string Prefix = "V1.";
 
         [DomainEventType(Prefix + "UserLoginClaimed")]
-        public record UserLoginClaimed(
-            string UserId,
-            string UserOnboardingId);
+        public record UserLoginClaimed(string UserId);
 
         [DomainEventType(Prefix + "UserLoginReleased")]
         public record UserLoginReleased(string UserId);

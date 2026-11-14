@@ -4,8 +4,8 @@ using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Auth;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.User;
 using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 
@@ -24,9 +24,9 @@ public sealed class CompleteUserOnboardingAuthenticationTests
     {
         await using var host = await VerticalSliceTestHost.Start();
 
-        var userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
-        using var response = await host.HttpClient.PostJson(
-            $"/user-onboarding/{userOnboardingId.Value}/complete",
+        var userOnboardingId = new UserId(1.ToGuid().ToString());
+        using var response = await host.HttpClient.PutJson(
+            $"/users/{userOnboardingId.Value}/onboarding/completion",
             new CompleteUserOnboardingRequest
             {
                 TermsOfServiceVersion = "v1",
@@ -42,13 +42,13 @@ public sealed class CompleteUserOnboardingAuthenticationTests
     public async Task Endpoint_rejects_authenticated_users_without_user_id()
     {
         await using var host = await VerticalSliceTestHost.Start();
-        var userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        var userOnboardingId = new UserId(1.ToGuid().ToString());
         var token = host.GoogleIdentityToken()
             .WithSubject("google-sub-123")
             .Build();
 
-        using var response = await host.HttpClient.PostJson(
-            $"/user-onboarding/{userOnboardingId.Value}/complete",
+        using var response = await host.HttpClient.PutJson(
+            $"/users/{userOnboardingId.Value}/onboarding/completion",
             new CompleteUserOnboardingRequest { TermsOfServiceVersion = "v1", PrivacyPolicyVersion = "v1" },
             token);
 

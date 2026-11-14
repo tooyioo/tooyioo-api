@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Slicent.Application;
 using Slicent.Application.Queries;
-using Tooyioo.Common;
 using Tooyioo.User.Features.RetrieveUserSummaries.Contract;
+
 // ReSharper disable UnusedType.Global
 
 namespace Tooyioo.User.Features.RetrieveUserSummaries;
@@ -25,6 +25,5 @@ public sealed class RetrieveUserSummariesEndpoint
                     .WithSummary("List user summaries")
                     .WithDescription(
                         "Returns paginated user summaries containing IDs, aliases, and names. Supports filtering by ID and alias.")
-                    .WithTags("users"))
-            .WithQueryConventions<RetrieveUserSummariesResponse, HttpProblemDetails>();
+                    .WithTags("users"));
 }

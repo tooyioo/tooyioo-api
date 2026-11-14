@@ -1,10 +1,12 @@
 using Eventuous;
+using Slicent.EventStore;
 using Tooyioo.User.Contracts;
 
 namespace Tooyioo.User.Features.Support;
 
+[StreamName("user_personal_data")]
 public sealed record UserPersonalDataState
-    : State<UserPersonalDataState, UserPersonalDataId>
+    : State<UserPersonalDataState>, IStreamState<UserId>
 {
     public bool IsRecorded { get; private init; }
     public string? Name { get; private init; }

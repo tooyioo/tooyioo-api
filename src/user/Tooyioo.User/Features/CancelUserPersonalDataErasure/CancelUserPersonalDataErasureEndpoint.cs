@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Routing;
 using Slicent.Application;
 using Slicent.Application.Authorization;
 using Slicent.Application.Commands;
-using Tooyioo.Common;
 using Tooyioo.User.Features.CancelUserPersonalDataErasure.Contracts;
 
 namespace Tooyioo.User.Features.CancelUserPersonalDataErasure;
@@ -14,19 +13,17 @@ public sealed class CancelUserPersonalDataErasureEndpoint
 {
     public void Map(IEndpointRouteBuilder app)
         => app
-            .MapCommand<
+            .MapDelete<
                 CancelUserPersonalDataErasureRoute,
-                CancelUserPersonalDataErasureRequest,
                 CancelUserPersonalDataErasureCommand,
                 CancelUserPersonalDataErasureCommandResult,
                 CancelUserPersonalDataErasureResponse>(
-                "/users/{id:guid}/personal-data/cancel-erasure",
+                "/users/{id:guid}/personal-data/erasure",
                 cfg => cfg
                     .WithName("cancel-user-personal-data-erasure")
-                    .WithSummary("Cancel personal data erasure")
+                    .WithSummary("Remove the personal data erasure request")
                     .WithDescription(
-                        "Cancels a pending erasure during its grace period. It is rejected once the erasure has been applied.")
+                        "Removes the pending erasure request of the authenticated user. It is rejected once the purge has started applying it.")
                     .WithTags("user-personal-data"))
-            .RequireRouteAuthorization<CancelUserPersonalDataErasureRoute, CancelUserPersonalDataErasureAuthorizer>()
-            .WithCommandConventions<CancelUserPersonalDataErasureResponse, HttpProblemDetails>();
+            .RequireRouteAuthorization<CancelUserPersonalDataErasureRoute, CancelUserPersonalDataErasureAuthorizer>();
 }

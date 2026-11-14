@@ -4,20 +4,20 @@ meta {
   seq: 3
 }
 
-post {
-  url: {{baseUrl}}/user-onboarding/{{dynamicUserOnboardingId}}/cancel
+put {
+  url: {{baseUrl}}/users/{{dynamicUserId}}/onboarding/cancellation
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "reason": "Terms and Conditions rejected"
+    "reasonCode": "Terms and Conditions rejected"
   }
 }
 
 script:post-response {
-  bru.setVar("dynamicUserOnboardingId", null);
+  bru.setVar("dynamicUserId", null);
 }
 
 settings {

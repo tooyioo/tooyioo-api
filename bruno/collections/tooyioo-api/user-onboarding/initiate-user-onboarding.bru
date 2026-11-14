@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/user-onboarding/initiate
+  url: {{baseUrl}}/users
   body: json
   auth: inherit
 }
@@ -15,7 +15,7 @@ body:json {
 }
 
 script:post-response {
-  bru.setVar("dynamicUserOnboardingId", res.body.userOnboardingId);
+  bru.setVar("dynamicUserId", res.body.userId);
 }
 
 settings {

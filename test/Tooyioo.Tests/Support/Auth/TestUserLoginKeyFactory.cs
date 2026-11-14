@@ -1,4 +1,4 @@
-using Tooyioo.Common;
+using Tooyioo.User.Identity;
 
 namespace Tooyioo.Tests.Support.Auth;
 

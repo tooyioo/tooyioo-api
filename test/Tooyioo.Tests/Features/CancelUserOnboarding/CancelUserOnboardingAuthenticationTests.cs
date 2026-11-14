@@ -1,8 +1,8 @@
 using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Auth;
 using Tooyioo.Tests.Support.Extensions;
-using Tooyioo.User;
 using Tooyioo.User.Features.CancelUserOnboarding.Contracts;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.CancelUserOnboarding;
 
@@ -21,9 +21,9 @@ public sealed class CancelUserOnboardingAuthenticationTests
     {
         await using var host = await VerticalSliceTestHost.Start();
 
-        var userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
-        using var response = await host.HttpClient.PostJson(
-            $"/user-onboarding/{userOnboardingId.Value}/cancel",
+        var userOnboardingId = new UserId(1.ToGuid().ToString());
+        using var response = await host.HttpClient.PutJson(
+            $"/users/{userOnboardingId.Value}/onboarding/cancellation",
             new CancelUserOnboardingRequest { ReasonCode = "Changed mind" },
             authenticationScenario,
             host);

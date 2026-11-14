@@ -23,7 +23,7 @@ public sealed class WhenUserLoginIsClaimedConcurrently
             .Build();
 
         _response = await Host.HttpClient.PostJson(
-            "/user-onboarding/initiate",
+            "/users",
             new InitiateUserOnboardingRequest(),
             token);
 

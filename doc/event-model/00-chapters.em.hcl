@@ -51,6 +51,8 @@ chapter "chapter_05_user_personal_data" {
     workflow.retrieve_user_personal_data,
     workflow.request_user_personal_data_erasure,
     workflow.cancel_user_personal_data_erasure,
-    workflow.apply_due_user_personal_data_erasures,
+    workflow.retrieve_pending_user_personal_data_erasures,
+    workflow.purge_user_personal_data_erasures,
+    workflow.apply_user_personal_data_erasures,
   ]
 }

@@ -1,7 +1,6 @@
 using Eventuous;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
-using Tooyioo.Common;
 using Tooyioo.User.Contracts;
 // ReSharper disable ClassNeverInstantiated.Global
 // ReSharper disable ConvertToPrimaryConstructor
@@ -28,19 +27,19 @@ public sealed class CompleteUserOnboardingHandler
         CompleteUserOnboardingCommand command,
         CancellationToken cancellationToken = default)
     {
-        var userOnboardingId = command.UserOnboardingId;
+        var userId = command.UserId;
 
         var userOnboarding =
-            await _eventReader.LoadStateOrNew<UserOnboardingState, UserOnboardingId>(userOnboardingId, cancellationToken);
+            await _eventReader.LoadStateOrNew<UserOnboardingState, UserId>(userId, cancellationToken);
 
-        if (userOnboarding.Events.Length == 0 || string.IsNullOrWhiteSpace(userOnboarding.State.UserId))
+        if (userOnboarding.Events.Length == 0)
         {
-            return new CompleteUserOnboardingUnexpectedStateError();
+            return new CompleteUserOnboardingNotFoundError();
         }
 
         if (userOnboarding.State.IsComplete)
         {
-            return new CompleteUserOnboardingCommandOkResult(new UserId(userOnboarding.State.UserId), userOnboardingId);
+            return new CompleteUserOnboardingCommandOkResult(userId);
         }
 
         if (userOnboarding.State.IsCanceled)
@@ -66,7 +65,7 @@ public sealed class CompleteUserOnboardingHandler
                 ],
                 cancellationToken);
 
-            return new CompleteUserOnboardingCommandOkResult(new UserId(userOnboarding.State.UserId), userOnboardingId);
+            return new CompleteUserOnboardingCommandOkResult(userId);
         }
         catch (OptimisticConcurrencyException)
         {
@@ -76,7 +75,7 @@ public sealed class CompleteUserOnboardingHandler
 }
 
 public sealed record CompleteUserOnboardingCommand(
-    UserOnboardingId UserOnboardingId,
+    UserId UserId,
     string TermsOfServiceVersion,
     string PrivacyPolicyVersion)
     : ICommand<CompleteUserOnboardingCommandResult>;
@@ -86,10 +85,10 @@ public union CompleteUserOnboardingCommandResult(
     CompleteUserOnboardingAlreadyCanceledError,
     CompleteUserOnboardingAliasNotChosenError,
     CompleteUserOnboardingConcurrencyConflict,
-    CompleteUserOnboardingUnexpectedStateError);
+    CompleteUserOnboardingNotFoundError);
 
-public sealed record CompleteUserOnboardingCommandOkResult(UserId UserId, UserOnboardingId UserOnboardingId);
+public sealed record CompleteUserOnboardingCommandOkResult(UserId UserId);
 public sealed record CompleteUserOnboardingAlreadyCanceledError;
 public sealed record CompleteUserOnboardingAliasNotChosenError;
 public sealed record CompleteUserOnboardingConcurrencyConflict;
-public sealed record CompleteUserOnboardingUnexpectedStateError;
+public sealed record CompleteUserOnboardingNotFoundError;

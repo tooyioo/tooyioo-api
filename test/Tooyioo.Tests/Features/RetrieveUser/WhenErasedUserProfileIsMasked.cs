@@ -17,16 +17,16 @@ public sealed class WhenErasedUserProfileIsMasked(MongoTestContainer mongoDb)
 {
     private HttpResponseMessage _response = null!;
     private RetrieveUserResponse _body = null!;
-    private UserOnboardingId _userId = null!;
+    private UserId _userId = null!;
 
     protected override async Task Given()
     {
-        _userId = new UserOnboardingId(1.ToGuid().ToString());
+        _userId = new UserId(1.ToGuid().ToString());
 
         await GivenUserLoginClaimingEvents(
             "google-sub-erased",
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_userId)
+                .WithUserId(_userId)
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
@@ -45,8 +45,8 @@ public sealed class WhenErasedUserProfileIsMasked(MongoTestContainer mongoDb)
                 .WithPrivacyPolicyVersion("1.0.0")
                 .Build());
 
-        await Host.GivenAndProject<UserProjector, UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userId.Value),
+        await Host.GivenAndProject<UserProjector, UserPersonalDataState, UserId>(
+            new UserId(_userId.Value),
             DomainEvent.UserPersonalDataErasureApplied().Build());
     }
 

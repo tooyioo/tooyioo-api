@@ -6,7 +6,7 @@
 
 ## Decisions
 
-- Completion does not mint an id. The `user_onboarding_id` is the stream id and the `user_id` is the person id; both are minted at initiation, and `UserOnboardingInitiated` carries the `user_id`.
+- Completion does not mint an id. The `user_id` is minted at initiation and is the onboarding stream id.
 - Completion writes only to the user onboarding process stream.
 - Completion requires a previously chosen alias; the handler does not choose or generate one.
 - Terms acceptance stays on the onboarding process stream because consent evidence must survive an erasure. It is not stored in `user_personal_data`.

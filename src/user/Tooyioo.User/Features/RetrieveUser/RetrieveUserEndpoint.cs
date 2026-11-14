@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Routing;
 using Slicent.Application;
 using Slicent.Application.Authorization;
 using Slicent.Application.Queries;
-using Tooyioo.Common;
 using Tooyioo.User.Features.RetrieveUser.Contract;
 
 // ReSharper disable UnusedType.Global
@@ -26,6 +25,5 @@ public sealed class RetrieveUserEndpoint
                     .WithName("retrieve-user")
                     .WithSummary("Get a user")
                     .WithTags("users"))
-            .RequireRouteAuthorization<RetrieveUserRoute, RetrieveUserAuthorizer>()
-            .WithQueryConventions<RetrieveUserResponse, HttpProblemDetails>();
+            .RequireRouteAuthorization<RetrieveUserRoute, RetrieveUserAuthorizer>();
 }

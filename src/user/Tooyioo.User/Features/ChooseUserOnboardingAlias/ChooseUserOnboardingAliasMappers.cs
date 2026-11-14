@@ -16,7 +16,7 @@ public static class ChooseUserOnboardingAliasMappers
             ChooseUserOnboardingAliasRequest request,
             HttpContext context)
             => new(
-                new UserOnboardingId(urlParams.UserOnboardingId.ToString()),
+                new UserId(urlParams.UserId.ToString()),
                 request.Alias.Trim());
     }
 
@@ -32,8 +32,7 @@ public static class ChooseUserOnboardingAliasMappers
                 ChooseUserOnboardingAliasCommandOkResult ok => commandHttpResponseGenerator.Ok(
                     new ChooseUserOnboardingAliasResponse
                     {
-                        UserId = ok.UserId.Value,
-                        UserOnboardingId = ok.UserOnboardingId.Value
+                        UserId = ok.UserId.Value
                     }),
                 ChooseUserOnboardingAliasAlreadyClaimedError aliasAlreadyClaimedError =>
                     commandHttpResponseGenerator.UnprocessableEntity(
@@ -53,10 +52,10 @@ public static class ChooseUserOnboardingAliasMappers
                     context,
                     "concurrent_update",
                     "Could not choose user onboarding alias because of a concurrency conflict, please retry"),
-                ChooseUserOnboardingAliasUnexpectedStateError => commandHttpResponseGenerator.Conflict(
+                ChooseUserOnboardingAliasNotFoundError => commandHttpResponseGenerator.NotFound(
                     context,
-                    "onboarding_state_unexpected",
-                    "Could not choose user onboarding alias because of an unexpected state conflict, please retry")
+                    "user_onboarding_not_found",
+                    "No user onboarding exists for the given user")
             };
     }
 }

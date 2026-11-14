@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -16,7 +16,7 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
 {
     private HttpResponseMessage _response = null!;
     private HttpProblemDetails _body = null!;
-    private UserOnboardingId _userOnboardingId = null!;
+    private UserId _userOnboardingId = null!;
     private string _subject = null!;
     private string _alias = null!;
     private EventStreamSnapshot _userOnboardingStreamBeforeWhen = null!;
@@ -24,11 +24,11 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
 
     protected override async Task Given()
     {
-        _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        _userOnboardingId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
         _alias = "jane-bloggs";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
+        await Host.Given<UserOnboardingState, UserId>(
             _userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithName("Jane")
@@ -45,11 +45,11 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_userOnboardingId)
+                .WithUserId(_userOnboardingId)
                 .Build());
 
         _userOnboardingStreamBeforeWhen = await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .CaptureSnapshot();
 
         _aliasClaimStreamBeforeWhen = await Host.Events
@@ -64,8 +64,8 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
             .WithPersonalDetails("Jane", "Bloggs", "jane.bloggs@test.com", true)
             .Build();
 
-        _response = await Host.HttpClient.PostJson(
-            $"/user-onboarding/{_userOnboardingId.Value}/choose-alias",
+        _response = await Host.HttpClient.PutJson(
+            $"/users/{_userOnboardingId.Value}/onboarding/alias",
             new ChooseUserOnboardingAliasRequest { Alias = _alias },
             token);
 
@@ -83,7 +83,7 @@ public sealed class WhenCompletedUserOnboardingChoosesAlias
     [Test]
     public async Task Then_user_onboarding_stream_has_no_new_events()
         => await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .ShouldHaveNoChangesSince(_userOnboardingStreamBeforeWhen);
 
     [Test]

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 
 namespace Slicent.Application.Commands;
 
@@ -6,6 +6,9 @@ public sealed class CommandHttpResponseGenerator<THttpResponse>
     where THttpResponse : class
 {
     public IResult Ok(THttpResponse response) => TypedResults.Ok(response);
+
+    public IResult Created(string location, THttpResponse response)
+        => TypedResults.Created(location, response);
 
     public IResult BadRequest(HttpContext ctx, string title, string? detail = null)
         => TypedResults.BadRequest(HttpProblemDetails.BadRequest(ctx, title, detail));

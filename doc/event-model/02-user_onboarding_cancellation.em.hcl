@@ -2,7 +2,7 @@
 
 state_change "cancel_user_onboarding" {
   title       = "Cancel User Onboarding"
-  description = "POST /user-onboarding/{user_onboarding_id}/cancel. Cancels an in-progress onboarding, releases its user login and alias, and requests an immediate personal data erasure. Completed or unknown user onboardings cannot be canceled."
+  description = "PUT /users/{user_id}/onboarding/cancellation cancels an in-progress onboarding, releases its user login and alias, and requests an immediate personal data erasure. Completed or unknown user onboardings cannot be canceled."
   status      = "done"
 
   screen "cancel_user_onboarding_ui" {
@@ -10,10 +10,10 @@ state_change "cancel_user_onboarding" {
     actor = actor.authenticated_user
     to    = [command.cancel_user_onboarding]
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "reason_code" {
@@ -26,7 +26,7 @@ state_change "cancel_user_onboarding" {
     title       = "Cancel User Onboarding"
     description = "Cancels an in-progress onboarding, releases its user login and alias, and requests an immediate personal data erasure in one atomic multi-stream append."
     aggregate   = aggregate.user.user_onboarding
-    api_endpoint = "POST /user-onboarding/{user_onboarding_id}/cancel"
+    api_endpoint = "PUT /users/{user_id}/onboarding/cancellation"
 
     aggregate_dependencies = [
       aggregate.user.user_login_claiming,
@@ -43,10 +43,10 @@ state_change "cancel_user_onboarding" {
       event.user.user_personal_data_erasure_requested,
     ]
 
-    field "user_onboarding_id" {
+    field "user_id" {
       type         = "String"
       id_attribute = true
-      example      = "00000000-0000-0000-0000-000000000001"
+      example      = "00000000-0000-0000-0000-000000000010"
     }
 
     field "reason_code" {
@@ -200,7 +200,7 @@ state_change "cancel_user_onboarding" {
 
     then {
       title = "No user onboarding process exists to cancel"
-      error = "onboarding_state_unexpected"
+      error = "user_onboarding_not_found"
     }
   }
 

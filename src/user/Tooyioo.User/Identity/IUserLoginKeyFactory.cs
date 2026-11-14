@@ -1,4 +1,4 @@
-namespace Tooyioo.Common;
+namespace Tooyioo.User.Identity;
 
 public interface IUserLoginKeyFactory
 {

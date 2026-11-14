@@ -1,13 +1,14 @@
 using Eventuous;
+using Slicent.EventStore;
 using Tooyioo.User.Contracts;
 
 namespace Tooyioo.User.Features.Support;
 
+[StreamName("user_login_claiming")]
 public sealed record UserLoginClaimingState
-    : State<UserLoginClaimingState, UserLoginClaimingId>
+    : State<UserLoginClaimingState>, IStreamState<UserLoginClaimingId>
 {
     public string? UserId { get; private init; }
-    public string? UserOnboardingId { get; private init; }
 
     public UserLoginClaimingState()
     {
@@ -18,14 +19,10 @@ public sealed record UserLoginClaimingState
     private static UserLoginClaimingState Claimed(
         UserLoginClaimingState state,
         UserLoginClaimingDomainEvents.V1.UserLoginClaimed domainEvent)
-        => state with
-        {
-            UserId = domainEvent.UserId,
-            UserOnboardingId = domainEvent.UserOnboardingId
-        };
+        => state with { UserId = domainEvent.UserId };
 
     private static UserLoginClaimingState Released(
         UserLoginClaimingState state,
         UserLoginClaimingDomainEvents.V1.UserLoginReleased domainEvent)
-        => state with { UserId = null, UserOnboardingId = null };
+        => state with { UserId = null };
 }

@@ -23,13 +23,13 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
 
     protected override async Task Given()
     {
-        var janeUserOnboardingId = new UserOnboardingId(101.ToGuid().ToString());
-        var johnUserOnboardingId = new UserOnboardingId(102.ToGuid().ToString());
-        var caseyUserOnboardingId = new UserOnboardingId(103.ToGuid().ToString());
+        var janeUserId = new UserId(101.ToGuid().ToString());
+        var johnUserId = new UserId(102.ToGuid().ToString());
+        var caseyUserId = new UserId(103.ToGuid().ToString());
 
-        _janeUserId = janeUserOnboardingId.Value;
-        _johnUserId = johnUserOnboardingId.Value;
-        _caseyUserId = caseyUserOnboardingId.Value;
+        _janeUserId = janeUserId.Value;
+        _johnUserId = johnUserId.Value;
+        _caseyUserId = caseyUserId.Value;
         _janeSubject = "google-sub-jane";
         const string johnSubject = "google-sub-john";
         const string caseySubject = "google-sub-casey";
@@ -37,23 +37,23 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
         await GivenUserLoginClaimingEvents(
             _janeSubject,
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(janeUserOnboardingId)
+                .WithUserId(janeUserId)
                 .Build());
 
         await GivenUserLoginClaimingEvents(
             johnSubject,
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(johnUserOnboardingId)
+                .WithUserId(johnUserId)
                 .Build());
 
         await GivenUserLoginClaimingEvents(
             caseySubject,
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(caseyUserOnboardingId)
+                .WithUserId(caseyUserId)
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
-            janeUserOnboardingId,
+            janeUserId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("Jane")
                 .WithLastName("Bloggs")
@@ -68,7 +68,7 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
-            johnUserOnboardingId,
+            johnUserId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("John")
                 .WithLastName("Smith")
@@ -83,7 +83,7 @@ public sealed class WhenUsersAreFilteredByAliasContainsIgnoringCase(MongoTestCon
                 .Build());
 
         await GivenUserOnboardingEventsWereProjected(
-            caseyUserOnboardingId,
+            caseyUserId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("Casey")
                 .WithLastName("Bloggins")

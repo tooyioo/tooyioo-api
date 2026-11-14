@@ -26,6 +26,8 @@ public static class QueryEndpointRouteBuilderExtensions
             return responseMapper.Map(result, ctx, gen);
         });
 
+        builder.WithQueryResponses<TResponse>();
+
         configure?.Invoke(builder);
         return builder;
     }
@@ -50,6 +52,8 @@ public static class QueryEndpointRouteBuilderExtensions
             var result = await dispatcher.Send(query, ctx.RequestAborted);
             return responseMapper.Map(result, ctx, gen);
         });
+
+        builder.WithQueryResponses<TResponse>();
 
         configure?.Invoke(builder);
         return builder;

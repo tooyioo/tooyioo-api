@@ -1,10 +1,12 @@
 using Eventuous;
+using Slicent.EventStore;
 using Tooyioo.User.Contracts;
 
 namespace Tooyioo.User.Features.Support;
 
+[StreamName("user_alias_claiming")]
 public sealed record UserAliasClaimingState
-    : State<UserAliasClaimingState, UserAliasClaimingId>
+    : State<UserAliasClaimingState>, IStreamState<UserAliasClaimingId>
 {
     public string? UserId { get; private init; }
 

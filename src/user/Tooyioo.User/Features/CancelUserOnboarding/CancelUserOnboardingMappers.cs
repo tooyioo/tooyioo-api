@@ -14,7 +14,7 @@ public static class CancelUserOnboardingMappers
             CancelUserOnboardingRoute urlParams,
             CancelUserOnboardingRequest request,
             HttpContext context)
-            => new(new UserOnboardingId(urlParams.UserOnboardingId.ToString()), request.ReasonCode.Trim());
+            => new(new UserId(urlParams.UserId.ToString()), request.ReasonCode.Trim());
     }
 
     public sealed class CommandHttpResponseMapper
@@ -29,8 +29,7 @@ public static class CancelUserOnboardingMappers
                 CancelUserOnboardingCommandOkResult ok => commandHttpResponseGenerator.Ok(
                     new CancelUserOnboardingResponse
                     {
-                        UserId = ok.UserId.Value,
-                        UserOnboardingId = ok.UserOnboardingId.Value
+                        UserId = ok.UserId.Value
                     }),
                 CancelUserOnboardingAlreadyCompletedError => commandHttpResponseGenerator.UnprocessableEntity(
                     context,
@@ -40,6 +39,10 @@ public static class CancelUserOnboardingMappers
                     context,
                     "concurrent_update",
                     "Could not cancel user onboarding because of a concurrency conflict, please retry"),
+                CancelUserOnboardingNotFoundError => commandHttpResponseGenerator.NotFound(
+                    context,
+                    "user_onboarding_not_found",
+                    "No user onboarding exists for the given user"),
                 CancelUserOnboardingUnexpectedStateError => commandHttpResponseGenerator.Conflict(
                     context,
                     "onboarding_state_unexpected",

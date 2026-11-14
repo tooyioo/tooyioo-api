@@ -9,7 +9,7 @@ public static class UserOnboardingDomainEvents
         private const string Prefix = "V1.";
 
         [DomainEventType(Prefix + "UserOnboardingInitiated")]
-        public record UserOnboardingInitiated(string UserId);
+        public record UserOnboardingInitiated;
 
         [DomainEventType(Prefix + "UserOnboardingAliasChosen")]
         public record UserOnboardingAliasChosen(string Alias);

@@ -3,6 +3,7 @@ using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.Support;
+// ReSharper disable ConvertToPrimaryConstructor
 
 namespace Tooyioo.User.Features.ApplyUserPersonalDataErasure;
 
@@ -23,7 +24,7 @@ public sealed class ApplyUserPersonalDataErasureHandler
         var userId = command.UserId;
 
         var personalData =
-            await _eventStore.LoadStateOrNew<UserPersonalDataState, UserPersonalDataId>(userId, cancellationToken);
+            await _eventStore.LoadStateOrNew<UserPersonalDataState, UserId>(userId, cancellationToken);
 
         if (personalData.Events.Length == 0)
         {
@@ -44,7 +45,7 @@ public sealed class ApplyUserPersonalDataErasureHandler
             }
         }
 
-        var streamName = StreamName.ForState<UserPersonalDataState>(userId.Value);
+        var streamName = personalData.StreamName;
         var requestRevision = await FindRequestRevision(streamName, cancellationToken);
 
         if (requestRevision is null)
@@ -53,8 +54,7 @@ public sealed class ApplyUserPersonalDataErasureHandler
         }
 
         var logins =
-            await _eventStore.LoadStateOrNew<UserLoginLinkingState, UserLoginLinkingId>(
-                new UserLoginLinkingId(userId.Value), cancellationToken);
+            await _eventStore.LoadStateOrNew<UserLoginLinkingState, UserId>(userId, cancellationToken);
 
         var changes = new List<StateStreamChanges>();
 
@@ -69,14 +69,14 @@ public sealed class ApplyUserPersonalDataErasureHandler
         {
             changes.Add(logins.ToStateStreamChanges(
                 logins.State.Logins
-                    .Select(x => (object)new UserLoginLinkingDomainEvents.V1.UserLoginUnlinked(x.UserLoginKey))
+                    .Select(x => (object)new UserLoginLinkingDomainEvents.V1.UserLoginUnlinked(x))
                     .ToArray()));
 
-            foreach (var login in logins.State.Logins)
+            foreach (var loginKey in logins.State.Logins)
             {
                 var claiming =
                     await _eventStore.LoadStateOrNew<UserLoginClaimingState, UserLoginClaimingId>(
-                        new UserLoginClaimingId(login.UserLoginKey), cancellationToken);
+                        new UserLoginClaimingId(loginKey), cancellationToken);
 
                 if (claiming.State.UserId == userId.Value)
                 {
@@ -130,7 +130,7 @@ public sealed class ApplyUserPersonalDataErasureHandler
     }
 }
 
-public sealed record ApplyUserPersonalDataErasureCommand(UserPersonalDataId UserId)
+public sealed record ApplyUserPersonalDataErasureCommand(UserId UserId)
     : ICommand<ApplyUserPersonalDataErasureCommandResult>;
 
 public union ApplyUserPersonalDataErasureCommandResult(
@@ -140,7 +140,7 @@ public union ApplyUserPersonalDataErasureCommandResult(
     ApplyUserPersonalDataErasureNotDueError,
     ApplyUserPersonalDataErasureConcurrencyConflictError);
 
-public sealed record ApplyUserPersonalDataErasureCommandOkResult(UserPersonalDataId UserId);
+public sealed record ApplyUserPersonalDataErasureCommandOkResult(UserId UserId);
 public sealed record ApplyUserPersonalDataErasureNotFoundError;
 public sealed record ApplyUserPersonalDataErasureNotRequestedError;
 public sealed record ApplyUserPersonalDataErasureNotDueError;

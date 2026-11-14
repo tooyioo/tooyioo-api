@@ -1,3 +1,4 @@
+using Tooyioo.User;
 using Eventuous;
 using Slicent.EventStore;
 using Tooyioo.User.Features.Support;
@@ -21,8 +22,8 @@ public sealed class UserPersonalDataDetailsRetriever
         CancellationToken cancellationToken)
     {
         var personalData =
-            await _eventReader.LoadStateOrNew<UserPersonalDataState, UserPersonalDataId>(
-                new UserPersonalDataId(userId),
+            await _eventReader.LoadStateOrNew<UserPersonalDataState, UserId>(
+                new UserId(userId),
                 cancellationToken);
 
         var state = personalData.State;

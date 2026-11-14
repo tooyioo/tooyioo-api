@@ -1,4 +1,4 @@
-namespace Tooyioo.Common;
+namespace Tooyioo.User.Identity;
 
 /// <summary>
 /// A pseudonymous user login key derived from a provider identity.

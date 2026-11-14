@@ -14,5 +14,5 @@
 
 ## Constraints
 
-- Auth: the route carries the `user_onboarding_id`; the authorizer loads the onboarding state and checks its `user_id` against the app-owned `user_id` claim. There is no `user_onboarding_id` claim.
+- Auth: the route carries the `user_id`, which is also the onboarding stream id; the authorizer compares it with the app-owned `user_id` claim and needs no stream read.
 - Multi-stream consistency: the cancellation, the user login and alias releases, and the erasure request are one expected-version write. A concurrent change returns a conflict.

@@ -21,8 +21,8 @@ public static class RetrieveBusinessOnboardingMappers
                 ?? throw new InvalidOperationException($"JWT is missing the '{Claims.UserId}' claim");
 
             return new RetrieveBusinessOnboardingQuery(
-                new BusinessOnboardingId(route.BusinessOnboardingId.ToString()),
-                new UserId(userId));
+                new BusinessId(route.BusinessId.ToString()),
+                new BusinessUserId(userId));
         }
     }
 
@@ -39,7 +39,7 @@ public static class RetrieveBusinessOnboardingMappers
                 RetrieveBusinessOnboardingQueryOkResult ok => queryHttpResponseGenerator.Ok(
                     new RetrieveBusinessOnboardingResponse
                     {
-                        BusinessOnboardingId = ok.Document.Id,
+                        BusinessId = ok.Document.Id,
                         LegalName = ok.Document.LegalName,
                         InitiatedBy = ok.Document.InitiatedBy,
                         Status = RetrieveBusinessOnboardingResponse.StatusInProgress,

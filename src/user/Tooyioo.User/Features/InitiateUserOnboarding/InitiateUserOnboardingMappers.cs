@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Slicent.Application.Commands;
-using Tooyioo.Common;
+using Tooyioo.User.Identity;
 using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
 using Tooyioo.User.Features.InitiateUserOnboarding.Support;
 // ReSharper disable ConvertToPrimaryConstructor
@@ -31,7 +31,6 @@ public static class InitiateUserOnboardingMappers
             var userLoginKey = _userLoginKeyFactory.ForOidc(externalIdentity.Issuer, externalIdentity.Id);
 
             return new InitiateUserOnboardingCommand(
-                UserOnboardingId.New(),
                 UserId.New(),
                 personalDetails.Name.Trim(),
                 personalDetails.LastName.Trim(),
@@ -50,11 +49,11 @@ public static class InitiateUserOnboardingMappers
             CommandHttpResponseGenerator<InitiateUserOnboardingResponse> commandHttpResponseGenerator)
             => commandResult switch
             {
-                InitiateUserOnboardingOkResult ok => commandHttpResponseGenerator.Ok(
+                InitiateUserOnboardingOkResult ok => commandHttpResponseGenerator.Created(
+                    $"/users/{ok.UserId.Value}",
                     new InitiateUserOnboardingResponse
                     {
-                        UserId = ok.UserId.Value,
-                        UserOnboardingId = ok.UserOnboardingId.Value
+                        UserId = ok.UserId.Value
                     }),
                 InitiateUserOnboardingConcurrencyError => commandHttpResponseGenerator.Conflict(
                     context,

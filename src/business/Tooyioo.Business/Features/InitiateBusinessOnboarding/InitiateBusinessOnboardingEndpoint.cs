@@ -15,17 +15,16 @@ public sealed class InitiateBusinessOnboardingEndpoint
 {
     public void Map(IEndpointRouteBuilder app)
         => app
-            .MapCommand<InitiateBusinessOnboardingRequest, InitiateBusinessOnboardingCommand,
+            .MapCreateCommand<InitiateBusinessOnboardingRequest, InitiateBusinessOnboardingCommand,
                 InitiateBusinessOnboardingCommandResult,
                 InitiateBusinessOnboardingResponse>(
-                "business-onboarding/initiate",
+                "/businesses",
                 cfg
                     => cfg
                         .WithName("initiate-business-onboarding")
-                        .WithSummary("Initiate business onboarding")
+                        .WithSummary("Create a business and start its onboarding")
                         .WithDescription(
-                            "Starts a business onboarding process for the authenticated user.")
-                        .WithTags("business-onboarding"))
-            .RequireAuthorization(AuthorizationPolicies.UserRequired)
-            .WithCommandConventions<InitiateBusinessOnboardingResponse, HttpProblemDetails>();
+                            "Creates the business for the authenticated user and starts its onboarding. The server mints the business_id and returns it in the Location header.")
+                        .WithTags("business"))
+            .RequireAuthorization(AuthorizationPolicies.UserRequired);
 }

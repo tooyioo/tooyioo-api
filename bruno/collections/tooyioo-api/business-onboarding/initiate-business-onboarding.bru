@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/business-onboarding/initiate
+  url: {{baseUrl}}/businesses
   body: json
   auth: inherit
 }
@@ -17,7 +17,7 @@ body:json {
 }
 
 script:post-response {
-  bru.setVar("dynamicBusinessOnboardingId", res.body.businessOnboardingId);
+  bru.setVar("dynamicBusinessId", res.body.businessId);
 }
 
 settings {

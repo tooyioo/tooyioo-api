@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Queries;
 using Tooyioo.User.Features.RetrieveUserPersonalData.Contracts;
-using Tooyioo.Common;
 
 namespace Tooyioo.User.Features.RetrieveUserPersonalData;
 

@@ -68,11 +68,35 @@ public static class OpenApiExtensions
                     ]
                 });
 
+                AddCreatedLocationHeader(operation);
+
                 return Task.CompletedTask;
             });
         });
 
         return builder;
+    }
+
+    private static void AddCreatedLocationHeader(OpenApiOperation operation)
+    {
+        if (operation.Responses is null
+            || !operation.Responses.TryGetValue("201", out var created)
+            || created is not OpenApiResponse response)
+        {
+            return;
+        }
+
+        response.Headers ??= new Dictionary<string, IOpenApiHeader>();
+        response.Headers["Location"] = new OpenApiHeader
+        {
+            Description = "URI of the created resource.",
+            Required = true,
+            Schema = new OpenApiSchema
+            {
+                Type = JsonSchemaType.String,
+                Format = "uri"
+            }
+        };
     }
 
     public static WebApplication UseOpenApi(this WebApplication app)

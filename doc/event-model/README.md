@@ -21,7 +21,7 @@ Scenario IDs use zero-padded prefixes (`scenario_01`, `scenario_02`, ...). The v
 
 ## Description conventions
 
-- A `state_change` description starts with the HTTP method and route, for example `POST /user-onboarding/initiate`.
+- A `state_change` description starts with the HTTP method and route, for example `POST /users`.
 - A `state_view` description starts with `GET <route>` when the read model is exposed over HTTP. Otherwise it states `Internal lookup; not an HTTP endpoint.` or `Internal projection; not an HTTP endpoint.`
 - Name the bounded context explicitly in prose: user onboarding or business onboarding, not bare onboarding.
 

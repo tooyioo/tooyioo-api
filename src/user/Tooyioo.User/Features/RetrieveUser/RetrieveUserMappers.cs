@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Queries;
-using Tooyioo.Common;
 using Tooyioo.User.Features.RetrieveUser.Contract;
 // ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable UnusedType.Global

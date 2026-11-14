@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Routing;
 using Slicent.Application;
 using Slicent.Application.Authorization;
 using Slicent.Application.Commands;
-using Tooyioo.Common;
 using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
 
 namespace Tooyioo.User.Features.CompleteUserOnboarding;
@@ -20,13 +19,13 @@ public sealed class CompleteUserOnboardingEndpoint
                 CompleteUserOnboardingCommand,
                 CompleteUserOnboardingCommandResult,
                 CompleteUserOnboardingResponse>(
-                "/user-onboarding/{id:guid}/complete",
+                "/users/{id:guid}/onboarding/completion",
                 cfg => cfg
                     .WithName("complete-user-onboarding")
-                    .WithSummary("Complete user onboarding")
+                    .WithSummary("Set the user onboarding completion")
                     .WithDescription(
-                        "Completes an onboarding that already has a chosen alias and returns the resulting user. Repeating the request after completion returns the existing user.")
-                    .WithTags("user-onboarding"))
-            .RequireRouteAuthorization<CompleteUserOnboardingRoute, CompleteUserOnboardingAuthorizer>()
-            .WithCommandConventions<CompleteUserOnboardingResponse, HttpProblemDetails>();
+                        "Sets the completion of an onboarding that already has a chosen alias and returns the resulting user. Repeating the same completion returns the existing user.")
+                    .WithTags("users"),
+                CommandHttpMethod.Put)
+            .RequireRouteAuthorization<CompleteUserOnboardingRoute, CompleteUserOnboardingAuthorizer>();
 }

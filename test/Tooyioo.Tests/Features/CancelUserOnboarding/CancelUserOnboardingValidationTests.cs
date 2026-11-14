@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.User;
 using Tooyioo.User.Features.CancelUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.CancelUserOnboarding;
 
@@ -25,18 +25,18 @@ public sealed class CancelUserOnboardingValidationTests
         await using var host = await VerticalSliceTestHost.Start();
 
         const string subject = "google-sub-123";
-        var userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        var userOnboardingId = new UserId(1.ToGuid().ToString());
 
-        await host.Given<UserOnboardingState, UserOnboardingId>(
+        await host.Given<UserOnboardingState, UserId>(
             userOnboardingId,
             DomainEvent.UserOnboardingInitiated().WithExternalIdentityId(subject).Build());
 
         await host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(subject),
-            DomainEvent.UserLoginClaimed().WithUserOnboardingId(userOnboardingId).Build());
+            DomainEvent.UserLoginClaimed().WithUserId(userOnboardingId).Build());
 
         var userOnboardingStreamBeforeWhen = await host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(userOnboardingId)
             .CaptureSnapshot();
 
         var token = host.GoogleIdentityToken()
@@ -54,8 +54,8 @@ public sealed class CancelUserOnboardingValidationTests
             ? new { }
             : new CancelUserOnboardingRequest { ReasonCode = reason };
 
-        using var response = await host.HttpClient.PostJson(
-            $"/user-onboarding/{userOnboardingId.Value}/cancel",
+        using var response = await host.HttpClient.PutJson(
+            $"/users/{userOnboardingId.Value}/onboarding/cancellation",
             request,
             token);
 
@@ -74,7 +74,7 @@ public sealed class CancelUserOnboardingValidationTests
         }
 
         await host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(userOnboardingId)
             .ShouldHaveNoChangesSince(userOnboardingStreamBeforeWhen);
     }
 }

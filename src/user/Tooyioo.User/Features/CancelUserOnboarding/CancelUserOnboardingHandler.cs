@@ -1,7 +1,6 @@
 using Eventuous;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
-using Tooyioo.Common;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.Support;
 
@@ -25,15 +24,14 @@ public sealed class CancelUserOnboardingHandler
         CancelUserOnboardingCommand command,
         CancellationToken cancellationToken = default)
     {
-        var userOnboardingId = command.UserOnboardingId;
+        var userId = command.UserId;
 
         var userOnboarding =
-            await _eventReader.LoadStateOrNew<UserOnboardingState, UserOnboardingId>(
-                userOnboardingId, cancellationToken);
+            await _eventReader.LoadStateOrNew<UserOnboardingState, UserId>(userId, cancellationToken);
 
-        if (userOnboarding.Events.Length == 0 || string.IsNullOrWhiteSpace(userOnboarding.State.UserId))
+        if (userOnboarding.Events.Length == 0)
         {
-            return new CancelUserOnboardingUnexpectedStateError();
+            return new CancelUserOnboardingNotFoundError();
         }
 
         if (userOnboarding.State.IsComplete)
@@ -43,12 +41,11 @@ public sealed class CancelUserOnboardingHandler
 
         if (userOnboarding.State.IsCanceled)
         {
-            return new CancelUserOnboardingCommandOkResult(new UserId(userOnboarding.State.UserId), userOnboardingId);
+            return new CancelUserOnboardingCommandOkResult(userId);
         }
 
         var personalData =
-            await _eventReader.LoadStateOrNew<UserPersonalDataState, UserPersonalDataId>(
-                new UserPersonalDataId(userOnboarding.State.UserId), cancellationToken);
+            await _eventReader.LoadStateOrNew<UserPersonalDataState, UserId>(userId, cancellationToken);
 
         if (personalData.Events.Length == 0)
         {
@@ -56,8 +53,7 @@ public sealed class CancelUserOnboardingHandler
         }
 
         var logins =
-            await _eventReader.LoadStateOrNew<UserLoginLinkingState, UserLoginLinkingId>(
-                new UserLoginLinkingId(userOnboarding.State.UserId), cancellationToken);
+            await _eventReader.LoadStateOrNew<UserLoginLinkingState, UserId>(userId, cancellationToken);
 
         var stateChanges = new List<StateStreamChanges>
         {
@@ -79,19 +75,19 @@ public sealed class CancelUserOnboardingHandler
         {
             stateChanges.Add(logins.ToStateStreamChanges(
                 logins.State.Logins
-                    .Select(x => (object)new UserLoginLinkingDomainEvents.V1.UserLoginUnlinked(x.UserLoginKey))
+                    .Select(x => (object)new UserLoginLinkingDomainEvents.V1.UserLoginUnlinked(x))
                     .ToArray()));
 
-            foreach (var login in logins.State.Logins)
+            foreach (var loginKey in logins.State.Logins)
             {
                 var claiming =
                     await _eventReader.LoadStateOrNew<UserLoginClaimingState, UserLoginClaimingId>(
-                        new UserLoginClaimingId(login.UserLoginKey), cancellationToken);
+                        new UserLoginClaimingId(loginKey), cancellationToken);
 
-                if (claiming.State.UserId == userOnboarding.State.UserId)
+                if (claiming.State.UserId == userId.Value)
                 {
                     stateChanges.Add(claiming.ToStateStreamChanges([
-                        new UserLoginClaimingDomainEvents.V1.UserLoginReleased(userOnboarding.State.UserId)
+                        new UserLoginClaimingDomainEvents.V1.UserLoginReleased(userId.Value)
                     ]));
                 }
             }
@@ -103,13 +99,13 @@ public sealed class CancelUserOnboardingHandler
                 await _eventReader.LoadStateOrNew<UserAliasClaimingState, UserAliasClaimingId>(
                     new UserAliasClaimingId(alias), cancellationToken);
 
-            if (aliasClaiming.State.UserId != userOnboarding.State.UserId)
+            if (aliasClaiming.State.UserId != userId.Value)
             {
                 return new CancelUserOnboardingUnexpectedStateError();
             }
 
             stateChanges.Add(aliasClaiming.ToStateStreamChanges([
-                new UserAliasClaimingDomainEvents.V1.UserAliasReleased(userOnboarding.State.UserId)
+                new UserAliasClaimingDomainEvents.V1.UserAliasReleased(userId.Value)
             ]));
         }
 
@@ -117,7 +113,7 @@ public sealed class CancelUserOnboardingHandler
         {
             _ = await _eventWriter.StoreStateChanges(stateChanges, cancellationToken);
 
-            return new CancelUserOnboardingCommandOkResult(new UserId(userOnboarding.State.UserId), userOnboardingId);
+            return new CancelUserOnboardingCommandOkResult(userId);
         }
         catch (OptimisticConcurrencyException)
         {
@@ -126,16 +122,18 @@ public sealed class CancelUserOnboardingHandler
     }
 }
 
-public sealed record CancelUserOnboardingCommand(UserOnboardingId UserOnboardingId, string ReasonCode)
+public sealed record CancelUserOnboardingCommand(UserId UserId, string ReasonCode)
     : ICommand<CancelUserOnboardingCommandResult>;
 
 public union CancelUserOnboardingCommandResult(
     CancelUserOnboardingCommandOkResult,
     CancelUserOnboardingAlreadyCompletedError,
     CancelUserOnboardingConcurrencyConflictError,
+    CancelUserOnboardingNotFoundError,
     CancelUserOnboardingUnexpectedStateError);
 
-public sealed record CancelUserOnboardingCommandOkResult(UserId UserId, UserOnboardingId UserOnboardingId);
+public sealed record CancelUserOnboardingCommandOkResult(UserId UserId);
 public sealed record CancelUserOnboardingAlreadyCompletedError;
 public sealed record CancelUserOnboardingConcurrencyConflictError;
+public sealed record CancelUserOnboardingNotFoundError;
 public sealed record CancelUserOnboardingUnexpectedStateError;

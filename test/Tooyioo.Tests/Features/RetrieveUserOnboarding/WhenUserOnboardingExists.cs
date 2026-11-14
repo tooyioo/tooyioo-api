@@ -1,12 +1,11 @@
 using System.Net;
-using Tooyioo.Common;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.RetrieveUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.RetrieveUserOnboarding;
 
@@ -16,7 +15,6 @@ public sealed class WhenUserOnboardingExists
 {
     private HttpResponseMessage _response = null!;
     private RetrieveUserOnboardingResponse _body = null!;
-    private UserOnboardingId _userOnboardingId = null!;
     private UserId _userId = null!;
     private string _subject = null!;
     private string _alias = null!;
@@ -26,18 +24,17 @@ public sealed class WhenUserOnboardingExists
 
     protected override async Task Given()
     {
-        _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
-        _userId = new UserId(2.ToGuid().ToString());
+        _userId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
         _alias = "jane-bloggs";
         _name = "Jane";
         _lastName = "Bloggs";
         _email = "jane.bloggs@test.com";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
-            _userOnboardingId,
+        await Host.Given<UserOnboardingState, UserId>(
+            _userId,
             DomainEvent.UserOnboardingInitiated()
-                .WithUserId(_userId)
+                
                 .WithExternalIdentityId(_subject)
                 .Build(),
             DomainEvent.UserOnboardingAliasChosen()
@@ -48,8 +45,8 @@ public sealed class WhenUserOnboardingExists
                 .WithPrivacyPolicyVersion("1.0.0")
                 .Build());
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userId.Value),
+        await Host.Given<UserPersonalDataState, UserId>(
+            _userId,
             DomainEvent.UserPersonalDataRecorded()
                 .WithName(_name)
                 .WithLastName(_lastName)
@@ -61,7 +58,6 @@ public sealed class WhenUserOnboardingExists
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed()
                 .WithUserId(_userId)
-                .WithUserOnboardingId(_userOnboardingId)
                 .Build());
     }
 
@@ -72,7 +68,7 @@ public sealed class WhenUserOnboardingExists
             .Build();
 
         _response = await Host.HttpClient.Get(
-            $"/user-onboarding/{_userOnboardingId.Value}",
+            $"/users/{_userId.Value}/onboarding",
             token);
 
         _body = await _response.ReadJson<RetrieveUserOnboardingResponse>();
@@ -83,11 +79,8 @@ public sealed class WhenUserOnboardingExists
         => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
     [Test]
-    public async Task Then_response_returns_both_ids()
-    {
-        await Assert.That(_body.UserId).IsEqualTo(_userId.Value);
-        await Assert.That(_body.UserOnboardingId).IsEqualTo(_userOnboardingId.Value);
-    }
+    public async Task Then_response_returns_the_user_id()
+        => await Assert.That(_body.UserId).IsEqualTo(_userId.Value);
 
     [Test]
     public async Task Then_response_returns_the_onboarding_state()

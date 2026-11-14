@@ -15,7 +15,7 @@ public static class CompleteUserOnboardingMappers
             CompleteUserOnboardingRequest request,
             HttpContext context)
             => new(
-                new UserOnboardingId(urlParams.UserOnboardingId.ToString()),
+                new UserId(urlParams.UserId.ToString()),
                 request.TermsOfServiceVersion,
                 request.PrivacyPolicyVersion);
     }
@@ -32,8 +32,7 @@ public static class CompleteUserOnboardingMappers
                 CompleteUserOnboardingCommandOkResult ok => commandHttpResponseGenerator.Ok(
                     new CompleteUserOnboardingResponse
                     {
-                        UserId = ok.UserId.Value,
-                        UserOnboardingId = ok.UserOnboardingId.Value
+                        UserId = ok.UserId.Value
                     }),
                 CompleteUserOnboardingAlreadyCanceledError => commandHttpResponseGenerator.UnprocessableEntity(
                     context,
@@ -47,10 +46,10 @@ public static class CompleteUserOnboardingMappers
                     context,
                     "concurrent_update",
                     "Could not complete user onboarding because of a concurrency conflict, please retry"),
-                CompleteUserOnboardingUnexpectedStateError => commandHttpResponseGenerator.Conflict(
+                CompleteUserOnboardingNotFoundError => commandHttpResponseGenerator.NotFound(
                     context,
-                    "onboarding_state_unexpected",
-                    "Could not complete user onboarding because of an unexpected state conflict, please retry")
+                    "user_onboarding_not_found",
+                    "No user onboarding exists for the given user")
             };
     }
 }

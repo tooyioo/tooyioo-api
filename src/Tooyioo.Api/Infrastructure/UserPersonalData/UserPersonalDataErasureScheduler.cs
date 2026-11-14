@@ -1,8 +1,10 @@
+using Tooyioo.User;
 using Eventuous.Projections.MongoDB.Tools;
 using MongoDB.Driver;
 using Slicent.Application.Commands;
 using Tooyioo.User.Features.ApplyUserPersonalDataErasure;
 using Tooyioo.User.Features.Support;
+// ReSharper disable ConvertToPrimaryConstructor
 
 namespace Tooyioo.Api.Infrastructure.UserPersonalData;
 
@@ -68,7 +70,7 @@ public sealed class UserPersonalDataErasureScheduler
             try
             {
                 await dispatcher.Send(
-                    new ApplyUserPersonalDataErasureCommand(new UserPersonalDataId(document.Id)),
+                    new ApplyUserPersonalDataErasureCommand(new UserId(document.Id)),
                     cancellationToken);
             }
             catch (Exception exception)

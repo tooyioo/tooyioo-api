@@ -1,6 +1,7 @@
+using Tooyioo.User;
+using Tooyioo.User.Identity;
 using Eventuous;
 using Slicent.EventStore;
-using Tooyioo.Common;
 // ReSharper disable ConvertToPrimaryConstructor
 
 using Tooyioo.User.Features.Support;

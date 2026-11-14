@@ -5,7 +5,6 @@ using Eventuous.Subscriptions.Registrations;
 using KurrentDB.Client;
 using Slicent;
 using Slicent.Application;
-using Tooyioo.Api.Infrastructure.Mongo;
 using Tooyioo.Api.Infrastructure.OpenApi;
 using Tooyioo.Api.Infrastructure.UserPersonalData;
 using Tooyioo.Business.Features.Support;
@@ -47,8 +46,6 @@ public static class SlicentExtensions
             ?? new MongoDbOptions();
 
         builder.Services.AddSlicentMongoDb(mongoDbOptions.MongoDb);
-
-        builder.Services.AddHostedService<MongoReadModelIndexInitializer>();
 
         builder.Services
             .AddOptions<UserPersonalDataErasureOptions>()

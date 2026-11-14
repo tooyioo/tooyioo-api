@@ -1,19 +1,16 @@
 using Microsoft.AspNetCore.Http;
 using Slicent.Application.Commands;
 using Tooyioo.User.Features.CancelUserPersonalDataErasure.Contracts;
-using Tooyioo.Common;
 
 namespace Tooyioo.User.Features.CancelUserPersonalDataErasure;
 
 public static class CancelUserPersonalDataErasureMappers
 {
     public sealed class CommandMapper
-        : ICommandMapper<CancelUserPersonalDataErasureRoute, CancelUserPersonalDataErasureRequest, HttpContext,
-            CancelUserPersonalDataErasureCommand>
+        : ICommandMapper<CancelUserPersonalDataErasureRoute, HttpContext, CancelUserPersonalDataErasureCommand>
     {
         public CancelUserPersonalDataErasureCommand Map(
             CancelUserPersonalDataErasureRoute urlParams,
-            CancelUserPersonalDataErasureRequest request,
             HttpContext context)
             => new(new UserId(urlParams.UserId.ToString()));
     }

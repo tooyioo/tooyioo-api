@@ -9,8 +9,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using Tooyioo.Common;
 using Tooyioo.Tests.Support.Auth;
+using Tooyioo.User.Identity;
 
 namespace Tooyioo.Tests.Support;
 

@@ -24,7 +24,7 @@ public sealed class InitiateBusinessOnboardingAuthenticationTests
         await using var host = await VerticalSliceTestHost.Start();
 
         using var response = await host.HttpClient.PostJson(
-            "/business-onboarding/initiate",
+            "/businesses",
             new InitiateBusinessOnboardingRequest { LegalName = "Acme Ltd" },
             authenticationScenario,
             host);
@@ -41,7 +41,7 @@ public sealed class InitiateBusinessOnboardingAuthenticationTests
             .Build();
 
         using var response = await host.HttpClient.PostJson(
-            "/business-onboarding/initiate",
+            "/businesses",
             new InitiateBusinessOnboardingRequest { LegalName = "Acme Ltd" },
             token);
 

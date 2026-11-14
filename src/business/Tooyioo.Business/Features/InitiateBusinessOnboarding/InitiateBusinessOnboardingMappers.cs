@@ -20,9 +20,9 @@ public static class InitiateBusinessOnboardingMappers
                 ?? throw new InvalidOperationException($"JWT is missing the '{Claims.UserId}' claim");
 
             return new InitiateBusinessOnboardingCommand(
-                BusinessOnboardingId.New(),
+                BusinessId.New(),
                 request.LegalName.Trim(),
-                new UserId(userId));
+                new BusinessUserId(userId));
         }
     }
 
@@ -36,10 +36,11 @@ public static class InitiateBusinessOnboardingMappers
             CommandHttpResponseGenerator<InitiateBusinessOnboardingResponse> commandHttpResponseGenerator)
             => commandResult switch
             {
-                InitiateBusinessOnboardingOkResult ok => commandHttpResponseGenerator.Ok(
+                InitiateBusinessOnboardingOkResult ok => commandHttpResponseGenerator.Created(
+                    $"/businesses/{ok.BusinessId.Value}",
                     new InitiateBusinessOnboardingResponse
                     {
-                        BusinessOnboardingId = ok.BusinessOnboardingId
+                        BusinessId = ok.BusinessId.Value
                     }),
                 InitiateBusinessOnboardingConcurrencyError => commandHttpResponseGenerator.Conflict(
                     context,

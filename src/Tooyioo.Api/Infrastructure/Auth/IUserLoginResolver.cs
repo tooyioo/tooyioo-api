@@ -1,4 +1,5 @@
-using Tooyioo.Common;
+using Tooyioo.User;
+using Tooyioo.User.Identity;
 
 namespace Tooyioo.Api.Infrastructure.Auth;
 

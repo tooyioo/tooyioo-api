@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.RetrieveUserPersonalData.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.UserPersonalData;
 
@@ -17,13 +17,13 @@ public sealed class WhenPendingUserPersonalDataIsRetrieved(MongoTestContainer mo
 {
     private HttpResponseMessage _response = null!;
     private RetrieveUserPersonalDataResponse _body = null!;
-    private UserOnboardingId _userId = null!;
+    private UserId _userId = null!;
     private string _subject = null!;
     private DateTime _eraseAfterUtc;
 
     protected override async Task Given()
     {
-        _userId = new UserOnboardingId(1.ToGuid().ToString());
+        _userId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
         _eraseAfterUtc = DateTime.UtcNow.AddHours(1);
 
@@ -31,8 +31,8 @@ public sealed class WhenPendingUserPersonalDataIsRetrieved(MongoTestContainer mo
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed().WithUserId(_userId.Value).Build());
 
-        await Host.GivenAndProject<UserPersonalDataProjector, UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_userId.Value),
+        await Host.GivenAndProject<UserPersonalDataProjector, UserPersonalDataState, UserId>(
+            new UserId(_userId.Value),
             DomainEvent.UserPersonalDataRecorded()
                 .WithName("Joe")
                 .WithLastName("Bloggs")

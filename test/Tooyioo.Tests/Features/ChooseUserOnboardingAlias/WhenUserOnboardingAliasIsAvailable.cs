@@ -3,9 +3,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -15,7 +15,7 @@ public sealed class WhenUserOnboardingAliasIsAvailable
 {
     private HttpResponseMessage _response = null!;
     private ChooseUserOnboardingAliasResponse _body = null!;
-    private UserOnboardingId _userOnboardingId = null!;
+    private UserId _userOnboardingId = null!;
     private string _subject = null!;
     private string _name = null!;
     private string _lastName = null!;
@@ -26,14 +26,14 @@ public sealed class WhenUserOnboardingAliasIsAvailable
 
     protected override async Task Given()
     {
-        _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        _userOnboardingId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
         _name = "Jane";
         _lastName = "Bloggs";
         _email = "jane.bloggs@test.com";
         _alias = "jane-bloggs";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
+        await Host.Given<UserOnboardingState, UserId>(
             _userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithName(_name)
@@ -45,11 +45,11 @@ public sealed class WhenUserOnboardingAliasIsAvailable
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_userOnboardingId)
+                .WithUserId(_userOnboardingId)
                 .Build());
 
         _userOnboardingStreamBeforeWhen = await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .CaptureSnapshot();
 
         _aliasClaimStreamBeforeWhen = await Host.Events
@@ -64,8 +64,8 @@ public sealed class WhenUserOnboardingAliasIsAvailable
             .WithPersonalDetails(_name, _lastName, _email, true)
             .Build();
 
-        _response = await Host.HttpClient.PostJson(
-            $"/user-onboarding/{_userOnboardingId.Value}/choose-alias",
+        _response = await Host.HttpClient.PutJson(
+            $"/users/{_userOnboardingId.Value}/onboarding/alias",
             new ChooseUserOnboardingAliasRequest { Alias = _alias },
             token);
 
@@ -78,7 +78,7 @@ public sealed class WhenUserOnboardingAliasIsAvailable
 
     [Test]
     public async Task Then_response_returns_user_onboarding_id()
-        => await Assert.That(_body.UserOnboardingId).IsEqualTo(_userOnboardingId.Value);
+        => await Assert.That(_body.UserId).IsEqualTo(_userOnboardingId.Value);
 
     [Test]
     public async Task Then_response_returns_user_id()
@@ -87,7 +87,7 @@ public sealed class WhenUserOnboardingAliasIsAvailable
     [Test]
     public async Task Then_user_onboarding_alias_is_chosen()
         => await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .ShouldAppendExactly(
                 _userOnboardingStreamBeforeWhen,
                 DomainEvent.UserOnboardingAliasChosen()
@@ -101,6 +101,6 @@ public sealed class WhenUserOnboardingAliasIsAvailable
             .ShouldAppendExactly(
                 _aliasClaimStreamBeforeWhen,
                 DomainEvent.UserAliasClaimed()
-                    .WithUserOnboardingId(_userOnboardingId)
+                    .WithUserId(_userOnboardingId)
                     .Build());
 }

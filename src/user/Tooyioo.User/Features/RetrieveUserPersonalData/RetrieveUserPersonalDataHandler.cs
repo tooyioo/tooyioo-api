@@ -1,6 +1,5 @@
 using Slicent.Application.Queries;
 using Tooyioo.User.Features.Support;
-using Tooyioo.Common;
 
 // ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable UnusedType.Global

@@ -3,9 +3,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 
@@ -15,7 +15,7 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
 {
     private HttpResponseMessage _response = null!;
     private InitiateUserOnboardingResponse _body = null!;
-    private UserOnboardingId _existingUserOnboardingId = null!;
+    private UserId _existingUserId = null!;
     private string _subject = null!;
     private string _name = null!;
     private string _lastName = null!;
@@ -27,14 +27,14 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
 
     protected override async Task Given()
     {
-        _existingUserOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
+        _existingUserId = new UserId(1.ToGuid().ToString());
         _subject = "google-sub-123";
         _name = "Jane";
         _lastName = "Bloggs";
         _email = "jane.bloggs@test.com";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
-            _existingUserOnboardingId,
+        await Host.Given<UserOnboardingState, UserId>(
+            _existingUserId,
             DomainEvent.UserOnboardingInitiated()
                 .WithName(_name)
                 .WithLastName(_lastName)
@@ -45,21 +45,21 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_existingUserOnboardingId)
+                .WithUserId(_existingUserId)
                 .Build());
 
-        await Host.Given<UserPersonalDataState, UserPersonalDataId>(
-            new UserPersonalDataId(_existingUserOnboardingId.Value),
+        await Host.Given<UserPersonalDataState, UserId>(
+            new UserId(_existingUserId.Value),
             DomainEvent.UserPersonalDataRecorded().Build());
 
-        await Host.Given<UserLoginLinkingState, UserLoginLinkingId>(
-            new UserLoginLinkingId(_existingUserOnboardingId.Value),
+        await Host.Given<UserLoginLinkingState, UserId>(
+            new UserId(_existingUserId.Value),
             DomainEvent.UserLoginLinked()
                 .WithUserLoginKey(_subject)
                 .Build());
 
         _userOnboardingStreamBeforeWhen = await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_existingUserOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_existingUserId)
             .CaptureSnapshot();
 
         _externalIdentityClaimStreamBeforeWhen = await Host.Events
@@ -68,13 +68,13 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
             .CaptureSnapshot();
 
         _personalDataStreamBeforeWhen = await Host.Events
-            .Stream<UserPersonalDataState, UserPersonalDataId>(
-                new UserPersonalDataId(_existingUserOnboardingId.Value))
+            .Stream<UserPersonalDataState, UserId>(
+                new UserId(_existingUserId.Value))
             .CaptureSnapshot();
 
         _userLoginLinkingStreamBeforeWhen = await Host.Events
-            .Stream<UserLoginLinkingState, UserLoginLinkingId>(
-                new UserLoginLinkingId(_existingUserOnboardingId.Value))
+            .Stream<UserLoginLinkingState, UserId>(
+                new UserId(_existingUserId.Value))
             .CaptureSnapshot();
     }
 
@@ -86,7 +86,7 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
             .Build();
 
         _response = await Host.HttpClient.PostJson(
-            "/user-onboarding/initiate",
+            "/users",
             new { },
             token);
 
@@ -95,16 +95,16 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
 
     [Test]
     public async Task Then_response_is_ok()
-        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.Created);
 
     [Test]
     public async Task Then_response_returns_existing_user_onboarding_id()
-        => await Assert.That(_body.UserOnboardingId).IsEqualTo(_existingUserOnboardingId.Value);
+        => await Assert.That(_body.UserId).IsEqualTo(_existingUserId.Value);
 
     [Test]
     public async Task Then_user_onboarding_stream_has_no_new_events()
         => await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_existingUserOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_existingUserId)
             .ShouldHaveNoChangesSince(_userOnboardingStreamBeforeWhen);
 
     [Test]
@@ -116,14 +116,14 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
     [Test]
     public async Task Then_personal_data_stream_has_no_new_events()
         => await Host.Events
-            .Stream<UserPersonalDataState, UserPersonalDataId>(
-                new UserPersonalDataId(_existingUserOnboardingId.Value))
+            .Stream<UserPersonalDataState, UserId>(
+                new UserId(_existingUserId.Value))
             .ShouldHaveNoChangesSince(_personalDataStreamBeforeWhen);
 
     [Test]
     public async Task Then_user_login_linking_stream_has_no_new_events()
         => await Host.Events
-            .Stream<UserLoginLinkingState, UserLoginLinkingId>(
-                new UserLoginLinkingId(_existingUserOnboardingId.Value))
+            .Stream<UserLoginLinkingState, UserId>(
+                new UserId(_existingUserId.Value))
             .ShouldHaveNoChangesSince(_userLoginLinkingStreamBeforeWhen);
 }

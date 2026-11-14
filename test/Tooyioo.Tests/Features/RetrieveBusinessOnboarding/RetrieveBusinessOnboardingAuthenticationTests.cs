@@ -25,7 +25,7 @@ public sealed class RetrieveBusinessOnboardingAuthenticationTests
 
         var businessOnboardingId = 1.ToGuid();
         using var response = await host.HttpClient.Get(
-            $"/business-onboarding/{businessOnboardingId}",
+            $"/businesses/{businessOnboardingId}/onboarding",
             authenticationScenario,
             host);
 
@@ -42,7 +42,7 @@ public sealed class RetrieveBusinessOnboardingAuthenticationTests
             .Build();
 
         using var response = await host.HttpClient.Get(
-            $"/business-onboarding/{businessOnboardingId}",
+            $"/businesses/{businessOnboardingId}/onboarding",
             token);
 
         var body = await response.ReadJson<HttpProblemDetails>();

@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User;
 using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.ChooseUserOnboardingAlias;
 
@@ -16,8 +16,8 @@ public sealed class WhenUserOnboardingAliasIsAlreadyInUse
 {
     private HttpResponseMessage _response = null!;
     private HttpProblemDetails _body = null!;
-    private UserOnboardingId _userOnboardingId = null!;
-    private UserOnboardingId _otherUserOnboardingId = null!;
+    private UserId _userOnboardingId = null!;
+    private UserId _otherUserId = null!;
     private string _subject = null!;
     private string _name = null!;
     private string _lastName = null!;
@@ -28,15 +28,15 @@ public sealed class WhenUserOnboardingAliasIsAlreadyInUse
 
     protected override async Task Given()
     {
-        _userOnboardingId = new UserOnboardingId(1.ToGuid().ToString());
-        _otherUserOnboardingId = new UserOnboardingId(2.ToGuid().ToString());
+        _userOnboardingId = new UserId(1.ToGuid().ToString());
+        _otherUserId = new UserId(2.ToGuid().ToString());
         _subject = "google-sub-123";
         _name = "Jane";
         _lastName = "Bloggs";
         _email = "jane.bloggs@test.com";
         _alias = "jane-bloggs";
 
-        await Host.Given<UserOnboardingState, UserOnboardingId>(
+        await Host.Given<UserOnboardingState, UserId>(
             _userOnboardingId,
             DomainEvent.UserOnboardingInitiated()
                 .WithName(_name)
@@ -48,17 +48,17 @@ public sealed class WhenUserOnboardingAliasIsAlreadyInUse
         await Host.Given<UserLoginClaimingState, UserLoginClaimingId>(
             new UserLoginClaimingId(_subject),
             DomainEvent.UserLoginClaimed()
-                .WithUserOnboardingId(_userOnboardingId)
+                .WithUserId(_userOnboardingId)
                 .Build());
 
         await Host.Given<UserAliasClaimingState, UserAliasClaimingId>(
             new UserAliasClaimingId(_alias),
             DomainEvent.UserAliasClaimed()
-                .WithUserOnboardingId(_otherUserOnboardingId)
+                .WithUserId(_otherUserId)
                 .Build());
 
         _userOnboardingStreamBeforeWhen = await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .CaptureSnapshot();
 
         _aliasClaimStreamBeforeWhen = await Host.Events
@@ -73,8 +73,8 @@ public sealed class WhenUserOnboardingAliasIsAlreadyInUse
             .WithPersonalDetails(_name, _lastName, _email, true)
             .Build();
 
-        _response = await Host.HttpClient.PostJson(
-            $"/user-onboarding/{_userOnboardingId.Value}/choose-alias",
+        _response = await Host.HttpClient.PutJson(
+            $"/users/{_userOnboardingId.Value}/onboarding/alias",
             new ChooseUserOnboardingAliasRequest { Alias = _alias },
             token);
 
@@ -92,7 +92,7 @@ public sealed class WhenUserOnboardingAliasIsAlreadyInUse
     [Test]
     public async Task Then_user_onboarding_stream_has_no_new_events()
         => await Host.Events
-            .Stream<UserOnboardingState, UserOnboardingId>(_userOnboardingId)
+            .Stream<UserOnboardingState, UserId>(_userOnboardingId)
             .ShouldHaveNoChangesSince(_userOnboardingStreamBeforeWhen);
 
     [Test]

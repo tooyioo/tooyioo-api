@@ -1,33 +1,24 @@
 using System.Security.Claims;
-using Eventuous;
 using Microsoft.AspNetCore.Http;
 using Slicent.Application.Authorization;
-using Slicent.EventStore;
 using Tooyioo.Common;
 
 namespace Tooyioo.User.Features.Support;
 
-public abstract class UserOnboardingRouteAuthorizer<TRoute>(IEventReader eventReader)
+public abstract class UserOnboardingRouteAuthorizer<TRoute>
     : IRouteAuthorizer<TRoute>
 {
-    public async Task<bool> Authorize(
+    public Task<bool> Authorize(
         ClaimsPrincipal claimsPrincipal,
         TRoute route,
         HttpContext http,
         CancellationToken cancellationToken = default)
     {
-        if (claimsPrincipal.GetClaim(Claims.UserId) is not { } userId)
-        {
-            return false;
-        }
+        var userId = claimsPrincipal.GetClaim(Claims.UserId);
+        var authorized = userId is not null && GetUserId(route).ToString() == userId;
 
-        var userOnboardingId = GetUserOnboardingId(route).ToString();
-        var onboarding = 
-            await eventReader.LoadStateOrNew<UserOnboardingState, UserOnboardingId>(
-                new UserOnboardingId(userOnboardingId), cancellationToken);
-
-        return onboarding.Events.Length == 0 || onboarding.State.UserId == userId;
+        return Task.FromResult(authorized);
     }
 
-    protected abstract Guid GetUserOnboardingId(TRoute route);
+    protected abstract Guid GetUserId(TRoute route);
 }

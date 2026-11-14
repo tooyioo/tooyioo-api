@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Routing;
 using Slicent.Application;
 using Slicent.Application.Authorization;
 using Slicent.Application.Commands;
-using Tooyioo.Common;
 using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 
 // ReSharper disable UnusedType.Global
@@ -22,13 +21,13 @@ public sealed class ChooseUserOnboardingAliasEndpoint
                 ChooseUserOnboardingAliasCommand,
                 ChooseUserOnboardingAliasCommandResult,
                 ChooseUserOnboardingAliasResponse>(
-                "/user-onboarding/{id:guid}/choose-alias",
+                "/users/{id:guid}/onboarding/alias",
                 cfg => cfg
                     .WithName("choose-user-onboarding-alias")
-                    .WithSummary("Choose a user onboarding alias")
+                    .WithSummary("Set the user onboarding alias")
                     .WithDescription(
-                        "Claims an available alias for an in-progress onboarding. Repeating the same choice is idempotent; a different alias cannot replace it.")
-                    .WithTags("user-onboarding"))
-            .RequireRouteAuthorization<ChooseUserOnboardingAliasRoute, ChooseUserOnboardingAliasAuthorizer>()
-            .WithCommandConventions<ChooseUserOnboardingAliasResponse, HttpProblemDetails>();
+                        "Sets the alias of an in-progress onboarding. Repeating the same alias is idempotent; a different alias cannot replace it.")
+                    .WithTags("users"),
+                CommandHttpMethod.Put)
+            .RequireRouteAuthorization<ChooseUserOnboardingAliasRoute, ChooseUserOnboardingAliasAuthorizer>();
 }

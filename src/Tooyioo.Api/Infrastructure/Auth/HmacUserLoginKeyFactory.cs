@@ -1,8 +1,8 @@
+using Tooyioo.User.Identity;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Tooyioo.Common;
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace Tooyioo.Api.Infrastructure.Auth;

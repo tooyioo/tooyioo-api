@@ -1,3 +1,5 @@
+using Tooyioo.User.Identity;
+using Tooyioo.User;
 using System.Security.Claims;
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
