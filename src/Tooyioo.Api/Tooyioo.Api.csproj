@@ -3,6 +3,7 @@
     <PropertyGroup>
         <!--OpenApi-->
         <OpenApiDocumentsDirectory>.</OpenApiDocumentsDirectory>
+        <OpenApiGenerationEnvironment>Development</OpenApiGenerationEnvironment>
         <UserSecretsId>8cc4ed73-e88d-40e1-8a36-17f74554ab89</UserSecretsId>
   </PropertyGroup>
     
@@ -28,9 +29,6 @@
       <ProjectReference Include="..\Slicent\Slicent.csproj" />
       <ProjectReference Include="..\business\Tooyioo.Business\Tooyioo.Business.csproj" />
       <ProjectReference Include="..\user\Tooyioo.User\Tooyioo.User.csproj" />
-      <ProjectReference Include="..\business\Tooyioo.Business\Tooyioo.Business.csproj" />
-      <ProjectReference Include="..\user\Tooyioo.User\Tooyioo.User.csproj" />
-      <ProjectReference Include="..\business\Tooyioo.Business\Tooyioo.Business.csproj" />
     </ItemGroup>
 
     <ItemGroup>

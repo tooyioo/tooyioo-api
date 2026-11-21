@@ -99,7 +99,7 @@ public static class OpenApiExtensions
 
     public static WebApplication UseOpenApi(this WebApplication app)
     {
-        if (!app.Environment.IsDevelopment())
+        if (!app.Environment.IsDevelopment() || Assembly.GetEntryAssembly().IsOpenApiGenerationLaunch())
         {
             return app;
         }
