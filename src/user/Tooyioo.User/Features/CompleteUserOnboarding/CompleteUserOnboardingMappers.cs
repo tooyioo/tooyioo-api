@@ -1,3 +1,10 @@
+global using CompleteUserOnboardingHttpResult =
+    Microsoft.AspNetCore.Http.HttpResults.Results<
+        Microsoft.AspNetCore.Http.HttpResults.Ok<Tooyioo.User.Features.CompleteUserOnboarding.Contracts.CompleteUserOnboardingResponse>,
+        Microsoft.AspNetCore.Http.HttpResults.NotFound<Slicent.Application.HttpProblemDetails>,
+        Microsoft.AspNetCore.Http.HttpResults.Conflict<Slicent.Application.HttpProblemDetails>,
+        Microsoft.AspNetCore.Http.HttpResults.UnprocessableEntity<Slicent.Application.HttpProblemDetails>>;
+
 using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Commands;
@@ -22,40 +29,34 @@ public static class CompleteUserOnboardingMappers
     }
 
     public sealed class CommandHttpResponseMapper
-        : ICommandHttpResponseMapper<CompleteUserOnboardingCommandResult, HttpContext, CompleteUserOnboardingResponse>
+        : ICommandHttpResponseMapper<CompleteUserOnboardingCommandResult, HttpContext, CompleteUserOnboardingHttpResult>
     {
-
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status200OK],
-            ErrorStatusCodes: [StatusCodes.Status404NotFound, StatusCodes.Status409Conflict, StatusCodes.Status422UnprocessableEntity]);
-
-        public IResult Map(
+        public CompleteUserOnboardingHttpResult Map(
             CompleteUserOnboardingCommandResult commandResult,
-            HttpContext context,
-            CommandHttpResponseGenerator<CompleteUserOnboardingResponse> commandHttpResponseGenerator)
+            HttpContext context)
             => commandResult switch
             {
-                CompleteUserOnboardingCommandOkResult ok => commandHttpResponseGenerator.Ok(
+                CompleteUserOnboardingCommandOkResult ok => TypedResults.Ok(
                     new CompleteUserOnboardingResponse
                     {
                         UserId = ok.UserId.Value
                     }),
-                CompleteUserOnboardingAlreadyCanceledError => commandHttpResponseGenerator.UnprocessableEntity(
+                CompleteUserOnboardingAlreadyCanceledError => TypedResults.UnprocessableEntity(HttpProblemDetails.UnprocessableEntity(
                     context,
                     "onboarding_already_canceled",
-                    "Could not complete user onboarding because it has been canceled"),
-                CompleteUserOnboardingAliasNotChosenError => commandHttpResponseGenerator.UnprocessableEntity(
+                    "Could not complete user onboarding because it has been canceled")),
+                CompleteUserOnboardingAliasNotChosenError => TypedResults.UnprocessableEntity(HttpProblemDetails.UnprocessableEntity(
                     context,
                     "onboarding_alias_not_chosen",
-                    "Could not complete user onboarding because no alias has been chosen"),
-                CompleteUserOnboardingConcurrencyConflict => commandHttpResponseGenerator.Conflict(
+                    "Could not complete user onboarding because no alias has been chosen")),
+                CompleteUserOnboardingConcurrencyConflict => TypedResults.Conflict(HttpProblemDetails.Conflict(
                     context,
                     "concurrent_update",
-                    "Could not complete user onboarding because of a concurrency conflict, please retry"),
-                CompleteUserOnboardingNotFoundError => commandHttpResponseGenerator.NotFound(
+                    "Could not complete user onboarding because of a concurrency conflict, please retry")),
+                CompleteUserOnboardingNotFoundError => TypedResults.NotFound(HttpProblemDetails.NotFound(
                     context,
                     "user_onboarding_not_found",
-                    "No user onboarding exists for the given user")
+                    "No user onboarding exists for the given user"))
             };
     }
 }

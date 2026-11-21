@@ -33,9 +33,6 @@ public static class ServiceCollectionExtensions
         AddCommandHandlersAndInvokers(services, candidates);
         AddQueryHandlersAndInvokers(services, candidates);
         
-        services.TryAddScoped(typeof(CommandHttpResponseGenerator<>));
-        services.TryAddScoped(typeof(QueryHttpResponseGenerator<>));
-        
         AddClosedGenericImplementations(services, candidates, typeof(ICommandMapper<,,>), ServiceLifetime.Scoped);
         AddClosedGenericImplementations(services, candidates, typeof(ICommandMapper<,,,>), ServiceLifetime.Scoped);
         AddClosedGenericImplementations(services, candidates, typeof(ICommandHttpResponseMapper<,,>), ServiceLifetime.Scoped);

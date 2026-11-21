@@ -2,9 +2,9 @@ using System.Net;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.VerticalSlices;
+using Tooyioo.User;
 using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
 using Tooyioo.User.Features.Support;
-using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.InitiateUserOnboarding;
 

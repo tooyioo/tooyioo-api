@@ -1,9 +1,14 @@
+global using InitiateUserOnboardingHttpResult =
+    Microsoft.AspNetCore.Http.HttpResults.Results<
+        Microsoft.AspNetCore.Http.HttpResults.Created<Tooyioo.User.Features.InitiateUserOnboarding.Contracts.InitiateUserOnboardingResponse>,
+        Microsoft.AspNetCore.Http.HttpResults.Ok<Tooyioo.User.Features.InitiateUserOnboarding.Contracts.InitiateUserOnboardingResponse>,
+        Microsoft.AspNetCore.Http.HttpResults.Conflict<Slicent.Application.HttpProblemDetails>>;
 using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Commands;
-using Tooyioo.User.Identity;
 using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
 using Tooyioo.User.Features.InitiateUserOnboarding.Support;
+using Tooyioo.User.Identity;
 // ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable UnusedType.Global
 
@@ -42,38 +47,32 @@ public static class InitiateUserOnboardingMappers
     }
 
     public sealed class CommandHttpResponseMapper
-        : ICommandHttpResponseMapper<InitiateUserOnboardingCommandResult, HttpContext, InitiateUserOnboardingResponse>
+        : ICommandHttpResponseMapper<InitiateUserOnboardingCommandResult, HttpContext, InitiateUserOnboardingHttpResult>
     {
-
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status201Created, StatusCodes.Status200OK],
-            ErrorStatusCodes: [StatusCodes.Status409Conflict]);
-
-        public IResult Map(
+        public InitiateUserOnboardingHttpResult Map(
             InitiateUserOnboardingCommandResult commandResult,
-            HttpContext context,
-            CommandHttpResponseGenerator<InitiateUserOnboardingResponse> commandHttpResponseGenerator)
+            HttpContext context)
             => commandResult switch
             {
-                InitiateUserOnboardingCreatedResult created => commandHttpResponseGenerator.Created(
+                InitiateUserOnboardingCreatedResult created => TypedResults.Created(
                     $"/users/{created.UserId.Value}",
                     new InitiateUserOnboardingResponse
                     {
                         UserId = created.UserId.Value
                     }),
-                InitiateUserOnboardingExistingResult existing => commandHttpResponseGenerator.Ok(
+                InitiateUserOnboardingExistingResult existing => TypedResults.Ok(
                     new InitiateUserOnboardingResponse
                     {
                         UserId = existing.UserId.Value
                     }),
-                InitiateUserOnboardingConcurrencyError => commandHttpResponseGenerator.Conflict(
+                InitiateUserOnboardingConcurrencyError => TypedResults.Conflict(HttpProblemDetails.Conflict(
                     context,
                     "concurrent_update",
-                    "Could not initiate user onboarding because of a concurrency conflict, please retry"),
-                InitiateUserOnboardingUnexpectedStateError => commandHttpResponseGenerator.Conflict(
+                    "Could not initiate user onboarding because of a concurrency conflict, please retry")),
+                InitiateUserOnboardingUnexpectedStateError => TypedResults.Conflict(HttpProblemDetails.Conflict(
                     context,
                     "onboarding_state_unexpected",
-                    "Could not initiate user onboarding because of an unexpected state conflict, please retry")
+                    "Could not initiate user onboarding because of an unexpected state conflict, please retry"))
             };
     }
 }

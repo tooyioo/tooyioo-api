@@ -18,7 +18,7 @@ public sealed class RetrieveUserSummariesEndpoint
                 RetrieveUserSummariesRoute,
                 RetrieveUserSummariesQuery,
                 RetrieveUserSummariesQueryResult,
-                RetrieveUserSummariesResponse>(
+                RetrieveUserSummariesHttpResult>(
                 "/users/summaries",
                 cfg => cfg
                     .WithName("retrieve-user-summaries")

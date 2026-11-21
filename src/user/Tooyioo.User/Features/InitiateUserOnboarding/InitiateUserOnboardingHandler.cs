@@ -1,9 +1,9 @@
 using Eventuous;
 using Slicent.Application.Commands;
 using Slicent.EventStore;
-using Tooyioo.User.Identity;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.Support;
+using Tooyioo.User.Identity;
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace Tooyioo.User.Features.InitiateUserOnboarding;
@@ -34,7 +34,7 @@ public sealed class InitiateUserOnboardingHandler
 
         if (userLoginClaiming.State.UserId is { } existingUserId)
         {
-            return new InitiateUserOnboardingExistingResult(new UserId(existingUserId));
+            return new InitiateUserOnboardingExistingResult(existingUserId);
         }
 
         var userId = command.UserId;

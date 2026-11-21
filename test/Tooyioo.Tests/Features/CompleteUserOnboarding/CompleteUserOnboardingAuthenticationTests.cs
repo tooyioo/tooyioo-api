@@ -4,8 +4,8 @@ using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Auth;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
-using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
 using Tooyioo.User;
+using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
 
 namespace Tooyioo.Tests.Features.CompleteUserOnboarding;
 

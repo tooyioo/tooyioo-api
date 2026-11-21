@@ -18,7 +18,7 @@ public sealed class RequestUserPersonalDataErasureEndpoint
                 RequestUserPersonalDataErasureRequest,
                 RequestUserPersonalDataErasureCommand,
                 RequestUserPersonalDataErasureCommandResult,
-                RequestUserPersonalDataErasureResponse>(
+                RequestUserPersonalDataErasureHttpResult>(
                 "/users/{id:guid}/personal-data/erasure",
                 cfg => cfg
                     .WithName("request-user-personal-data-erasure")

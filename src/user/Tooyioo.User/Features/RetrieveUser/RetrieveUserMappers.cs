@@ -1,3 +1,8 @@
+global using RetrieveUserHttpResult =
+    Microsoft.AspNetCore.Http.HttpResults.Results<
+        Microsoft.AspNetCore.Http.HttpResults.Ok<Tooyioo.User.Features.RetrieveUser.Contract.RetrieveUserResponse>,
+        Microsoft.AspNetCore.Http.HttpResults.NotFound<Slicent.Application.HttpProblemDetails>>;
+
 using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Queries;
@@ -17,20 +22,14 @@ public static class RetrieveUserMappers
     }
 
     public sealed class QueryHttpResponseMapper
-        : IQueryHttpResponseMapper<RetrieveUserQueryResult, HttpContext, RetrieveUserResponse>
+        : IQueryHttpResponseMapper<RetrieveUserQueryResult, HttpContext, RetrieveUserHttpResult>
     {
-
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status200OK],
-            ErrorStatusCodes: [StatusCodes.Status404NotFound]);
-
-        public IResult Map(
+        public RetrieveUserHttpResult Map(
             RetrieveUserQueryResult queryResult,
-            HttpContext context,
-            QueryHttpResponseGenerator<RetrieveUserResponse> queryHttpResponseGenerator)
+            HttpContext context)
             => queryResult switch
             {
-                RetrieveUserQueryOkResult ok => queryHttpResponseGenerator.Ok(
+                RetrieveUserQueryOkResult ok => TypedResults.Ok(
                     new RetrieveUserResponse
                     {
                         Id = ok.Document.Id,
@@ -46,10 +45,10 @@ public static class RetrieveUserMappers
                         TermsOfServiceVersion = ok.Document.TermsOfServiceVersion ?? string.Empty,
                         PrivacyPolicyVersion = ok.Document.PrivacyPolicyVersion ?? string.Empty
                     }),
-                RetrieveUserQueryNotFoundResult notFound => queryHttpResponseGenerator.NotFound(
+                RetrieveUserQueryNotFoundResult notFound => TypedResults.NotFound(HttpProblemDetails.NotFound(
                     context,
                     "profile_not_found",
-                    $"Could not find Profile with Id {notFound.Id}")
+                    $"Could not find Profile with Id {notFound.Id}"))
             };
     }
 }

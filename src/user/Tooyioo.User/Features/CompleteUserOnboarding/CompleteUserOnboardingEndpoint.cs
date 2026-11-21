@@ -18,7 +18,7 @@ public sealed class CompleteUserOnboardingEndpoint
                 CompleteUserOnboardingRequest,
                 CompleteUserOnboardingCommand,
                 CompleteUserOnboardingCommandResult,
-                CompleteUserOnboardingResponse>(
+                CompleteUserOnboardingHttpResult>(
                 "/users/{id:guid}/onboarding/completion",
                 cfg => cfg
                     .WithName("complete-user-onboarding")

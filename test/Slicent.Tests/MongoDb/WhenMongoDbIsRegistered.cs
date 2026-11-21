@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using Slicent;
 
 namespace Slicent.Tests.MongoDb;
 

@@ -1,7 +1,7 @@
 using Tooyioo.Business.Contracts;
 using Tooyioo.Tests.Support.Extensions;
-using Tooyioo.User.Contracts;
 using Tooyioo.User;
+using Tooyioo.User.Contracts;
 
 namespace Tooyioo.Tests.Support.Events;
 

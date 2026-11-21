@@ -1,3 +1,10 @@
+global using CancelUserPersonalDataErasureHttpResult =
+    Microsoft.AspNetCore.Http.HttpResults.Results<
+        Microsoft.AspNetCore.Http.HttpResults.Ok<Tooyioo.User.Features.CancelUserPersonalDataErasure.Contracts.CancelUserPersonalDataErasureResponse>,
+        Microsoft.AspNetCore.Http.HttpResults.NotFound<Slicent.Application.HttpProblemDetails>,
+        Microsoft.AspNetCore.Http.HttpResults.Conflict<Slicent.Application.HttpProblemDetails>,
+        Microsoft.AspNetCore.Http.HttpResults.UnprocessableEntity<Slicent.Application.HttpProblemDetails>>;
+
 using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Commands;
@@ -17,37 +24,31 @@ public static class CancelUserPersonalDataErasureMappers
     }
 
     public sealed class CommandHttpResponseMapper
-        : ICommandHttpResponseMapper<CancelUserPersonalDataErasureCommandResult, HttpContext, CancelUserPersonalDataErasureResponse>
+        : ICommandHttpResponseMapper<CancelUserPersonalDataErasureCommandResult, HttpContext, CancelUserPersonalDataErasureHttpResult>
     {
-
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status200OK],
-            ErrorStatusCodes: [StatusCodes.Status404NotFound, StatusCodes.Status409Conflict, StatusCodes.Status422UnprocessableEntity]);
-
-        public IResult Map(
+        public CancelUserPersonalDataErasureHttpResult Map(
             CancelUserPersonalDataErasureCommandResult commandResult,
-            HttpContext context,
-            CommandHttpResponseGenerator<CancelUserPersonalDataErasureResponse> commandHttpResponseGenerator)
+            HttpContext context)
             => commandResult switch
             {
-                CancelUserPersonalDataErasureCommandOkResult ok => commandHttpResponseGenerator.Ok(
+                CancelUserPersonalDataErasureCommandOkResult ok => TypedResults.Ok(
                     new CancelUserPersonalDataErasureResponse
                     {
                         UserId = ok.UserId.Value,
                         Status = "active"
                     }),
-                CancelUserPersonalDataErasureNotFoundError => commandHttpResponseGenerator.NotFound(
+                CancelUserPersonalDataErasureNotFoundError => TypedResults.NotFound(HttpProblemDetails.NotFound(
                     context,
                     "user_personal_data_not_found",
-                    "Could not find personal data for the given user"),
-                CancelUserPersonalDataErasureAlreadyErasedError => commandHttpResponseGenerator.UnprocessableEntity(
+                    "Could not find personal data for the given user")),
+                CancelUserPersonalDataErasureAlreadyErasedError => TypedResults.UnprocessableEntity(HttpProblemDetails.UnprocessableEntity(
                     context,
                     "user_personal_data_already_erased",
-                    "The personal data has already been erased"),
-                CancelUserPersonalDataErasureConcurrencyConflictError => commandHttpResponseGenerator.Conflict(
+                    "The personal data has already been erased")),
+                CancelUserPersonalDataErasureConcurrencyConflictError => TypedResults.Conflict(HttpProblemDetails.Conflict(
                     context,
                     "concurrent_update",
-                    "Could not cancel personal data erasure because of a concurrency conflict, please retry")
+                    "Could not cancel personal data erasure because of a concurrency conflict, please retry"))
             };
     }
 }

@@ -17,7 +17,7 @@ public sealed class RetrieveUserPersonalDataEndpoint
                 RetrieveUserPersonalDataRoute,
                 RetrieveUserPersonalDataQuery,
                 RetrieveUserPersonalDataQueryResult,
-                RetrieveUserPersonalDataResponse>(
+                RetrieveUserPersonalDataHttpResult>(
                 "/users/{id:guid}/personal-data",
                 cfg => cfg
                     .WithName("retrieve-user-personal-data")

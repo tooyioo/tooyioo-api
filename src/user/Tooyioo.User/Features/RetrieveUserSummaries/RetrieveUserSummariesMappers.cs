@@ -1,5 +1,7 @@
+global using RetrieveUserSummariesHttpResult =
+    Microsoft.AspNetCore.Http.HttpResults.Ok<Tooyioo.User.Features.RetrieveUserSummaries.Contract.RetrieveUserSummariesResponse>;
+
 using Microsoft.AspNetCore.Http;
-using Slicent.Application;
 using Slicent.Application.Queries;
 using Tooyioo.User.Features.RetrieveUserSummaries.Contract;
 // ReSharper disable ConvertToPrimaryConstructor
@@ -23,21 +25,15 @@ public static class RetrieveUserSummariesMappers
     }
 
     public sealed class QueryHttpResponseMapper
-        : IQueryHttpResponseMapper<RetrieveUserSummariesQueryResult, HttpContext, RetrieveUserSummariesResponse>
+        : IQueryHttpResponseMapper<RetrieveUserSummariesQueryResult, HttpContext, RetrieveUserSummariesHttpResult>
     {
-
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status200OK],
-            ErrorStatusCodes: []);
-
-        public IResult Map(
+        public RetrieveUserSummariesHttpResult Map(
             RetrieveUserSummariesQueryResult queryResult,
-            HttpContext context,
-            QueryHttpResponseGenerator<RetrieveUserSummariesResponse> queryHttpResponseGenerator)
+            HttpContext context)
         {
             var pagedResult = queryResult.PagedResult;
 
-            return queryHttpResponseGenerator.Ok(new RetrieveUserSummariesResponse
+            return TypedResults.Ok(new RetrieveUserSummariesResponse
             {
                 PageNumber = pagedResult.PageNumber,
                 PageSize = pagedResult.PageSize,

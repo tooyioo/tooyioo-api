@@ -3,8 +3,8 @@ using Tooyioo.Tests.Features.Support;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
-using Tooyioo.User.Features.RetrieveUserSummaries.Contract;
 using Tooyioo.User;
+using Tooyioo.User.Features.RetrieveUserSummaries.Contract;
 
 namespace Tooyioo.Tests.Features.RetrieveUserSummaries;
 

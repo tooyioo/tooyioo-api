@@ -1,3 +1,8 @@
+global using RetrieveBusinessOnboardingHttpResult =
+    Microsoft.AspNetCore.Http.HttpResults.Results<
+        Microsoft.AspNetCore.Http.HttpResults.Ok<Tooyioo.Business.Features.RetrieveBusinessOnboarding.Contracts.RetrieveBusinessOnboardingResponse>,
+        Microsoft.AspNetCore.Http.HttpResults.NotFound<Slicent.Application.HttpProblemDetails>>;
+
 using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Queries;
@@ -27,21 +32,16 @@ public static class RetrieveBusinessOnboardingMappers
     }
 
     public sealed class QueryHttpResponseMapper
-        : IQueryHttpResponseMapper<RetrieveBusinessOnboardingQueryResult, HttpContext,
-            RetrieveBusinessOnboardingResponse>
+        : IQueryHttpResponseMapper<RetrieveBusinessOnboardingQueryResult, HttpContext, RetrieveBusinessOnboardingHttpResult>
     {
 
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status200OK],
-            ErrorStatusCodes: [StatusCodes.Status404NotFound]);
 
-        public IResult Map(
+        public RetrieveBusinessOnboardingHttpResult Map(
             RetrieveBusinessOnboardingQueryResult queryResult,
-            HttpContext context,
-            QueryHttpResponseGenerator<RetrieveBusinessOnboardingResponse> queryHttpResponseGenerator)
+            HttpContext context)
             => queryResult switch
             {
-                RetrieveBusinessOnboardingQueryOkResult ok => queryHttpResponseGenerator.Ok(
+                RetrieveBusinessOnboardingQueryOkResult ok => TypedResults.Ok(
                     new RetrieveBusinessOnboardingResponse
                     {
                         BusinessId = ok.Document.Id,
@@ -51,10 +51,10 @@ public static class RetrieveBusinessOnboardingMappers
                         CreatedAt = ok.Document.CreatedAt,
                         LastModifiedAt = ok.Document.LastModifiedAt
                     }),
-                RetrieveBusinessOnboardingQueryNotFoundResult notFound => queryHttpResponseGenerator.NotFound(
+                RetrieveBusinessOnboardingQueryNotFoundResult notFound => TypedResults.NotFound(HttpProblemDetails.NotFound(
                     context,
                     "business_onboarding_not_found",
-                    $"Could not find business onboarding with Id {notFound.Id}")
+                    $"Could not find business onboarding with Id {notFound.Id}"))
             };
 
 

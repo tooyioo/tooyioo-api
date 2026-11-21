@@ -20,7 +20,7 @@ public sealed class ChooseUserOnboardingAliasEndpoint
                 ChooseUserOnboardingAliasRequest,
                 ChooseUserOnboardingAliasCommand,
                 ChooseUserOnboardingAliasCommandResult,
-                ChooseUserOnboardingAliasResponse>(
+                ChooseUserOnboardingAliasHttpResult>(
                 "/users/{id:guid}/onboarding/alias",
                 cfg => cfg
                     .WithName("choose-user-onboarding-alias")

@@ -1,8 +1,8 @@
 using Tooyioo.Tests.Support;
 using Tooyioo.Tests.Support.Auth;
 using Tooyioo.Tests.Support.Extensions;
-using Tooyioo.User.Features.CancelUserOnboarding.Contracts;
 using Tooyioo.User;
+using Tooyioo.User.Features.CancelUserOnboarding.Contracts;
 
 namespace Tooyioo.Tests.Features.CancelUserOnboarding;
 

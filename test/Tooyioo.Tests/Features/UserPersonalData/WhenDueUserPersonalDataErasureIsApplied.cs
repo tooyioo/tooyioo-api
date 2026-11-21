@@ -1,10 +1,10 @@
-using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Events;
+using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.VerticalSlices;
+using Tooyioo.User;
 using Tooyioo.User.Contracts;
 using Tooyioo.User.Features.ApplyUserPersonalDataErasure;
 using Tooyioo.User.Features.Support;
-using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.UserPersonalData;
 

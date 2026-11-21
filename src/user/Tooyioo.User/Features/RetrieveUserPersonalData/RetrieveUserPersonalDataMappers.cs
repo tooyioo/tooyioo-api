@@ -1,3 +1,8 @@
+global using RetrieveUserPersonalDataHttpResult =
+    Microsoft.AspNetCore.Http.HttpResults.Results<
+        Microsoft.AspNetCore.Http.HttpResults.Ok<Tooyioo.User.Features.RetrieveUserPersonalData.Contracts.RetrieveUserPersonalDataResponse>,
+        Microsoft.AspNetCore.Http.HttpResults.NotFound<Slicent.Application.HttpProblemDetails>>;
+
 using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Queries;
@@ -15,20 +20,14 @@ public static class RetrieveUserPersonalDataMappers
     }
 
     public sealed class QueryHttpResponseMapper
-        : IQueryHttpResponseMapper<RetrieveUserPersonalDataQueryResult, HttpContext, RetrieveUserPersonalDataResponse>
+        : IQueryHttpResponseMapper<RetrieveUserPersonalDataQueryResult, HttpContext, RetrieveUserPersonalDataHttpResult>
     {
-
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status200OK],
-            ErrorStatusCodes: [StatusCodes.Status404NotFound]);
-
-        public IResult Map(
+        public RetrieveUserPersonalDataHttpResult Map(
             RetrieveUserPersonalDataQueryResult queryResult,
-            HttpContext context,
-            QueryHttpResponseGenerator<RetrieveUserPersonalDataResponse> queryHttpResponseGenerator)
+            HttpContext context)
             => queryResult switch
             {
-                RetrieveUserPersonalDataQueryOkResult ok => queryHttpResponseGenerator.Ok(
+                RetrieveUserPersonalDataQueryOkResult ok => TypedResults.Ok(
                     new RetrieveUserPersonalDataResponse
                     {
                         UserId = ok.Document.Id,
@@ -41,10 +40,10 @@ public static class RetrieveUserPersonalDataMappers
                         CreatedAt = ok.Document.CreatedAt,
                         LastModifiedAt = ok.Document.LastModifiedAt
                     }),
-                RetrieveUserPersonalDataQueryNotFoundResult notFound => queryHttpResponseGenerator.NotFound(
+                RetrieveUserPersonalDataQueryNotFoundResult notFound => TypedResults.NotFound(HttpProblemDetails.NotFound(
                     context,
                     "user_personal_data_not_found",
-                    $"Could not find personal data for user {notFound.UserId}")
+                    $"Could not find personal data for user {notFound.UserId}"))
             };
     }
 }

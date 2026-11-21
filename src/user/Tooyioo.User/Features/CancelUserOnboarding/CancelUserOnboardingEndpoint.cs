@@ -18,7 +18,7 @@ public sealed class CancelUserOnboardingEndpoint
                 CancelUserOnboardingRequest,
                 CancelUserOnboardingCommand,
                 CancelUserOnboardingCommandResult,
-                CancelUserOnboardingResponse>(
+                CancelUserOnboardingHttpResult>(
                 "/users/{id:guid}/onboarding/cancellation",
                 cfg => cfg
                     .WithName("cancel-user-onboarding")

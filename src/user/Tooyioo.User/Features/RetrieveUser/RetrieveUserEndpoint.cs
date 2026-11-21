@@ -19,7 +19,7 @@ public sealed class RetrieveUserEndpoint
                 RetrieveUserRoute,
                 RetrieveUserQuery,
                 RetrieveUserQueryResult,
-                RetrieveUserResponse>(
+                RetrieveUserHttpResult>(
                 "/users/{id:guid}",
                 cfg => cfg
                     .WithName("retrieve-user")

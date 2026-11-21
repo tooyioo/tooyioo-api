@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
-using Slicent.Application;
 using Slicent.Application.Commands;
 // ReSharper disable ClassNeverInstantiated.Local
 
@@ -35,7 +35,7 @@ public sealed class WhenCommandServicesAreRegistered
         await using var scope = provider.CreateAsyncScope();
 
         var mapper = scope.ServiceProvider
-            .GetRequiredService<ICommandHttpResponseMapper<TestCommandResult, HttpContext, TestResponse>>();
+            .GetRequiredService<ICommandHttpResponseMapper<TestCommandResult, HttpContext, Ok<TestResponse>>>();
 
         await Assert.That(mapper).IsTypeOf<TestCommandResponseMapper>();
     }
@@ -63,16 +63,11 @@ public sealed class WhenCommandServicesAreRegistered
     }
 
     private sealed class TestCommandResponseMapper
-        : ICommandHttpResponseMapper<TestCommandResult, HttpContext, TestResponse>
+        : ICommandHttpResponseMapper<TestCommandResult, HttpContext, Ok<TestResponse>>
     {
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status200OK],
-            ErrorStatusCodes: []);
-
-        public IResult Map(
+        public Ok<TestResponse> Map(
             TestCommandResult commandResult,
-            HttpContext context,
-            CommandHttpResponseGenerator<TestResponse> commandHttpResponseGenerator)
-            => commandHttpResponseGenerator.Ok(new TestResponse { Id = commandResult.Id });
+            HttpContext context)
+            => TypedResults.Ok(new TestResponse { Id = commandResult.Id });
     }
 }

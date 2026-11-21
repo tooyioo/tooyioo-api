@@ -1,7 +1,5 @@
-using Tooyioo.User.Identity;
-using Tooyioo.User;
-using System.Security.Claims;
 using System.Reflection;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +7,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Tooyioo.Api.Infrastructure.OpenApi;
 using Tooyioo.Common;
+using Tooyioo.User;
+using Tooyioo.User.Identity;
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMethodReturnValue.Global
 

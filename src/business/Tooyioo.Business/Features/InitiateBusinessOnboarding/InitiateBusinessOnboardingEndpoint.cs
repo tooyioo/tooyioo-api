@@ -15,9 +15,9 @@ public sealed class InitiateBusinessOnboardingEndpoint
 {
     public void Map(IEndpointRouteBuilder app)
         => app
-            .MapCreateCommand<InitiateBusinessOnboardingRequest, InitiateBusinessOnboardingCommand,
+            .MapCommand<InitiateBusinessOnboardingRequest, InitiateBusinessOnboardingCommand,
                 InitiateBusinessOnboardingCommandResult,
-                InitiateBusinessOnboardingResponse>(
+                InitiateBusinessOnboardingHttpResult>(
                 "/businesses",
                 cfg
                     => cfg

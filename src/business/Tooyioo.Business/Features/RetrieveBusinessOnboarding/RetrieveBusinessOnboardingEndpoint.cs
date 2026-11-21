@@ -18,7 +18,7 @@ public sealed class RetrieveBusinessOnboardingEndpoint
                 RetrieveBusinessOnboardingRoute,
                 RetrieveBusinessOnboardingQuery,
                 RetrieveBusinessOnboardingQueryResult,
-                RetrieveBusinessOnboardingResponse>(
+                RetrieveBusinessOnboardingHttpResult>(
                 "/businesses/{id:guid}/onboarding",
                 cfg => cfg
                     .WithName("retrieve-business-onboarding")

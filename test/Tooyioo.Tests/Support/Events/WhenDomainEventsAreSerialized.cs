@@ -2,11 +2,11 @@ using Eventuous;
 using Microsoft.Extensions.DependencyInjection;
 using Slicent;
 using static Tooyioo.Business.Contracts.BusinessOnboardingDomainEvents.V1;
-using static Tooyioo.User.Contracts.UserLoginClaimingDomainEvents.V1;
-using static Tooyioo.User.Contracts.UserPersonalDataDomainEvents.V1;
 using static Tooyioo.User.Contracts.UserAliasClaimingDomainEvents.V1;
+using static Tooyioo.User.Contracts.UserLoginClaimingDomainEvents.V1;
 using static Tooyioo.User.Contracts.UserLoginLinkingDomainEvents.V1;
 using static Tooyioo.User.Contracts.UserOnboardingDomainEvents.V1;
+using static Tooyioo.User.Contracts.UserPersonalDataDomainEvents.V1;
 
 namespace Tooyioo.Tests.Support.Events;
 

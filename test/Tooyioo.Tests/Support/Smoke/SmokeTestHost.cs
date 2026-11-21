@@ -111,7 +111,7 @@ public sealed class SmokeTestHost
 
     public async ValueTask DisposeAsync()
     {
-        HttpClient?.Dispose();
+        HttpClient.Dispose();
 
         if (_factory is not null)
         {

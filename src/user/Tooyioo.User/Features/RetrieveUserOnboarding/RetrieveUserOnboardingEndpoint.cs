@@ -19,7 +19,7 @@ public sealed class RetrieveUserOnboardingEndpoint
                 RetrieveUserOnboardingRoute,
                 RetrieveUserOnboardingQuery,
                 RetrieveUserOnboardingQueryResult,
-                RetrieveUserOnboardingResponse>(
+                RetrieveUserOnboardingHttpResult>(
                 "/users/{id:guid}/onboarding",
                 cfg => cfg
                     .WithName("retrieve-user-onboarding")

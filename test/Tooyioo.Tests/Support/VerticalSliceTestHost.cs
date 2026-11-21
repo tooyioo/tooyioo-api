@@ -8,8 +8,8 @@ using Slicent.Application.Commands;
 using Slicent.EventStore;
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.ReadModels;
-using Tooyioo.User.Features.Support;
 using Tooyioo.User;
+using Tooyioo.User.Features.Support;
 
 // ReSharper disable MemberCanBePrivate.Global
 

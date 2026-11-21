@@ -1,9 +1,9 @@
 using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.ReadModels;
 using Tooyioo.Tests.Support.VerticalSlices;
-using Tooyioo.User.Features.Support;
-using Tooyioo.User.Contracts;
 using Tooyioo.User;
+using Tooyioo.User.Contracts;
+using Tooyioo.User.Features.Support;
 
 namespace Tooyioo.Tests.Features.Support;
 

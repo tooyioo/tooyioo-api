@@ -1,3 +1,8 @@
+global using InitiateBusinessOnboardingHttpResult =
+    Microsoft.AspNetCore.Http.HttpResults.Results<
+        Microsoft.AspNetCore.Http.HttpResults.Created<Tooyioo.Business.Features.InitiateBusinessOnboarding.Contracts.InitiateBusinessOnboardingResponse>,
+        Microsoft.AspNetCore.Http.HttpResults.Conflict<Slicent.Application.HttpProblemDetails>>;
+
 using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Commands;
@@ -28,34 +33,29 @@ public static class InitiateBusinessOnboardingMappers
     }
 
     public sealed class CommandHttpResponseMapper
-        : ICommandHttpResponseMapper<InitiateBusinessOnboardingCommandResult, HttpContext,
-            InitiateBusinessOnboardingResponse>
+        : ICommandHttpResponseMapper<InitiateBusinessOnboardingCommandResult, HttpContext, InitiateBusinessOnboardingHttpResult>
     {
 
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status201Created],
-            ErrorStatusCodes: [StatusCodes.Status409Conflict]);
 
-        public IResult Map(
+        public InitiateBusinessOnboardingHttpResult Map(
             InitiateBusinessOnboardingCommandResult commandResult,
-            HttpContext context,
-            CommandHttpResponseGenerator<InitiateBusinessOnboardingResponse> commandHttpResponseGenerator)
+            HttpContext context)
             => commandResult switch
             {
-                InitiateBusinessOnboardingOkResult ok => commandHttpResponseGenerator.Created(
+                InitiateBusinessOnboardingOkResult ok => TypedResults.Created(
                     $"/businesses/{ok.BusinessId.Value}",
                     new InitiateBusinessOnboardingResponse
                     {
                         BusinessId = ok.BusinessId.Value
                     }),
-                InitiateBusinessOnboardingConcurrencyError => commandHttpResponseGenerator.Conflict(
+                InitiateBusinessOnboardingConcurrencyError => TypedResults.Conflict(HttpProblemDetails.Conflict(
                     context,
                     "concurrent_update",
-                    "Could not initiate business onboarding because of a concurrency conflict, please retry"),
-                InitiateBusinessOnboardingUnexpectedStateError => commandHttpResponseGenerator.Conflict(
+                    "Could not initiate business onboarding because of a concurrency conflict, please retry")),
+                InitiateBusinessOnboardingUnexpectedStateError => TypedResults.Conflict(HttpProblemDetails.Conflict(
                     context,
                     "onboarding_state_unexpected",
-                    "Could not initiate business onboarding because of an unexpected state conflict, please retry")
+                    "Could not initiate business onboarding because of an unexpected state conflict, please retry"))
             };
     }
 }

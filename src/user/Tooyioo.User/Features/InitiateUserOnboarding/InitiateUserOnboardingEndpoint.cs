@@ -15,9 +15,8 @@ public sealed class InitiateUserOnboardingEndpoint
 {
     public void Map(IEndpointRouteBuilder app)
         => app
-            .MapCreateCommand<InitiateUserOnboardingRequest, InitiateUserOnboardingCommand,
-                InitiateUserOnboardingCommandResult,
-                InitiateUserOnboardingResponse>(
+            .MapCommand<InitiateUserOnboardingRequest, InitiateUserOnboardingCommand,
+                InitiateUserOnboardingCommandResult, InitiateUserOnboardingHttpResult>(
                 "/users",
                 cfg
                     => cfg

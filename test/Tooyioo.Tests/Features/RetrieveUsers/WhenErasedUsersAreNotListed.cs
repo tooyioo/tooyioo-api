@@ -4,9 +4,9 @@ using Tooyioo.Tests.Support.Events;
 using Tooyioo.Tests.Support.Extensions;
 using Tooyioo.Tests.Support.Http;
 using Tooyioo.Tests.Support.ReadModels;
+using Tooyioo.User;
 using Tooyioo.User.Features.RetrieveUsers.Contract;
 using Tooyioo.User.Features.Support;
-using Tooyioo.User;
 
 namespace Tooyioo.Tests.Features.RetrieveUsers;
 

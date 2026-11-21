@@ -1,3 +1,8 @@
+global using RetrieveUserOnboardingHttpResult =
+    Microsoft.AspNetCore.Http.HttpResults.Results<
+        Microsoft.AspNetCore.Http.HttpResults.Ok<Tooyioo.User.Features.RetrieveUserOnboarding.Contracts.RetrieveUserOnboardingResponse>,
+        Microsoft.AspNetCore.Http.HttpResults.NotFound<Slicent.Application.HttpProblemDetails>>;
+
 using Microsoft.AspNetCore.Http;
 using Slicent.Application;
 using Slicent.Application.Queries;
@@ -21,20 +26,14 @@ public static class RetrieveUserOnboardingMappers
     }
 
     public sealed class QueryHttpResponseMapper
-        : IQueryHttpResponseMapper<RetrieveUserOnboardingQueryResult, HttpContext, RetrieveUserOnboardingResponse>
+        : IQueryHttpResponseMapper<RetrieveUserOnboardingQueryResult, HttpContext, RetrieveUserOnboardingHttpResult>
     {
-
-        public HttpResponseMetadata Responses { get; } = new(
-            SuccessStatusCodes: [StatusCodes.Status200OK],
-            ErrorStatusCodes: [StatusCodes.Status404NotFound]);
-
-        public IResult Map(
+        public RetrieveUserOnboardingHttpResult Map(
             RetrieveUserOnboardingQueryResult queryResult,
-            HttpContext context,
-            QueryHttpResponseGenerator<RetrieveUserOnboardingResponse> queryHttpResponseGenerator)
+            HttpContext context)
             => queryResult switch
             {
-                RetrieveUserOnboardingQueryOkResult ok => queryHttpResponseGenerator.Ok(
+                RetrieveUserOnboardingQueryOkResult ok => TypedResults.Ok(
                     new RetrieveUserOnboardingResponse
                     {
                         UserId = ok.UserId.Value,
@@ -46,10 +45,10 @@ public static class RetrieveUserOnboardingMappers
                         CancellationReasonCode = ok.State.CancellationReasonCode,
                         Status = ToStatus(ok.State)
                     }),
-                RetrieveUserOnboardingQueryNotFoundResult notFound => queryHttpResponseGenerator.NotFound(
+                RetrieveUserOnboardingQueryNotFoundResult notFound => TypedResults.NotFound(HttpProblemDetails.NotFound(
                     context,
                     "user_onboarding_not_found",
-                    $"Could not find user onboarding with Id {notFound.UserId}")
+                    $"Could not find user onboarding with Id {notFound.UserId}"))
             };
 
         private static string ToStatus(UserOnboardingState state) =>
