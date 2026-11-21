@@ -20,8 +20,6 @@ public static class OpenApiExtensions
         
         builder.Services.AddOpenApi(DocumentName, options =>
         {
-            options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
-            
             options.AddDocumentTransformer((document, context, _) =>
             {
                 var googleOAuthOptions = context.ApplicationServices
