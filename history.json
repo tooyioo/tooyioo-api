@@ -382,5 +382,13 @@
     "status": "FAILED",
     "sha": "42336d9",
     "url": "https://github.com/tooyioo/tooyioo-api/actions/runs/44913801455"
+  },
+  {
+    "run": "44915373537",
+    "number": "51",
+    "date": "2026-11-21 14:44:39 UTC",
+    "status": "FAILED",
+    "sha": "18a1fb4",
+    "url": "https://github.com/tooyioo/tooyioo-api/actions/runs/44915373537"
   }
 ]
