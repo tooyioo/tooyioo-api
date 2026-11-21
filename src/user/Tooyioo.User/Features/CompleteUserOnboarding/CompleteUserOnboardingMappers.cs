@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Slicent.Application;
 using Slicent.Application.Commands;
 using Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
 
@@ -23,6 +24,11 @@ public static class CompleteUserOnboardingMappers
     public sealed class CommandHttpResponseMapper
         : ICommandHttpResponseMapper<CompleteUserOnboardingCommandResult, HttpContext, CompleteUserOnboardingResponse>
     {
+
+        public HttpResponseMetadata Responses { get; } = new(
+            SuccessStatusCodes: [StatusCodes.Status200OK],
+            ErrorStatusCodes: [StatusCodes.Status404NotFound, StatusCodes.Status409Conflict, StatusCodes.Status422UnprocessableEntity]);
+
         public IResult Map(
             CompleteUserOnboardingCommandResult commandResult,
             HttpContext context,

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Slicent.Application;
 using Slicent.Application.Commands;
 using Tooyioo.Business.Features.InitiateBusinessOnboarding.Contracts;
 using Tooyioo.Common;
@@ -30,6 +31,11 @@ public static class InitiateBusinessOnboardingMappers
         : ICommandHttpResponseMapper<InitiateBusinessOnboardingCommandResult, HttpContext,
             InitiateBusinessOnboardingResponse>
     {
+
+        public HttpResponseMetadata Responses { get; } = new(
+            SuccessStatusCodes: [StatusCodes.Status201Created],
+            ErrorStatusCodes: [StatusCodes.Status409Conflict]);
+
         public IResult Map(
             InitiateBusinessOnboardingCommandResult commandResult,
             HttpContext context,

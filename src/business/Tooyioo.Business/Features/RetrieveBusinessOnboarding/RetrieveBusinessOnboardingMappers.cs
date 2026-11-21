@@ -30,6 +30,11 @@ public static class RetrieveBusinessOnboardingMappers
         : IQueryHttpResponseMapper<RetrieveBusinessOnboardingQueryResult, HttpContext,
             RetrieveBusinessOnboardingResponse>
     {
+
+        public HttpResponseMetadata Responses { get; } = new(
+            SuccessStatusCodes: [StatusCodes.Status200OK],
+            ErrorStatusCodes: [StatusCodes.Status404NotFound]);
+
         public IResult Map(
             RetrieveBusinessOnboardingQueryResult queryResult,
             HttpContext context,

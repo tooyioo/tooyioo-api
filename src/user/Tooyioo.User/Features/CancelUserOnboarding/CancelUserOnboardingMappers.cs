@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Slicent.Application;
 using Slicent.Application.Commands;
 using Tooyioo.User.Features.CancelUserOnboarding.Contracts;
 
@@ -20,6 +21,11 @@ public static class CancelUserOnboardingMappers
     public sealed class CommandHttpResponseMapper
         : ICommandHttpResponseMapper<CancelUserOnboardingCommandResult, HttpContext, CancelUserOnboardingResponse>
     {
+
+        public HttpResponseMetadata Responses { get; } = new(
+            SuccessStatusCodes: [StatusCodes.Status200OK],
+            ErrorStatusCodes: [StatusCodes.Status404NotFound, StatusCodes.Status409Conflict, StatusCodes.Status422UnprocessableEntity]);
+
         public IResult Map(
             CancelUserOnboardingCommandResult commandResult,
             HttpContext context,

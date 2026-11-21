@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Slicent.Application;
 using Slicent.Application.Commands;
 using Tooyioo.User.Identity;
 using Tooyioo.User.Features.InitiateUserOnboarding.Contracts;
@@ -32,28 +33,38 @@ public static class InitiateUserOnboardingMappers
 
             return new InitiateUserOnboardingCommand(
                 UserId.New(),
+                userLoginKey,
                 personalDetails.Name.Trim(),
                 personalDetails.LastName.Trim(),
                 personalDetails.Email.Trim(),
-                personalDetails.IsEmailVerified,
-                userLoginKey);
+                personalDetails.IsEmailVerified);
         }
     }
 
     public sealed class CommandHttpResponseMapper
         : ICommandHttpResponseMapper<InitiateUserOnboardingCommandResult, HttpContext, InitiateUserOnboardingResponse>
     {
+
+        public HttpResponseMetadata Responses { get; } = new(
+            SuccessStatusCodes: [StatusCodes.Status201Created, StatusCodes.Status200OK],
+            ErrorStatusCodes: [StatusCodes.Status409Conflict]);
+
         public IResult Map(
             InitiateUserOnboardingCommandResult commandResult,
             HttpContext context,
             CommandHttpResponseGenerator<InitiateUserOnboardingResponse> commandHttpResponseGenerator)
             => commandResult switch
             {
-                InitiateUserOnboardingOkResult ok => commandHttpResponseGenerator.Created(
-                    $"/users/{ok.UserId.Value}",
+                InitiateUserOnboardingCreatedResult created => commandHttpResponseGenerator.Created(
+                    $"/users/{created.UserId.Value}",
                     new InitiateUserOnboardingResponse
                     {
-                        UserId = ok.UserId.Value
+                        UserId = created.UserId.Value
+                    }),
+                InitiateUserOnboardingExistingResult existing => commandHttpResponseGenerator.Ok(
+                    new InitiateUserOnboardingResponse
+                    {
+                        UserId = existing.UserId.Value
                     }),
                 InitiateUserOnboardingConcurrencyError => commandHttpResponseGenerator.Conflict(
                     context,

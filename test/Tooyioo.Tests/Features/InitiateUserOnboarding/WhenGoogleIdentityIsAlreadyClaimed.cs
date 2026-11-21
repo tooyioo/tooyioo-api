@@ -95,7 +95,11 @@ public sealed class WhenGoogleIdentityIsAlreadyClaimed
 
     [Test]
     public async Task Then_response_is_ok()
-        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.Created);
+        => await Assert.That(_response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+    [Test]
+    public async Task Then_response_does_not_claim_to_have_created_a_resource()
+        => await Assert.That(_response.Headers.Location).IsNull();
 
     [Test]
     public async Task Then_response_returns_existing_user_onboarding_id()

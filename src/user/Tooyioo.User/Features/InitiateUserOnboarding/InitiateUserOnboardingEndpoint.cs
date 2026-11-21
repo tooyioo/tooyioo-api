@@ -24,7 +24,7 @@ public sealed class InitiateUserOnboardingEndpoint
                         .WithName("initiate-user-onboarding")
                         .WithSummary("Create a user and start its onboarding")
                         .WithDescription(
-                            "Creates the user from the authenticated user login, records the personal data and starts onboarding. The server mints the user_id and returns it in the Location header. Repeated requests for an already claimed credential return its existing user_id.")
+                            "Creates the user from the authenticated user login, records the personal data and starts onboarding. The server mints the user_id and returns 201 Created with its Location on the first request. A repeated request for an already claimed credential returns 200 OK with the existing user_id and appends nothing.")
                         .WithTags("users"))
             .RequireAuthorization(AuthorizationPolicies.SubRequired);
 }

@@ -19,6 +19,11 @@ public static class RetrieveUserMappers
     public sealed class QueryHttpResponseMapper
         : IQueryHttpResponseMapper<RetrieveUserQueryResult, HttpContext, RetrieveUserResponse>
     {
+
+        public HttpResponseMetadata Responses { get; } = new(
+            SuccessStatusCodes: [StatusCodes.Status200OK],
+            ErrorStatusCodes: [StatusCodes.Status404NotFound]);
+
         public IResult Map(
             RetrieveUserQueryResult queryResult,
             HttpContext context,

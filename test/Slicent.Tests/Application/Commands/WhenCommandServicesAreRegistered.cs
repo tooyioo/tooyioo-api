@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Slicent.Application;
 using Slicent.Application.Commands;
 // ReSharper disable ClassNeverInstantiated.Local
 
@@ -64,6 +65,10 @@ public sealed class WhenCommandServicesAreRegistered
     private sealed class TestCommandResponseMapper
         : ICommandHttpResponseMapper<TestCommandResult, HttpContext, TestResponse>
     {
+        public HttpResponseMetadata Responses { get; } = new(
+            SuccessStatusCodes: [StatusCodes.Status200OK],
+            ErrorStatusCodes: []);
+
         public IResult Map(
             TestCommandResult commandResult,
             HttpContext context,

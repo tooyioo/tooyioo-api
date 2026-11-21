@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable ConvertToExtensionBlock
 
 namespace Slicent.Application.Queries;
@@ -26,7 +27,7 @@ public static class QueryEndpointRouteBuilderExtensions
             return responseMapper.Map(result, ctx, gen);
         });
 
-        builder.WithQueryResponses<TResponse>();
+        builder.WithQueryResponses<TResponse>(ResolveResponses<TResult, TResponse>(app));
 
         configure?.Invoke(builder);
         return builder;
@@ -53,10 +54,19 @@ public static class QueryEndpointRouteBuilderExtensions
             return responseMapper.Map(result, ctx, gen);
         });
 
-        builder.WithQueryResponses<TResponse>();
+        builder.WithQueryResponses<TResponse>(ResolveResponses<TResult, TResponse>(app));
 
         configure?.Invoke(builder);
         return builder;
     }
-}
 
+    private static HttpResponseMetadata ResolveResponses<TResult, TResponse>(IEndpointRouteBuilder app)
+        where TResponse : class
+    {
+        using var scope = app.ServiceProvider.CreateScope();
+
+        return scope.ServiceProvider
+            .GetRequiredService<IQueryHttpResponseMapper<TResult, HttpContext, TResponse>>()
+            .Responses;
+    }
+}

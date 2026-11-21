@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Slicent.Application;
 using Slicent.Application.Commands;
 using Tooyioo.User.Features.CancelUserPersonalDataErasure.Contracts;
 
@@ -18,6 +19,11 @@ public static class CancelUserPersonalDataErasureMappers
     public sealed class CommandHttpResponseMapper
         : ICommandHttpResponseMapper<CancelUserPersonalDataErasureCommandResult, HttpContext, CancelUserPersonalDataErasureResponse>
     {
+
+        public HttpResponseMetadata Responses { get; } = new(
+            SuccessStatusCodes: [StatusCodes.Status200OK],
+            ErrorStatusCodes: [StatusCodes.Status404NotFound, StatusCodes.Status409Conflict, StatusCodes.Status422UnprocessableEntity]);
+
         public IResult Map(
             CancelUserPersonalDataErasureCommandResult commandResult,
             HttpContext context,

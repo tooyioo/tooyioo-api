@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Slicent.Application;
 using Slicent.Application.Commands;
 using Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 // ReSharper disable UnusedType.Global
@@ -23,6 +24,11 @@ public static class ChooseUserOnboardingAliasMappers
     public sealed class CommandHttpResponseMapper
         : ICommandHttpResponseMapper<ChooseUserOnboardingAliasCommandResult, HttpContext, ChooseUserOnboardingAliasResponse>
     {
+
+        public HttpResponseMetadata Responses { get; } = new(
+            SuccessStatusCodes: [StatusCodes.Status200OK],
+            ErrorStatusCodes: [StatusCodes.Status404NotFound, StatusCodes.Status409Conflict, StatusCodes.Status422UnprocessableEntity]);
+
         public IResult Map(
             ChooseUserOnboardingAliasCommandResult commandResult,
             HttpContext context,

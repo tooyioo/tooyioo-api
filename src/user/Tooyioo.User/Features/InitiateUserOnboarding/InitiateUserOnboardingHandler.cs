@@ -34,7 +34,7 @@ public sealed class InitiateUserOnboardingHandler
 
         if (userLoginClaiming.State.UserId is { } existingUserId)
         {
-            return new InitiateUserOnboardingOkResult(new UserId(existingUserId));
+            return new InitiateUserOnboardingExistingResult(new UserId(existingUserId));
         }
 
         var userId = command.UserId;
@@ -87,7 +87,7 @@ public sealed class InitiateUserOnboardingHandler
                 ],
                 cancellationToken);
 
-            return new InitiateUserOnboardingOkResult(userId);
+            return new InitiateUserOnboardingCreatedResult(userId);
         }
         catch (OptimisticConcurrencyException)
         {
@@ -98,18 +98,20 @@ public sealed class InitiateUserOnboardingHandler
 
 public sealed record InitiateUserOnboardingCommand(
     UserId UserId,
+    UserLoginKey UserLoginKey,
     string Name,
     string LastName,
     string Email,
-    bool IsEmailVerified,
-    UserLoginKey UserLoginKey)
+    bool IsEmailVerified)
     : ICommand<InitiateUserOnboardingCommandResult>;
 
 public union InitiateUserOnboardingCommandResult(
-    InitiateUserOnboardingOkResult,
+    InitiateUserOnboardingCreatedResult,
+    InitiateUserOnboardingExistingResult,
     InitiateUserOnboardingConcurrencyError,
     InitiateUserOnboardingUnexpectedStateError);
 
-public sealed record InitiateUserOnboardingOkResult(UserId UserId);
+public sealed record InitiateUserOnboardingCreatedResult(UserId UserId);
+public sealed record InitiateUserOnboardingExistingResult(UserId UserId);
 public sealed record InitiateUserOnboardingConcurrencyError;
 public sealed record InitiateUserOnboardingUnexpectedStateError;
