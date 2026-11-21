@@ -67,20 +67,27 @@ public static class ServiceCollectionExtensions
         return services;
     }
     
-    public static IServiceCollection AddSlicentMongoDb(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddSlicentMongoDb(
+        this IServiceCollection services,
+        Func<IServiceProvider, string> connectionStringFactory,
+        Func<IServiceProvider, string> databaseNameFactory)
     {
-        var mongoClientSettings = MongoClientSettings.FromConnectionString(connectionString);
-        
-        var mongoClient = new MongoClient(mongoClientSettings);
-        services.AddSingleton(mongoClient);
-        
+        ArgumentNullException.ThrowIfNull(connectionStringFactory);
+        ArgumentNullException.ThrowIfNull(databaseNameFactory);
+
+        services.AddSingleton(sp =>
+        {
+            var mongoClientSettings =
+                MongoClientSettings.FromConnectionString(connectionStringFactory(sp));
+            return new MongoClient(mongoClientSettings);
+        });
+
         services.AddSingleton(sp =>
         {
             var client = sp.GetRequiredService<MongoClient>();
-            var mongoDatabase = client.GetDatabase("Tooyioo");
-            return mongoDatabase;
+            return client.GetDatabase(databaseNameFactory(sp));
         });
-        
+
         return services;
     }
 

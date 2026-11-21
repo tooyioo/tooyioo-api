@@ -22,8 +22,8 @@ public static class AuthExtensions
         where TBuilder : IHostApplicationBuilder
     {
         builder.Services
-            .AddOptions<GoogleJwtOptions>()
-            .BindConfiguration(GoogleJwtOptions.SectionName)
+            .AddOptions<GoogleIdentityProviderOptions>()
+            .BindConfiguration(GoogleIdentityProviderOptions.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
@@ -51,9 +51,9 @@ public static class AuthExtensions
 
         builder.Services
             .AddOptions<JwtBearerOptions>(DefaultScheme)
-            .Configure<IOptions<GoogleJwtOptions>>((options, googleJwtOptions) =>
+            .Configure<IOptions<GoogleIdentityProviderOptions>>((options, googleIdentityProviderOptions) =>
             {
-                ConfigureGoogleJwt(options, googleJwtOptions.Value);
+                ConfigureGoogleIdentityProvider(options, googleIdentityProviderOptions.Value);
                 options.Events = new JwtBearerEvents
                 {
                     OnTokenValidated = OnTokenValidated,
@@ -98,19 +98,19 @@ public static class AuthExtensions
         }
     }
 
-    private static void ConfigureGoogleJwt(JwtBearerOptions options, GoogleJwtOptions googleJwtOptions)
+    private static void ConfigureGoogleIdentityProvider(JwtBearerOptions options, GoogleIdentityProviderOptions googleIdentityProviderOptions)
     {
         // JWT validation is the issuer security boundary: the raw iss must match exactly.
         options.RequireHttpsMetadata = true;
         options.MapInboundClaims = false;
-        options.Authority = googleJwtOptions.Issuer;
+        options.Authority = googleIdentityProviderOptions.Issuer;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuers = [googleJwtOptions.Issuer],
+            ValidIssuers = [googleIdentityProviderOptions.Issuer],
 
             ValidateAudience = true,
-            ValidAudiences = [googleJwtOptions.ClientId],
+            ValidAudiences = [googleIdentityProviderOptions.ClientId],
 
             ValidateLifetime = true,
             NameClaimType = "sub"

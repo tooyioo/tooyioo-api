@@ -14,8 +14,6 @@ namespace Tooyioo.Tests.Support.Smoke;
 public sealed class SmokeTestHost
     : IAsyncInitializer, IAsyncDisposable
 {
-    private const string TestPepper = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-
     private readonly byte[] _signingKey = GoogleIdentityTokenBuilder.CreateSigningKey();
 
     private MongoTestContainer? _mongo;
@@ -43,19 +41,15 @@ public sealed class SmokeTestHost
             throw;
         }
 
-        _factory = new SmokeWebApplicationFactory(_signingKey);
+        _factory = new SmokeWebApplicationFactory(_signingKey, database.ConnectionString);
 
-        // appsettings.json wins over host configuration for existing keys. Environment
-        // variables are read by WebApplication.CreateBuilder after appsettings, so they are
-        // the only override that reaches the connection strings before AddSlicent reads them.
-        // They are restored once the host has started; the registered clients keep the values.
-        var previousKurrent = Environment.GetEnvironmentVariable("ConnectionStrings__KurrentDb");
-        var previousMongo = Environment.GetEnvironmentVariable("ConnectionStrings__MongoDb");
-        var previousPepper = Environment.GetEnvironmentVariable("UserLogin__Pepper");
+        // AddSlicent reads the KurrentDB connection string eagerly while the host is built.
+        // appsettings.json wins over host configuration, so the override must be an environment
+        // variable, which WebApplication.CreateBuilder applies after appsettings. It is restored
+        // once the host has started; the registered client keeps the value.
+        var previousKurrent = Environment.GetEnvironmentVariable("KurrentDb__ConnectionString");
 
-        Environment.SetEnvironmentVariable("ConnectionStrings__KurrentDb", _kurrent.ConnectionString);
-        Environment.SetEnvironmentVariable("ConnectionStrings__MongoDb", database.ConnectionString);
-        Environment.SetEnvironmentVariable("UserLogin__Pepper", TestPepper);
+        Environment.SetEnvironmentVariable("KurrentDb__ConnectionString", _kurrent.ConnectionString);
 
         try
         {
@@ -63,9 +57,7 @@ public sealed class SmokeTestHost
         }
         finally
         {
-            Environment.SetEnvironmentVariable("ConnectionStrings__KurrentDb", previousKurrent);
-            Environment.SetEnvironmentVariable("ConnectionStrings__MongoDb", previousMongo);
-            Environment.SetEnvironmentVariable("UserLogin__Pepper", previousPepper);
+            Environment.SetEnvironmentVariable("KurrentDb__ConnectionString", previousKurrent);
         }
     }
 

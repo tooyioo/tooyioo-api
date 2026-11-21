@@ -4,8 +4,8 @@ namespace Tooyioo.Api.Infrastructure.Slicent;
 
 public sealed class KurrentDbOptions
 {
-    public const string SectionName = "ConnectionStrings";
+    public const string SectionName = "KurrentDb";
 
     [Required]
-    public string KurrentDb { get; init; } = string.Empty;
+    public string ConnectionString { get; init; } = string.Empty;
 }

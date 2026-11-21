@@ -15,9 +15,13 @@ namespace Tooyioo.Tests.Support.Smoke;
 /// Hosts the API with the real KurrentDB and MongoDB providers, keeping the projection
 /// subscription running. Unlike the vertical slice factory, hosted services are not removed.
 /// </summary>
-internal sealed class SmokeWebApplicationFactory(byte[] signingKey)
+internal sealed class SmokeWebApplicationFactory(
+    byte[] signingKey,
+    string mongoDbConnectionString)
     : WebApplicationFactory<Program>
 {
+    private const string TestPepper = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+
     protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.ConfigureHostConfiguration(configuration =>
@@ -34,6 +38,15 @@ internal sealed class SmokeWebApplicationFactory(byte[] signingKey)
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+
+        builder.ConfigureAppConfiguration((_, configuration) =>
+        {
+            configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["MongoDb:ConnectionString"] = mongoDbConnectionString,
+                ["UserLogin:Pepper"] = TestPepper
+            });
+        });
 
         builder.ConfigureServices(services =>
         {

@@ -3,6 +3,7 @@ using Eventuous.KurrentDB.Subscriptions;
 using Eventuous.Projections.MongoDB;
 using Eventuous.Subscriptions.Registrations;
 using KurrentDB.Client;
+using Microsoft.Extensions.Options;
 using Slicent;
 using Slicent.Application;
 using Tooyioo.Api.Infrastructure.OpenApi;
@@ -40,12 +41,10 @@ public static class SlicentExtensions
             .GetSection(SlicentOptions.SectionName)
             .Get<SlicentOptions>()
             ?? new SlicentOptions();
-        var mongoDbOptions = builder.Configuration
-            .GetSection(MongoDbOptions.SectionName)
-            .Get<MongoDbOptions>()
-            ?? new MongoDbOptions();
 
-        builder.Services.AddSlicentMongoDb(mongoDbOptions.MongoDb);
+        builder.Services.AddSlicentMongoDb(
+            sp => sp.GetRequiredService<IOptions<MongoDbOptions>>().Value.ConnectionString,
+            sp => sp.GetRequiredService<IOptions<MongoDbOptions>>().Value.Database);
 
         builder.Services
             .AddOptions<UserPersonalDataErasureOptions>()
@@ -64,13 +63,22 @@ public static class SlicentExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        // AddKurrentDBClient takes the connection string at registration time and adds its
+        // instrumentation, so this read remains eager. Smoke tests override it through the
+        // environment until the client exposes a factory-friendly registration overload.
         var kurrentDbOptions = builder.Configuration
             .GetSection(KurrentDbOptions.SectionName)
             .Get<KurrentDbOptions>()
             ?? new KurrentDbOptions();
 
+        if (string.IsNullOrWhiteSpace(kurrentDbOptions.ConnectionString))
+        {
+            throw new InvalidOperationException(
+                $"{KurrentDbOptions.SectionName}:{nameof(KurrentDbOptions.ConnectionString)} is required.");
+        }
+
         builder.Services
-            .AddSlicentKurrentDb(kurrentDbOptions.KurrentDb)
+            .AddSlicentKurrentDb(kurrentDbOptions.ConnectionString)
             .AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
                 "ReadModelsSubscription",
                 subscriptionBuilder => subscriptionBuilder
