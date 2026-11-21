@@ -14,4 +14,5 @@ public static class TestCategories
     public const string Infrastructure = "infrastructure";
     public const string MongoDb = "mongodb";
     public const string KurrentDb = "kurrentdb";
+    public const string Smoke = "smoke";
 }
