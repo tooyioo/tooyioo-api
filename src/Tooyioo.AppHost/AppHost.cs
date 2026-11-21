@@ -18,7 +18,7 @@ var mongoDb =
         .WithLifetime(ContainerLifetime.Session)
         .WithMongoExpress(cfg => cfg.WithHostPort(27018));
 
-builder.AddProject<Projects.Tooyioo_Api>("tooyioo-api")
+builder.AddDotnetProject("tooyioo-api", "../Tooyioo.Api/Tooyioo.Api.csproj")
     .WithReference(kurrentDb, "KurrentDb")
     .WithReference(mongoDb, "MongoDb")
     .WaitFor(kurrentDb)
