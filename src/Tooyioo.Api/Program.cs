@@ -27,7 +27,6 @@ var domainEventAssemblies =
 
 var allAssemblies = sliceAssemblies.Concat(domainEventAssemblies).ToArray();
 
-#pragma warning disable ASP0029
 builder
     .AddHealth()
     .AddTelemetry()
@@ -37,8 +36,6 @@ builder
     .AddMinimalApiValidator(sliceAssemblies)
     .AddSlicent(allAssemblies)
     .AddAuth();
-
-#pragma warning restore ASP0029
 
 var app = builder.Build();
 

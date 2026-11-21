@@ -8,9 +8,7 @@ namespace Tooyioo.Business.Features.InitiateBusinessOnboarding.Contracts;
 /// Request payload used to initiate business onboarding
 /// </summary>
 /// <example>{"legalName": "Acme Ltd"}</example>
-#pragma warning disable ASP0029
 [ValidatableType]
-#pragma warning restore ASP0029
 public sealed record InitiateBusinessOnboardingRequest
 {
     public const int LegalNameMaxLength = 200;

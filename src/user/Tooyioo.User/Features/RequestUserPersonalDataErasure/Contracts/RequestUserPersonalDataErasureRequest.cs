@@ -7,9 +7,7 @@ namespace Tooyioo.User.Features.RequestUserPersonalDataErasure.Contracts;
 /// Request payload used to request the erasure of the authenticated user's personal data.
 /// </summary>
 /// <example>{"reasonCode": "user_request"}</example>
-#pragma warning disable ASP0029
 [ValidatableType]
-#pragma warning restore ASP0029
 public sealed record RequestUserPersonalDataErasureRequest
 {
     public const int ReasonCodeMaxLength = 50;

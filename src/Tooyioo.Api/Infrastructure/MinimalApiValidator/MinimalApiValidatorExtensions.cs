@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Extensions.Validation;
 
@@ -6,7 +5,6 @@ namespace Tooyioo.Api.Infrastructure.MinimalApiValidator;
 
 public static class MinimalApiValidatorExtensions
 {
-    [Experimental("ASP0029")]
     public static TBuilder AddMinimalApiValidator<TBuilder>(this TBuilder builder, params Assembly[] assemblies) 
         where TBuilder : IHostApplicationBuilder
     {

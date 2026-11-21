@@ -8,8 +8,8 @@
         <PackageReference Include="Eventuous.Testing" Version="0.17.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0" />
-        <PackageReference Include="Testcontainers.MongoDb" Version="4.16.0" />
-        <PackageReference Include="TUnit" Version="1.85.0" />
+        <PackageReference Include="Testcontainers.MongoDb" Version="4.17.0" />
+        <PackageReference Include="TUnit" Version="1.87.12" />
     </ItemGroup>
 
     <ItemGroup>

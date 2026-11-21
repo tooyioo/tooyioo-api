@@ -7,9 +7,7 @@ namespace Tooyioo.User.Features.ChooseUserOnboardingAlias.Contracts;
 /// Request payload used to complete the profile
 /// </summary>
 /// <example>{"alias": "joe-bloggs-spain_123"}</example>
-#pragma warning disable ASP0029
 [ValidatableType]
-#pragma warning restore ASP0029
 public sealed record ChooseUserOnboardingAliasRequest
 {
     /// <summary>

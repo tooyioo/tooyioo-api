@@ -10,9 +10,7 @@ namespace Tooyioo.User.Features.CompleteUserOnboarding.Contracts;
 /// It's idempotent. If the onboarding is already completed, it will be returned as-is
 /// </remarks>
 /// <example>{"termsOfServiceVersion": "1.0.0", "privacyPolicyVersion": "1.0.0"}</example>
-#pragma warning disable ASP0029
 [ValidatableType]
-#pragma warning restore ASP0029
 public sealed record CompleteUserOnboardingRequest
 {
     public const int VersionMaxLength = 50;
